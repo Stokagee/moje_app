@@ -1,0 +1,18 @@
+{
+    "users": {
+        "admin": {
+            "username": "admin",
+            "password": "admin123",
+            "role": "administrator"
+        },
+        "tester": {
+            "username": "tester",
+            "password": "test123",
+            "role": "user"
+        }
+    },
+    "urls": {
+        "login": "https://example.com/login",
+        "dashboard": "https://example.com/dashboard"
+    }
+}
