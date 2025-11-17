@@ -6,8 +6,8 @@ Library    Collections
 Library    JSONLibrary  
 Library    OperatingSystem
 Library    String
-Library    DebugLibrary
 Library    RequestsLibrary    
+Library    DatabaseLibrary
 Resource    ../UI/locators/form_page_locators.resource
 Resource    ../UI/locators/page2_locators.resource
 Resource    ../UI/pages/form_page.resource
@@ -111,3 +111,7 @@ Ověření Vyplněné Hodnoty Z Elementu
                 
     END
     RETURN    ${ziskany_text}
+
+Connect To My Database
+    [Arguments]    ${db_api}    ${db_name}    ${db_username}    ${db_password}    ${db_host}    ${db_port}
+    Connect To Database    ${db_api}    ${db_name}    ${db_username}    ${db_password}    ${db_host}    ${db_port}

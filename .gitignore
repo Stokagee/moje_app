@@ -11,3 +11,5 @@ RF/playwright-log.txt
 RF/README_CLAUDE.md
 fe/mojeApp/README_CLAUDE.md
 be/tests/README.md
+playwright-log.txt
+.claude/settings.local.json
