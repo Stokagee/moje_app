@@ -7,12 +7,17 @@ Library    JSONLibrary
 Library    OperatingSystem
 Library    String
 Library    RequestsLibrary    
-Library    DatabaseLibrary
 Resource    ../UI/locators/form_page_locators.resource
 Resource    ../UI/locators/page2_locators.resource
 Resource    ../UI/pages/form_page.resource
 Resource    ../UI/pages/page2.resource
 Resource    variables.resource
+
+# *** API Connections ***
+Resource    ../RF/API/common.resource
+
+# *** DB Connections ***
+Resource    ../RF/db/common.resource
 
 *** Keywords ***
 

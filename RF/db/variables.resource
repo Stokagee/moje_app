@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 *** Variables ***
 ${DB_MODULE}        psycopg2
 ${DB_NAME}          TestDatabaze

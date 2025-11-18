@@ -26,7 +26,6 @@ Vyplní Nový Formulář
     ...    $.users.admin.role
     Vlož Data Z JSON Do Instrukcí    ${value_from_json}
     Nahraje Textový Soubor
-    
     Klikne Na Odeslat Tlačítko
     Potvrdit Modal & Přejít Na Druhou Page
     ${jméno}=    Kliknout Na Jméno    ${name}    ${last_name}
@@ -36,8 +35,11 @@ Vyplní Nový Formulář
     ${id}=    Získat ID Podle Jména    ${jméno}
     Log To Console    ID záznamu je: ${id}
     Vytvoří Session pro API    ${BASE_URL}
+    Connect To Test Database
+    Verify Row Count In Database    SELECT * FROM form_data WHERE email = '${email}'    ==    1
     DELETE On Session    mysession    /${id}
     Aktualizovat Stránku
     Ověřit Že Jméno Bylo Smazáno    ${jméno}
+    Disconnect From Test Database
 
 
