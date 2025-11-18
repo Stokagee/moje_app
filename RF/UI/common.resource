@@ -3,10 +3,12 @@ Library    Browser
 Library    RPA.FTP
 Library    FakerLibrary
 Library    Collections
-Library    JSONLibrary  
+Library    JSONLibrary
 Library    OperatingSystem
 Library    String
-Library    RequestsLibrary    
+Library    RequestsLibrary
+Library    RobotEyes
+Library    DateTime
 Resource    ../UI/locators/form_page_locators.resource
 Resource    ../UI/locators/page2_locators.resource
 Resource    ../UI/pages/form_page.resource
