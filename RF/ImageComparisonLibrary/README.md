@@ -39,8 +39,8 @@ Hlavní, nejpřísnější klíčové slovo pro regresní testy.
 ```robot
 Compare Layouts And Generate Diff
     [Arguments]    ${baseline_image}    ${current_image}    ${diff_directory}
-    ...           algorithm=phash    tolerance=5    pixel_tolerance=25    hash_size=8
-    ...           diff_mode=contours    min_contour_area=100    enable_color_coding=False
+    ...           algorithm=phash    tolerance=5    pixel_tolerance=60    hash_size=8
+    ...           diff_mode=contours    min_contour_area=5000    contour_thickness=3    enable_color_coding=False
 ```
 
 **Parametry:**
@@ -49,10 +49,11 @@ Compare Layouts And Generate Diff
 - `diff_directory` (povinný): Adresář pro uložení diff obrázku při selhání
 - `algorithm` (volitelný, výchozí 'phash'): Hashovací algoritmus ('phash' nebo 'dhash')
 - `tolerance` (volitelný, výchozí 5): Maximální povolená Hammingova vzdálenost
-- `pixel_tolerance` (volitelný, výchozí 25): Tolerance barevného rozdílu (0-255) - zvýšeno pro méně false positives
+- `pixel_tolerance` (volitelný, výchozí 60): Tolerance barevného rozdílu (0-255) - vyšší hodnota ignoruje semi-transparent změny
 - `hash_size` (volitelný, výchozí 8): Velikost hashovací mřížky
 - `diff_mode` (volitelný, výchozí 'contours'): Režim vizualizace - 'contours' nebo 'filled'
-- `min_contour_area` (volitelný, výchozí 100): Minimální plocha kontury - filtruje šum
+- `min_contour_area` (volitelný, výchozí 5000): Minimální plocha kontury - filtruje malé změny a šum
+- `contour_thickness` (volitelný, výchozí 3): Tloušťka obrysů v pixelech
 - `enable_color_coding` (volitelný, výchozí False): Barevné kódování - False = jen červená
 
 **Příklady:**
@@ -110,17 +111,28 @@ Quick Visual Check
     ...    ${DIFF_DIR}
 ```
 
-## Nové funkce (verze 1.1.0+)
+## Nové funkce (verze 1.2.0+)
 
-### Profesionální Diff Vizualizace s Kontúrami
+### Profesionální Diff Vizualizace s Poloprůhlednou Výplní
 
-Knihovna nyní podporuje pokročilou vizualizaci rozdílů pomocí **tenkých obrysů** místo vyplněných oblastí:
+Knihovna nyní podporuje pokročilou vizualizaci rozdílů pomocí **semi-transparent výplně + silných obrysů**:
+
+**Výchozí režim - Kontury s výplní:**
+- 🎨 Poloprůhledná růžová výplň (30% opacity) pro vyznačení změn
+- 🖍️ Silné červené obrysy (3px) pro jasné hranice
+- 🔍 Optimalizováno pro semi-transparent overlay (loader, dialogy)
+- ✅ Filtruje malé změny (min_contour_area=5000)
 
 ```robot
-# Nový výchozí režim - kontury s barevným kódováním
+# Výchozí nastavení - optimalizováno pro velké změny
 Compare Layouts And Generate Diff
 ...    ${BASELINE}    ${CURRENT}    ${DIFF_DIR}
-# Automaticky použije contours mode s color coding
+# pixel_tolerance=60, min_contour_area=5000
+
+# Pro zachycení kompletního loader overlay
+Compare Layouts And Generate Diff
+...    ${BASELINE}    ${CURRENT}    ${DIFF_DIR}
+...    pixel_tolerance=45    min_contour_area=1500
 
 # Starý režim (zpětná kompatibilita)
 Compare Layouts And Generate Diff

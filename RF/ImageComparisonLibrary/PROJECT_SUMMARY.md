@@ -62,11 +62,15 @@ ImageComparisonLibrary/
    - Méně přísné (tolerance=15, dhash)
    - Rychlejší pro hrubé srovnání
 
-### Implementované funkce:
+### Implementované funkce (verze 1.2.0+):
 - ✅ Podpora 3 typů vstupů (str, Path, PIL.Image)
 - ✅ Dva hashovací algoritmy (phash, dhash)
 - ✅ Kontrola rozměrů obrázků
-- ✅ Vizuální diff s konfigurovatelnou pixel_tolerance
+- ✅ **Semi-transparent výplň + silné obrysy** (30% opacity + 3px thickness)
+- ✅ **Optimalizováno pro semi-transparent overlay** (loader, dialogy)
+- ✅ Minimální preprocessing - kernel (3,3), bez dilate
+- ✅ Filtrování malých změn (min_contour_area=5000)
+- ✅ Vizuální diff s konfigurovatelnou pixel_tolerance=60
 - ✅ Unikátní názvy diff souborů s timestampem
 - ✅ Robot Framework logování (robot.api.logger)
 - ✅ Čisté chybové hlášky podle specifikace

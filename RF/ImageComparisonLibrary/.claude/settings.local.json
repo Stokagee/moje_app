@@ -3,7 +3,10 @@
     "allow": [
       "Bash(pip install:*)",
       "Bash(python -m pytest:*)",
-      "Bash(python test_generate_diff.py:*)"
+      "Bash(python test_generate_diff.py:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

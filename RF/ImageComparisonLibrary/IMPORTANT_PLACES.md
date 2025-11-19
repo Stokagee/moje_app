@@ -102,14 +102,17 @@ class ImageComparisonLibrary:
 - Vytvoření binární masky s prahem `pixel_tolerance`
 - Vrací: `(binary_mask, color_diff_array, baseline_array)`
 
-###### `_find_contours()` (řádky 381-421)
-**Zodpovědnost:** Detekce kontur v binární masce
+###### `_find_contours()` (řádky 465-514)
+**Zodpovědnost:** Detekce kontur v binární masce s minimálním preprocessingem
 
 **Klíčové kroky:**
-- Morfologické operace pro čištění masky
-- OpenCV `findContours()` s `RETR_EXTERNAL` a `CHAIN_APPROX_SIMPLE`
-- Filtrace podle `min_contour_area` (výchozí 100 pixelů)
+- **Malý kernel (3,3)** pro MORPH_CLOSE - zavírá malé díry bez agresivního spojování
+- **BEZ dilate operací** - nesloučí oddělené oblasti dohromady
+- OpenCV `findContours()` s **`RETR_EXTERNAL`** (pouze vnější kontury) a `CHAIN_APPROX_SIMPLE`
+- Filtrace podle `min_contour_area` (výchozí **5000 pixelů** - zachytí velké změny jako loader)
 - Vrací: seznam filtrovaných kontur
+
+**Účel:** Detekuje JEN velké, významné změny (loader overlay, dialogy), ignoruje malé změny (input pole pod semi-transparent overlay)
 
 ###### `_classify_contour_severity()` (řádky 423-459)
 **Zodpovědnost:** Klasifikace závažnosti změny v kontuře
@@ -119,14 +122,20 @@ class ImageComparisonLibrary:
 - Moderate: průměrný rozdíl ≤ pixel_tolerance * 3.0
 - Severe: větší rozdíly
 
-###### `_draw_contours_on_diff()` (řádky 461-559)
-**Zodpovědnost:** Vykreslení kontur na diff obrázek
+###### `_draw_contours_on_diff()` (řádky 556-689)
+**Zodpovědnost:** Vykreslení kontur s poloprůhlednou výplní
 
 **Klíčové funkce:**
-- Volitelné barevné kódování podle závažnosti
+- **Dvouprůchodové vykreslení:**
+  1. **PASS 1:** Vyplnit všechny kontury barvou na overlay
+  2. **Alpha blending:** Smíchat overlay s baseline (30% výplň + 70% baseline)
+  3. **PASS 2:** Vykreslit silné obrysy (thickness=3) přes smíchaný obrázek
+- Volitelné barevné kódování podle závažnosti (výchozí: pouze červená)
 - Konverze RGB → BGR pro OpenCV
-- `cv2.drawContours()` s anti-aliasing
-- Vrací: numpy pole s vykreslenými kontúrami
+- `cv2.drawContours()` s anti-aliasing (`cv2.LINE_AA`)
+- Vrací: numpy pole s poloprůhlednou výplní + silnými obrysy
+
+**Výsledek:** Změny jsou jasně viditelné díky růžové výplni (30% opacity) + červeným obrysům (3px)
 
 ###### `_calculate_statistics()` (řádky 561-649)
 **Zodpovědnost:** Výpočet detailních statistik
@@ -288,13 +297,19 @@ def compare_layouts_and_generate_diff(
     diff_directory: Union[str, Path],
     algorithm: str = 'phash',         # ← výchozí algoritmus
     tolerance: int = 5,                # ← výchozí tolerance
-    pixel_tolerance: int = 25,         # ← tolerance pro diff (zvýšeno z 10)
+    pixel_tolerance: int = 60,         # ← tolerance pro diff (optimalizováno pro semi-transparent overlay)
     hash_size: int = 8,                # ← velikost hashe
     diff_mode: str = 'contours',       # ← režim diffu (contours/filled)
-    min_contour_area: int = 100,       # ← filtrování šumu (nové)
+    contour_thickness: int = 3,        # ← tloušťka obrysů (nové)
+    min_contour_area: int = 5000,      # ← filtrování malých změn (zachytí velké objekty)
     enable_color_coding: bool = False  # ← barevné kódování (výchozí jen červená)
 ) -> int:
 ```
+
+**Use cases:**
+- `pixel_tolerance=60, min_contour_area=5000`: Výchozí - ignoruje semi-transparent změny, detekuje velké objekty
+- `pixel_tolerance=45, min_contour_area=1500`: Pro kompletní loader overlay (včetně světlých částí)
+- `pixel_tolerance=25, min_contour_area=100`: Pro detailní pixel-level detekci
 
 ### Přidání podpory pro nový formát vstupu
 **Soubor:** `core.py`
