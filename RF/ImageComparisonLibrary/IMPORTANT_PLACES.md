@@ -8,7 +8,7 @@ Tento dokument poskytuje přehled klíčových částí kódu a jejich zodpověd
 ImageComparisonLibrary/
 ├── ImageComparisonLibrary/          # Hlavní balíček
 │   ├── __init__.py                 # Export knihovny a veřejné API
-│   ├── core.py                     # Hlavní implementace (1,104 řádků)
+│   ├── core.py                     # Hlavní implementace (1,454+ řádků)
 │   └── version.py                  # Verze knihovny
 ├── tests/
 │   └── test_core.py                # Jednotkové testy (12 testů)
@@ -20,9 +20,34 @@ ImageComparisonLibrary/
 └── example_test_suite.robot        # Příklady použití v RF
 ```
 
-## 🆕 Nové Funkce (verze 1.1.0+)
+## 🆕 Nové Funkce
 
-### Profesionální Diff Vizualizace s Kontúrami
+### Verze 1.3.0 (2024-11-19)
+
+#### Timestamp Styling na Diff Obrázcích - ZMĚNĚNO
+- **Barva**: Bílá → **Červená** (255, 0, 0)
+- **Velikost**: 14 → **16** (+2 jednotky)
+- **Pozice**: Pravý dolní roh → **Pravý horní roh**
+- Černý stín pro čitelnost na jakémkoliv pozadí
+- Formát: dd/mm/yy hh:mm:ss (např. "19/11/25 18:23:45")
+
+#### HTML Embedding Layout - ZMĚNĚNO
+- **Před (v1.2.x)**: 2 obrázky (baseline + diff) vedle sebe
+- **Nyní (v1.3.0)**: **3 obrázky**:
+  - Horní řádek: Baseline | Diff (vedle sebe)
+  - Dolní řádek: Current Screenshot (přes celou šířku)
+- Všechny obrázky jako base64 data URI
+- Zobrazení přímo v Robot Framework log.html
+
+**Důvod změn:**
+- Červený timestamp lépe viditelný proti různým pozadím
+- Větší font zlepšuje čitelnost
+- Top-right pozice neblokuje důležitý obsah ve spodní části
+- 3 obrázky poskytují kompletní přehled (baseline, current, diff)
+
+### Verze 1.1.0-1.2.0
+
+#### Profesionální Diff Vizualizace s Kontúrami
 - **Contours mode** (výchozí): Tenké obrysy místo vyplněných oblastí
 - **Filled mode**: Zachována zpětná kompatibilita s původním režimem
 - **Pouze červená barva** (výchozí): Čistá vizualizace bez barevného kódování
@@ -195,6 +220,55 @@ class ImageComparisonLibrary:
 - Změna barvy kontur: parametry `minor_color`, `moderate_color`, `severe_color`
 - Změna tloušťky kontur: parametr `contour_thickness`
 - Změna filtru šumu: parametr `min_contour_area`
+
+###### `_encode_image_to_base64()` (řádky 1302-1332)
+**Zodpovědnost:** Enkódování obrázku do base64 data URI
+
+- Podporuje `PIL.Image.Image` nebo `Path`
+- Konverze do PNG formátu
+- Vrací: data URI string (`data:image/png;base64,...`)
+- Použití: embedování obrázků do HTML logu
+
+###### `_log_images_to_html()` (řádky 1334-1396)
+**Zodpovědnost:** Logování obrázků do Robot Framework HTML logu
+
+**ZMĚNĚNO v 1.3.0:**
+- **Před**: 2 obrázky (baseline + diff) vedle sebe
+- **Nyní**: **3 obrázky** - baseline + diff v horním řádku, current screenshot v dolním řádku
+
+**Parametry:**
+- `baseline_img`: Baseline PIL Image
+- `current_img`: Current PIL Image (NOVÝ v 1.3.0)
+- `diff_path`: Cesta k diff obrázku
+
+**HTML struktura:**
+- Tabulka se 2 sloupci
+- Řádek 1: Baseline | Diff (vedle sebe)
+- Řádek 2: Current Screenshot (přes celou šířku - colspan="2")
+- Všechny obrázky jako base64 data URI
+
+###### `_add_timestamp_to_image()` (řádky 1384-1454)
+**Zodpovědnost:** Přidání timestamp overlay na diff obrázek
+
+**ZMĚNĚNO v 1.3.0:**
+
+| Aspekt | Před (v1.2.x) | Nyní (v1.3.0) |
+|--------|--------------|---------------|
+| Barva | Bílá (255,255,255) | **Červená (255,0,0)** |
+| Velikost | 14 | **16** |
+| Pozice | Pravý dolní roh | **Pravý horní roh** |
+
+**Parametry:**
+- `image`: PIL Image pro přidání timestampu
+- `timestamp_text`: Řetězec s časem (např. "19/11/25 18:23:45")
+- `padding`: Odsazení od okrajů (výchozí: 10px)
+- `font_size`: Velikost fontu (výchozí: 16)
+
+**Funkce:**
+- Červený text s černým stínem (4 směry) pro čitelnost
+- Pokus o načtení Arial fontu, fallback na výchozí
+- Pozice: `x = img_width - text_width - padding`, `y = padding`
+- Vrací: upravený PIL Image
 
 ###### `_get_image_path()` (řádky 1105-1104)
 **Zodpovědnost:** Získání cesty k obrázku pro error messages
@@ -415,4 +489,4 @@ python -m unittest tests.test_core.TestImageComparisonLibrary.test_identical_ima
 ---
 
 **Poslední aktualizace:** 2024-11-19
-**Verze knihovny:** 1.1.0 (s novými funkcemi: contours mode, DiffStatistics, HTML reports)
+**Verze knihovny:** 1.3.0 (nové změny: červený timestamp nahoře vpravo, 3-image HTML layout, viz verze historie výše)

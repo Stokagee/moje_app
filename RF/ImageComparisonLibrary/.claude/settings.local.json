@@ -11,7 +11,8 @@
       "Bash(claude mcp add context7 -- npx -y @upstash/context7-mcp)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

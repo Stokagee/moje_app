@@ -8,7 +8,7 @@ from typing import Union, Dict, Tuple, Optional, Literal
 from datetime import datetime
 from dataclasses import dataclass
 import imagehash
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from robot.api import logger
 import cv2
 import numpy as np
@@ -76,7 +76,8 @@ class ImageComparisonLibrary:
         enable_color_coding: bool = False,
         log_statistics: bool = True,
         generate_html: bool = False,
-        embed_images_to_log: bool = True
+        embed_images_to_log: bool = True,
+        add_timestamp: bool = True
     ) -> int:
         """Compare two images using perceptual hashing and generate diff on failure.
 
@@ -104,6 +105,7 @@ class ImageComparisonLibrary:
             log_statistics: If True, log detailed statistics to RF logger. Default: True.
             generate_html: If True, generate HTML report with side-by-side comparison. Default: False.
             embed_images_to_log: If True, embed baseline and diff images to RF log.html as base64. Default: True.
+            add_timestamp: If True, add timestamp to diff image (bottom-right corner, format: dd/mm/yy hh:mm:ss). Default: True.
 
         Returns:
             int: The Hamming distance between the two images.
@@ -139,6 +141,7 @@ class ImageComparisonLibrary:
             log_statistics: Pokud True, zaloguje detailní statistiky do RF loggeru. Výchozí: True.
             generate_html: Pokud True, vygeneruje HTML report s porovnáním. Výchozí: False.
             embed_images_to_log: Pokud True, embeduje baseline a diff obrázky do RF log.html jako base64. Výchozí: True.
+            add_timestamp: Pokud True, přidá timestamp do diff obrázku (pravý dolní roh, formát: dd/mm/yy hh:mm:ss). Výchozí: True.
 
         Returns:
             int: Hammingova vzdálenost mezi dvěma obrázky.
@@ -198,6 +201,7 @@ class ImageComparisonLibrary:
             log_statistics=log_statistics,
             generate_html=generate_html,
             embed_images_to_log=embed_images_to_log,
+            add_timestamp=add_timestamp,
             baseline_path_for_html=baseline_path_str,
             current_path_for_html=current_path_str,
             hash_distance_for_html=distance,
@@ -241,7 +245,8 @@ class ImageComparisonLibrary:
         enable_color_coding: bool = False,
         log_statistics: bool = True,
         generate_html: bool = False,
-        embed_images_to_log: bool = True
+        embed_images_to_log: bool = True,
+        add_timestamp: bool = True
     ) -> int:
         """Check if two images are visually similar with relaxed tolerance.
 
@@ -267,6 +272,7 @@ class ImageComparisonLibrary:
             log_statistics: If True, log detailed statistics to RF logger. Default: True.
             generate_html: If True, generate HTML report with side-by-side comparison. Default: False.
             embed_images_to_log: If True, embed baseline and diff images to RF log.html as base64. Default: True.
+            add_timestamp: If True, add timestamp to diff image (bottom-right corner, format: dd/mm/yy hh:mm:ss). Default: True.
 
         Returns:
             int: The Hamming distance between the two images.
@@ -300,6 +306,7 @@ class ImageComparisonLibrary:
             log_statistics: Pokud True, zaloguje detailní statistiky do RF loggeru. Výchozí: True.
             generate_html: Pokud True, vygeneruje HTML report s porovnáním. Výchozí: False.
             embed_images_to_log: Pokud True, embeduje baseline a diff obrázky do RF log.html jako base64. Výchozí: True.
+            add_timestamp: Pokud True, přidá timestamp do diff obrázku (pravý dolní roh, formát: dd/mm/yy hh:mm:ss). Výchozí: True.
 
         Returns:
             int: Hammingova vzdálenost mezi dvěma obrázky.
@@ -329,7 +336,8 @@ class ImageComparisonLibrary:
             enable_color_coding=enable_color_coding,
             log_statistics=log_statistics,
             generate_html=generate_html,
-            embed_images_to_log=embed_images_to_log
+            embed_images_to_log=embed_images_to_log,
+            add_timestamp=add_timestamp
         )
     
     def _load_image(self, image: Union[str, Path, Image.Image]) -> Image.Image:
@@ -1069,6 +1077,7 @@ class ImageComparisonLibrary:
         log_statistics: bool = True,
         generate_html: bool = False,
         embed_images_to_log: bool = True,
+        add_timestamp: bool = True,
         baseline_path_for_html: Optional[str] = None,
         current_path_for_html: Optional[str] = None,
         hash_distance_for_html: Optional[int] = None,
@@ -1092,6 +1101,7 @@ class ImageComparisonLibrary:
             log_statistics: If True, log statistics to Robot Framework logger.
             generate_html: If True, generate HTML report.
             embed_images_to_log: If True, embed baseline and diff images to RF log.html as base64.
+            add_timestamp: If True, add timestamp to diff image (bottom-right corner). Default: True.
             baseline_path_for_html: Baseline image path for HTML report.
             current_path_for_html: Current image path for HTML report.
             hash_distance_for_html: Hash distance for HTML report.
@@ -1120,6 +1130,7 @@ class ImageComparisonLibrary:
             log_statistics: Pokud True, zaloguje statistiky do RF loggeru.
             generate_html: Pokud True, vygeneruje HTML report.
             embed_images_to_log: Pokud True, embeduje baseline a diff obrázky do RF log.html jako base64.
+            add_timestamp: Pokud True, přidá timestamp do diff obrázku (pravý dolní roh). Výchozí: True.
             baseline_path_for_html: Cesta k baseline obrázku pro HTML report.
             current_path_for_html: Cesta k aktuálnímu obrázku pro HTML report.
             hash_distance_for_html: Hash vzdálenost pro HTML report.
@@ -1217,12 +1228,17 @@ class ImageComparisonLibrary:
         diff_filename = f"diff_{timestamp}.png"
         diff_path = diff_dir / diff_filename
 
+        # Add timestamp overlay to diff image if requested
+        if add_timestamp:
+            timestamp_str = datetime.now().strftime("%d/%m/%y %H:%M:%S")
+            diff_img = self._add_timestamp_to_image(diff_img, timestamp_str)
+
         # Save diff image
         diff_img.save(diff_path)
 
         # Embed images to Robot Framework log if requested
         if embed_images_to_log:
-            self._log_images_to_html(baseline_img, diff_path)
+            self._log_images_to_html(baseline_img, current_img, diff_path)
 
         # Generate HTML report if requested
         if generate_html and all([
@@ -1318,33 +1334,39 @@ class ImageComparisonLibrary:
     def _log_images_to_html(
         self,
         baseline_img: Image.Image,
+        current_img: Image.Image,
         diff_path: Path
     ) -> None:
-        """Log baseline and diff images as HTML table to Robot Framework log.
+        """Log baseline, current, and diff images as HTML table to Robot Framework log.
 
-        Creates a side-by-side HTML table with baseline and diff images
-        embedded as base64 data URIs for direct viewing in log.html.
+        Creates an HTML table with baseline and diff images side-by-side on top row,
+        and current screenshot on bottom row. All images are embedded as base64 data URIs
+        for direct viewing in log.html.
 
         Args:
             baseline_img: Baseline PIL Image.
+            current_img: Current PIL Image.
             diff_path: Path to saved diff image.
 
         ---
 
-        Zaloguje baseline a diff obrázky jako HTML tabulku do Robot Framework logu.
+        Zaloguje baseline, aktuální a diff obrázky jako HTML tabulku do Robot Framework logu.
 
-        Vytvoří side-by-side HTML tabulku s baseline a diff obrázky
-        enkódovanými jako base64 data URI pro přímé zobrazení v log.html.
+        Vytvoří HTML tabulku s baseline a diff obrázky vedle sebe v horním řádku,
+        a aktuálním screenshotem v dolním řádku. Všechny obrázky jsou enkódovány
+        jako base64 data URI pro přímé zobrazení v log.html.
 
         Args:
             baseline_img: Baseline PIL Image.
+            current_img: Aktuální PIL Image.
             diff_path: Cesta k uloženému diff obrázku.
         """
         # Encode images to base64
         baseline_base64 = self._encode_image_to_base64(baseline_img)
+        current_base64 = self._encode_image_to_base64(current_img)
         diff_base64 = self._encode_image_to_base64(diff_path)
 
-        # Create HTML table with side-by-side images
+        # Create HTML table with baseline and diff on top, current screenshot on bottom
         html_content = f"""
 <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
   <tr>
@@ -1359,8 +1381,88 @@ class ImageComparisonLibrary:
       <img src="{diff_base64}" style="max-width:100%; height:auto; display:block; margin:auto;">
     </td>
   </tr>
+  <tr>
+    <th colspan="2" style="text-align:center; padding:10px; background-color:#f0f0f0; border:1px solid #ddd;">Current Screenshot</th>
+  </tr>
+  <tr>
+    <td colspan="2" style="padding:5px; text-align:center; border:1px solid #ddd;">
+      <img src="{current_base64}" style="max-width:100%; height:auto; display:block; margin:auto;">
+    </td>
+  </tr>
 </table>
 """
 
         # Log HTML to Robot Framework log
         logger.info(html_content, html=True)
+
+    def _add_timestamp_to_image(
+        self,
+        image: Image.Image,
+        timestamp_text: str,
+        padding: int = 10,
+        font_size: int = 16
+    ) -> Image.Image:
+        """Add timestamp overlay to image (top-right corner).
+
+        Adds timestamp text to the top-right corner of the image with
+        red text and black shadow for readability on any background.
+
+        Args:
+            image: PIL Image to add timestamp to.
+            timestamp_text: Timestamp string to display (e.g., "19/11/24 14:35:22").
+            padding: Padding from image edges in pixels. Default: 10.
+            font_size: Font size for timestamp text. Default: 16.
+
+        Returns:
+            PIL.Image.Image: Image with timestamp overlay.
+
+        ---
+
+        Přidá timestamp overlay do obrázku (pravý horní roh).
+
+        Přidá timestamp text do pravého horního rohu obrázku s červeným textem
+        a černým stínem pro čitelnost na jakémkoliv pozadí.
+
+        Args:
+            image: PIL Image pro přidání timestampu.
+            timestamp_text: Timestamp řetězec k zobrazení (např. "19/11/24 14:35:22").
+            padding: Odsazení od okrajů obrázku v pixelech. Výchozí: 10.
+            font_size: Velikost fontu pro timestamp text. Výchozí: 16.
+
+        Returns:
+            PIL.Image.Image: Obrázek s timestamp overlay.
+        """
+        # Create drawing context
+        draw = ImageDraw.Draw(image)
+
+        # Try to load TrueType font, fallback to default
+        try:
+            font = ImageFont.truetype("arial.ttf", font_size)
+        except (OSError, IOError):
+            # Fallback to default font if Arial not available
+            font = ImageFont.load_default()
+
+        # Calculate text bounding box
+        bbox = draw.textbbox((0, 0), timestamp_text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+
+        # Position: top-right corner with padding
+        img_width, img_height = image.size
+        x = img_width - text_width - padding
+        y = padding
+
+        # Draw black shadow (4-direction offset for better contrast)
+        shadow_offsets = [(1, 1), (-1, -1), (1, -1), (-1, 1)]
+        for offset_x, offset_y in shadow_offsets:
+            draw.text(
+                (x + offset_x, y + offset_y),
+                timestamp_text,
+                font=font,
+                fill=(0, 0, 0)  # Black shadow
+            )
+
+        # Draw red text on top
+        draw.text((x, y), timestamp_text, font=font, fill=(255, 0, 0))
+
+        return image

@@ -190,6 +190,68 @@ Compare Layouts And Generate Diff
 ...    min_contour_area=50
 ```
 
+### Timestamp na Diff Obrázcích
+
+**PŘED (verze < 1.3.0):**
+- Bílý text, velikost 14
+- Pozice: pravý dolní roh
+- Formát: dd/mm/yy hh:mm:ss
+
+**NYNí (verze 1.3.0+):**
+- **Červený text**, velikost **16**
+- Pozice: **pravý horní roh**
+- Formát: dd/mm/yy hh:mm:ss
+- Černý stín pro čitelnost
+
+```robot
+# Výchozí chování - timestamp ZAPNUTÝ
+Compare Layouts And Generate Diff
+...    ${BASELINE}    ${CURRENT}    ${DIFF_DIR}
+# Automaticky přidá červený timestamp do pravého horního rohu
+
+# Vypnutí timestampu
+Compare Layouts And Generate Diff
+...    ${BASELINE}    ${CURRENT}    ${DIFF_DIR}
+...    add_timestamp=False
+```
+
+**Příklad timestampu:** `19/11/25 18:23:45`
+
+### Embedování Obrázků do Robot Framework Logu
+
+**PŘED (verze < 1.2.0):**
+- Pouze cesty k obrázkům v logu
+- Nutné otevírat soubory manuálně
+
+**PŘED (verze 1.2.0 - 1.2.x):**
+- HTML tabulka se 2 obrázky (baseline + diff) vedle sebe
+- Base64 enkódování pro přímé zobrazení
+
+**NYNí (verze 1.3.0+):**
+- HTML tabulka se **3 obrázky**:
+  - **Horní řádek**: Baseline | Diff (vedle sebe)
+  - **Dolní řádek**: Current Screenshot (přes celou šířku)
+- Všechny obrázky jako base64 data URI
+- Zobrazení přímo v log.html bez externích souborů
+
+```robot
+# Výchozí chování - embedování ZAPNUTÉ
+Compare Layouts And Generate Diff
+...    ${BASELINE}    ${CURRENT}    ${DIFF_DIR}
+# Automaticky vloží baseline, diff a current do log.html
+
+# Vypnutí embedování (šetří velikost log.html)
+Compare Layouts And Generate Diff
+...    ${BASELINE}    ${CURRENT}    ${DIFF_DIR}
+...    embed_images_to_log=False
+```
+
+**Výhody:**
+- ✅ Okamžitý vizuální přehled všech 3 obrázků
+- ✅ Není třeba otevírat externí soubory
+- ✅ Vše v jednom log.html reportu
+- ✅ Ideální pro CI/CD a sdílení výsledků
+
 ## Chování knihovny
 
 ### Úspěšný scénář
