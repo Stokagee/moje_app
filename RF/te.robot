@@ -33,7 +33,9 @@ Přihlášení Uživatele
     Vyplnit Heslo Pro Přihlášení    ${login_password}
     Kliknout Na Přihlásit Tlačítko
     ${image_for_test}=    Take Screenshot    filename=${SCREENSHOT_PATH}login_page_${actual_time_stamp}.png
-    Check Layouts Are Visually Similar    ${BASELINE_IMAGE_PATH}login_page_20251118_174339.png    ${image_for_test}    ${diff_image_path}    pixel_tolerance=15
+    Compare Layouts And Generate Diff   ${BASELINE_IMAGE_PATH}login_page_20251118_174339.png    ${image_for_test}    ${diff_image_path}    
+    ...    pixel_tolerance=60    hash_size=16    diff_mode=contours    contour_thickness=3    min_contour_area=5000
+     ...    minor_color=(0, 255, 0)    moderate_color=(0, 255, 255)    severe_color=(0, 0, 255)
     Wait For Elements State    ${MAIN_DASHBOARD_H1}    ${TIMEOUT_TEST}
 
 

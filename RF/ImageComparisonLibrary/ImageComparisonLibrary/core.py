@@ -64,12 +64,12 @@ class ImageComparisonLibrary:
         diff_directory: Union[str, Path],
         algorithm: str = 'phash',
         tolerance: int = 5,
-        pixel_tolerance: int = 25,
+        pixel_tolerance: int = 60,
         hash_size: int = 8,
         # NEW PARAMETERS for enhanced diff visualization
         diff_mode: Literal['filled', 'contours'] = 'contours',
-        contour_thickness: int = 2,
-        min_contour_area: int = 100,
+        contour_thickness: int = 3,
+        min_contour_area: int = 5000,
         minor_color: Tuple[int, int, int] = (0, 255, 0),
         moderate_color: Tuple[int, int, int] = (0, 255, 255),
         severe_color: Tuple[int, int, int] = (0, 0, 255),
@@ -91,11 +91,11 @@ class ImageComparisonLibrary:
             diff_directory: Directory path to save diff image on failure. Accepts str or pathlib.Path.
             algorithm: Hashing algorithm to use. Options: 'phash', 'dhash'. Default: 'phash'.
             tolerance: Maximum allowed Hamming distance. Default: 5.
-            pixel_tolerance: Color difference tolerance (0-255) for visual diff generation. Default: 25.
+            pixel_tolerance: Color difference tolerance (0-255) for visual diff generation. Default: 60.
             hash_size: Hash grid size. Default: 8.
             diff_mode: Diff visualization mode: 'contours' (new, default) or 'filled' (legacy). Default: 'contours'.
-            contour_thickness: Thickness of contour lines in pixels (for contours mode). Default: 2.
-            min_contour_area: Minimum contour area to keep, filters noise. Default: 100.
+            contour_thickness: Thickness of contour lines in pixels (for contours mode). Default: 3.
+            min_contour_area: Minimum contour area to keep, filters small changes. Default: 5000.
             minor_color: RGB tuple for minor differences (green). Default: (0, 255, 0).
             moderate_color: RGB tuple for moderate differences (yellow). Default: (0, 255, 255).
             severe_color: RGB tuple for severe differences (red). Default: (0, 0, 255).
@@ -125,11 +125,11 @@ class ImageComparisonLibrary:
             diff_directory: Cesta k adresáři pro uložení diff obrázku při selhání. Akceptuje str nebo pathlib.Path.
             algorithm: Hashovací algoritmus k použití. Možnosti: 'phash', 'dhash'. Výchozí: 'phash'.
             tolerance: Maximální povolená Hammingova vzdálenost. Výchozí: 5.
-            pixel_tolerance: Tolerance barevného rozdílu (0-255) pro generování vizuálního diffu. Výchozí: 25.
+            pixel_tolerance: Tolerance barevného rozdílu (0-255) pro generování vizuálního diffu. Výchozí: 60.
             hash_size: Velikost hashovací mřížky. Výchozí: 8.
             diff_mode: Režim vizualizace: 'contours' (nový, výchozí) nebo 'filled' (legacy). Výchozí: 'contours'.
-            contour_thickness: Tloušťka linií kontur v pixelech (pro contours režim). Výchozí: 2.
-            min_contour_area: Minimální plocha kontury, filtruje šum. Výchozí: 100.
+            contour_thickness: Tloušťka linií kontur v pixelech (pro contours režim). Výchozí: 3.
+            min_contour_area: Minimální plocha kontury, filtruje malé změny. Výchozí: 5000.
             minor_color: RGB tuple pro menší rozdíly (zelená). Výchozí: (0, 255, 0).
             moderate_color: RGB tuple pro střední rozdíly (žlutá). Výchozí: (0, 255, 255).
             severe_color: RGB tuple pro velké rozdíly (červená). Výchozí: (0, 0, 255).
@@ -225,12 +225,12 @@ class ImageComparisonLibrary:
         diff_directory: Union[str, Path],
         algorithm: str = 'dhash',
         tolerance: int = 15,
-        pixel_tolerance: int = 25,
+        pixel_tolerance: int = 60,
         hash_size: int = 8,
         # NEW PARAMETERS for enhanced diff visualization (same as compare_layouts_and_generate_diff)
         diff_mode: Literal['filled', 'contours'] = 'contours',
-        contour_thickness: int = 2,
-        min_contour_area: int = 100,
+        contour_thickness: int = 3,
+        min_contour_area: int = 5000,
         minor_color: Tuple[int, int, int] = (0, 255, 0),
         moderate_color: Tuple[int, int, int] = (0, 255, 255),
         severe_color: Tuple[int, int, int] = (0, 0, 255),
@@ -250,11 +250,11 @@ class ImageComparisonLibrary:
             diff_directory: Directory path to save diff image on failure. Accepts str or pathlib.Path.
             algorithm: Hashing algorithm to use. Default: 'dhash'.
             tolerance: Maximum allowed Hamming distance. Default: 15.
-            pixel_tolerance: Color difference tolerance (0-255) for visual diff generation. Default: 25.
+            pixel_tolerance: Color difference tolerance (0-255) for visual diff generation. Default: 60.
             hash_size: Hash grid size. Default: 8.
             diff_mode: Diff visualization mode: 'contours' (new, default) or 'filled' (legacy). Default: 'contours'.
-            contour_thickness: Thickness of contour lines in pixels (for contours mode). Default: 2.
-            min_contour_area: Minimum contour area to keep, filters noise. Default: 100.
+            contour_thickness: Thickness of contour lines in pixels (for contours mode). Default: 3.
+            min_contour_area: Minimum contour area to keep, filters small changes. Default: 5000.
             minor_color: RGB tuple for minor differences (green). Default: (0, 255, 0).
             moderate_color: RGB tuple for moderate differences (yellow). Default: (0, 255, 255).
             severe_color: RGB tuple for severe differences (red). Default: (0, 0, 255).
@@ -282,11 +282,11 @@ class ImageComparisonLibrary:
             diff_directory: Cesta k adresáři pro uložení diff obrázku při selhání. Akceptuje str nebo pathlib.Path.
             algorithm: Hashovací algoritmus k použití. Výchozí: 'dhash'.
             tolerance: Maximální povolená Hammingova vzdálenost. Výchozí: 15.
-            pixel_tolerance: Tolerance barevného rozdílu (0-255) pro generování vizuálního diffu. Výchozí: 25.
+            pixel_tolerance: Tolerance barevného rozdílu (0-255) pro generování vizuálního diffu. Výchozí: 60.
             hash_size: Velikost hashovací mřížky. Výchozí: 8.
             diff_mode: Režim vizualizace: 'contours' (nový, výchozí) nebo 'filled' (legacy). Výchozí: 'contours'.
-            contour_thickness: Tloušťka linií kontur v pixelech (pro contours režim). Výchozí: 2.
-            min_contour_area: Minimální plocha kontury, filtruje šum. Výchozí: 100.
+            contour_thickness: Tloušťka linií kontur v pixelech (pro contours režim). Výchozí: 3.
+            min_contour_area: Minimální plocha kontury, filtruje malé změny. Výchozí: 5000.
             minor_color: RGB tuple pro menší rozdíly (zelená). Výchozí: (0, 255, 0).
             moderate_color: RGB tuple pro střední rozdíly (žlutá). Výchozí: (0, 255, 255).
             severe_color: RGB tuple pro velké rozdíly (červená). Výchozí: (0, 0, 255).
@@ -465,38 +465,47 @@ class ImageComparisonLibrary:
     def _find_contours(
         self,
         diff_mask: np.ndarray,
-        min_contour_area: int = 10
+        min_contour_area: int = 5000
     ) -> list:
-        """Find contours in difference mask using OpenCV.
+        """Find contours in difference mask using OpenCV with minimal preprocessing.
 
         Args:
             diff_mask: Binary mask (uint8, 255=diff, 0=same).
-            min_contour_area: Minimum contour area to keep (filters noise).
+            min_contour_area: Minimum contour area to keep (filters small changes). Default: 5000.
 
         Returns:
             List of contours (OpenCV format).
 
         ---
 
-        Najde kontury v masce rozdílů pomocí OpenCV.
+        Najde kontury v masce rozdílů pomocí OpenCV s minimálním preprocessingem.
 
         Args:
             diff_mask: Binární maska (uint8, 255=rozdíl, 0=stejné).
-            min_contour_area: Minimální plocha kontury (filtruje šum).
+            min_contour_area: Minimální plocha kontury (filtruje malé změny). Výchozí: 5000.
 
         Returns:
             Seznam kontur (OpenCV formát).
         """
-        # Find contours in the binary mask
-        # RETR_EXTERNAL = retrieve only outer contours
+        # Preprocessing: Apply minimal morphological operations
+        # Small kernel to fill tiny holes without aggressive expansion
+        kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+
+        # Close small holes in the mask
+        mask_processed = cv2.morphologyEx(diff_mask, cv2.MORPH_CLOSE, kernel_close)
+
+        # NO dilate - we don't want to expand contours and merge separate regions
+
+        # Find contours in the processed binary mask
+        # RETR_EXTERNAL = retrieve only outermost contours (ignore nested)
         # CHAIN_APPROX_SIMPLE = compress contours (store only corners)
         contours, _ = cv2.findContours(
-            diff_mask,
+            mask_processed,
             cv2.RETR_EXTERNAL,
             cv2.CHAIN_APPROX_SIMPLE
         )
 
-        # Filter out small contours (noise)
+        # Filter out small contours (e.g., input fields with slightly changed colors)
         filtered_contours = [
             contour for contour in contours
             if cv2.contourArea(contour) >= min_contour_area
@@ -549,13 +558,13 @@ class ImageComparisonLibrary:
         color_diff_array: np.ndarray,
         pixel_tolerance: int,
         diff_mask: np.ndarray,
-        contour_thickness: int = 2,
+        contour_thickness: int = 3,
         minor_color: Tuple[int, int, int] = (0, 255, 0),
         moderate_color: Tuple[int, int, int] = (0, 255, 255),
         severe_color: Tuple[int, int, int] = (0, 0, 255),
         enable_color_coding: bool = True
     ) -> np.ndarray:
-        """Draw contours on baseline image with severity-based coloring.
+        """Draw contours on baseline image with semi-transparent fill and outlines.
 
         Args:
             baseline_array: Numpy array of baseline image (RGB).
@@ -563,18 +572,18 @@ class ImageComparisonLibrary:
             color_diff_array: Array of per-pixel color differences.
             pixel_tolerance: Base tolerance for severity classification.
             diff_mask: Binary mask of differences.
-            contour_thickness: Thickness of contour lines in pixels.
+            contour_thickness: Thickness of contour lines in pixels. Default: 3.
             minor_color: RGB color for minor differences (default: green).
             moderate_color: RGB color for moderate differences (default: yellow).
             severe_color: RGB color for severe differences (default: red).
             enable_color_coding: If False, use only severe_color for all contours.
 
         Returns:
-            Numpy array of diff image with contours drawn (RGB).
+            Numpy array of diff image with filled contours and outlines (RGB).
 
         ---
 
-        Vykreslí kontury na diff obrázek s barevným kódováním podle závažnosti.
+        Vykreslí kontury s poloprůhlednou výplní a obrysem.
 
         Args:
             baseline_array: Numpy pole baseline obrázku (RGB).
@@ -582,17 +591,20 @@ class ImageComparisonLibrary:
             color_diff_array: Pole barevných rozdílů pro každý pixel.
             pixel_tolerance: Základní tolerance pro klasifikaci závažnosti.
             diff_mask: Binární maska rozdílů.
-            contour_thickness: Tloušťka linií kontury v pixelech.
+            contour_thickness: Tloušťka linií kontury v pixelech. Výchozí: 3.
             minor_color: RGB barva pro menší rozdíly (výchozí: zelená).
             moderate_color: RGB barva pro střední rozdíly (výchozí: žlutá).
             severe_color: RGB barva pro velké rozdíly (výchozí: červená).
             enable_color_coding: Pokud False, použije se pouze severe_color pro všechny kontury.
 
         Returns:
-            Numpy pole diff obrázku s nakreslenými konturami (RGB).
+            Numpy pole diff obrázku s vyplněnými konturami a obrysem (RGB).
         """
         # Create copy of baseline for diff image
         diff_image = baseline_array.copy()
+
+        # Create overlay for semi-transparent fill
+        overlay = baseline_array.copy()
 
         # Color mapping for severity levels
         color_map = {
@@ -601,7 +613,7 @@ class ImageComparisonLibrary:
             'severe': severe_color
         }
 
-        # Draw each contour with appropriate color
+        # PASS 1: Draw filled contours on overlay
         for contour in contours:
             if enable_color_coding:
                 # Calculate average color difference within this contour
@@ -630,11 +642,43 @@ class ImageComparisonLibrary:
             # Convert RGB to BGR for OpenCV drawing
             bgr_color = (color[2], color[1], color[0])
 
-            # Draw contour outline
+            # Draw filled contour on overlay
+            cv2.drawContours(
+                overlay,
+                [contour],
+                -1,
+                bgr_color,
+                -1  # -1 = fill the contour
+            )
+
+        # Blend overlay with baseline image (30% filled areas, 70% baseline)
+        alpha = 0.3
+        diff_image = cv2.addWeighted(overlay, alpha, diff_image, 1 - alpha, 0)
+
+        # PASS 2: Draw contour outlines on top for clear boundaries
+        for contour in contours:
+            if enable_color_coding:
+                # Recalculate color for this contour
+                contour_mask = np.zeros(diff_mask.shape, dtype=np.uint8)
+                cv2.drawContours(contour_mask, [contour], 0, 255, -1)
+                contour_pixels_mask = (contour_mask == 255) & (diff_mask == 255)
+
+                if np.any(contour_pixels_mask):
+                    avg_color_diff = np.mean(color_diff_array[contour_pixels_mask])
+                    severity = self._classify_diff_severity(avg_color_diff, pixel_tolerance)
+                    color = color_map[severity]
+                else:
+                    color = severe_color
+            else:
+                color = severe_color
+
+            bgr_color = (color[2], color[1], color[0])
+
+            # Draw contour outline with anti-aliasing
             cv2.drawContours(
                 diff_image,
                 [contour],
-                -1,  # Draw all contours (we're passing one at a time)
+                -1,
                 bgr_color,
                 contour_thickness,
                 cv2.LINE_AA  # Anti-aliased lines for smooth appearance
