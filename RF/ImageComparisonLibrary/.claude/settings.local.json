@@ -6,7 +6,12 @@
       "Bash(python test_generate_diff.py:*)",
       "Bash(dir:*)",
       "Bash(findstr:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(node --version)",
+      "Bash(claude mcp add context7 -- npx -y @upstash/context7-mcp)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

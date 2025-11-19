@@ -75,7 +75,8 @@ class ImageComparisonLibrary:
         severe_color: Tuple[int, int, int] = (0, 0, 255),
         enable_color_coding: bool = False,
         log_statistics: bool = True,
-        generate_html: bool = False
+        generate_html: bool = False,
+        embed_images_to_log: bool = True
     ) -> int:
         """Compare two images using perceptual hashing and generate diff on failure.
 
@@ -102,6 +103,7 @@ class ImageComparisonLibrary:
             enable_color_coding: If False, use only severe_color for all changes. Default: False.
             log_statistics: If True, log detailed statistics to RF logger. Default: True.
             generate_html: If True, generate HTML report with side-by-side comparison. Default: False.
+            embed_images_to_log: If True, embed baseline and diff images to RF log.html as base64. Default: True.
 
         Returns:
             int: The Hamming distance between the two images.
@@ -136,6 +138,7 @@ class ImageComparisonLibrary:
             enable_color_coding: Pokud False, použije se pouze severe_color. Výchozí: False.
             log_statistics: Pokud True, zaloguje detailní statistiky do RF loggeru. Výchozí: True.
             generate_html: Pokud True, vygeneruje HTML report s porovnáním. Výchozí: False.
+            embed_images_to_log: Pokud True, embeduje baseline a diff obrázky do RF log.html jako base64. Výchozí: True.
 
         Returns:
             int: Hammingova vzdálenost mezi dvěma obrázky.
@@ -194,6 +197,7 @@ class ImageComparisonLibrary:
             enable_color_coding=enable_color_coding,
             log_statistics=log_statistics,
             generate_html=generate_html,
+            embed_images_to_log=embed_images_to_log,
             baseline_path_for_html=baseline_path_str,
             current_path_for_html=current_path_str,
             hash_distance_for_html=distance,
@@ -236,7 +240,8 @@ class ImageComparisonLibrary:
         severe_color: Tuple[int, int, int] = (0, 0, 255),
         enable_color_coding: bool = False,
         log_statistics: bool = True,
-        generate_html: bool = False
+        generate_html: bool = False,
+        embed_images_to_log: bool = True
     ) -> int:
         """Check if two images are visually similar with relaxed tolerance.
 
@@ -261,6 +266,7 @@ class ImageComparisonLibrary:
             enable_color_coding: If False, use only severe_color for all changes. Default: False.
             log_statistics: If True, log detailed statistics to RF logger. Default: True.
             generate_html: If True, generate HTML report with side-by-side comparison. Default: False.
+            embed_images_to_log: If True, embed baseline and diff images to RF log.html as base64. Default: True.
 
         Returns:
             int: The Hamming distance between the two images.
@@ -293,6 +299,7 @@ class ImageComparisonLibrary:
             enable_color_coding: Pokud False, použije se pouze severe_color. Výchozí: False.
             log_statistics: Pokud True, zaloguje detailní statistiky do RF loggeru. Výchozí: True.
             generate_html: Pokud True, vygeneruje HTML report s porovnáním. Výchozí: False.
+            embed_images_to_log: Pokud True, embeduje baseline a diff obrázky do RF log.html jako base64. Výchozí: True.
 
         Returns:
             int: Hammingova vzdálenost mezi dvěma obrázky.
@@ -321,7 +328,8 @@ class ImageComparisonLibrary:
             severe_color=severe_color,
             enable_color_coding=enable_color_coding,
             log_statistics=log_statistics,
-            generate_html=generate_html
+            generate_html=generate_html,
+            embed_images_to_log=embed_images_to_log
         )
     
     def _load_image(self, image: Union[str, Path, Image.Image]) -> Image.Image:
@@ -1060,6 +1068,7 @@ class ImageComparisonLibrary:
         enable_color_coding: bool = False,
         log_statistics: bool = True,
         generate_html: bool = False,
+        embed_images_to_log: bool = True,
         baseline_path_for_html: Optional[str] = None,
         current_path_for_html: Optional[str] = None,
         hash_distance_for_html: Optional[int] = None,
@@ -1082,6 +1091,7 @@ class ImageComparisonLibrary:
             enable_color_coding: If False, use only severe_color for all changes.
             log_statistics: If True, log statistics to Robot Framework logger.
             generate_html: If True, generate HTML report.
+            embed_images_to_log: If True, embed baseline and diff images to RF log.html as base64.
             baseline_path_for_html: Baseline image path for HTML report.
             current_path_for_html: Current image path for HTML report.
             hash_distance_for_html: Hash distance for HTML report.
@@ -1109,6 +1119,7 @@ class ImageComparisonLibrary:
             enable_color_coding: Pokud False, použije se pouze severe_color.
             log_statistics: Pokud True, zaloguje statistiky do RF loggeru.
             generate_html: Pokud True, vygeneruje HTML report.
+            embed_images_to_log: Pokud True, embeduje baseline a diff obrázky do RF log.html jako base64.
             baseline_path_for_html: Cesta k baseline obrázku pro HTML report.
             current_path_for_html: Cesta k aktuálnímu obrázku pro HTML report.
             hash_distance_for_html: Hash vzdálenost pro HTML report.
@@ -1209,6 +1220,10 @@ class ImageComparisonLibrary:
         # Save diff image
         diff_img.save(diff_path)
 
+        # Embed images to Robot Framework log if requested
+        if embed_images_to_log:
+            self._log_images_to_html(baseline_img, diff_path)
+
         # Generate HTML report if requested
         if generate_html and all([
             baseline_path_for_html,
@@ -1259,3 +1274,93 @@ class ImageComparisonLibrary:
                 return "<PIL Image object in memory>"
         else:
             return str(image)
+
+    def _encode_image_to_base64(self, image: Union[Path, Image.Image]) -> str:
+        """Encode image to base64 data URI for HTML embedding.
+
+        Args:
+            image: Image as Path or PIL.Image.Image.
+
+        Returns:
+            str: Data URI string (data:image/png;base64,...)
+
+        ---
+
+        Enkóduje obrázek do base64 data URI pro HTML embedding.
+
+        Args:
+            image: Obrázek jako Path nebo PIL.Image.Image.
+
+        Returns:
+            str: Data URI řetězec (data:image/png;base64,...)
+        """
+        import base64
+        from io import BytesIO
+
+        # Load image if it's a Path
+        if isinstance(image, Path):
+            img = Image.open(image)
+        else:
+            img = image
+
+        # Convert to RGB if needed
+        if img.mode not in ('RGB', 'RGBA'):
+            img = img.convert('RGB')
+
+        # Encode to base64
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        img_bytes = buffer.getvalue()
+        img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+
+        return f"data:image/png;base64,{img_base64}"
+
+    def _log_images_to_html(
+        self,
+        baseline_img: Image.Image,
+        diff_path: Path
+    ) -> None:
+        """Log baseline and diff images as HTML table to Robot Framework log.
+
+        Creates a side-by-side HTML table with baseline and diff images
+        embedded as base64 data URIs for direct viewing in log.html.
+
+        Args:
+            baseline_img: Baseline PIL Image.
+            diff_path: Path to saved diff image.
+
+        ---
+
+        Zaloguje baseline a diff obrázky jako HTML tabulku do Robot Framework logu.
+
+        Vytvoří side-by-side HTML tabulku s baseline a diff obrázky
+        enkódovanými jako base64 data URI pro přímé zobrazení v log.html.
+
+        Args:
+            baseline_img: Baseline PIL Image.
+            diff_path: Cesta k uloženému diff obrázku.
+        """
+        # Encode images to base64
+        baseline_base64 = self._encode_image_to_base64(baseline_img)
+        diff_base64 = self._encode_image_to_base64(diff_path)
+
+        # Create HTML table with side-by-side images
+        html_content = f"""
+<table style="width:100%; border-collapse: collapse; margin-top: 10px;">
+  <tr>
+    <th style="text-align:center; padding:10px; background-color:#f0f0f0; border:1px solid #ddd;">Baseline Image</th>
+    <th style="text-align:center; padding:10px; background-color:#f0f0f0; border:1px solid #ddd;">Diff Image</th>
+  </tr>
+  <tr>
+    <td style="padding:5px; text-align:center; border:1px solid #ddd;">
+      <img src="{baseline_base64}" style="max-width:100%; height:auto; display:block; margin:auto;">
+    </td>
+    <td style="padding:5px; text-align:center; border:1px solid #ddd;">
+      <img src="{diff_base64}" style="max-width:100%; height:auto; display:block; margin:auto;">
+    </td>
+  </tr>
+</table>
+"""
+
+        # Log HTML to Robot Framework log
+        logger.info(html_content, html=True)
