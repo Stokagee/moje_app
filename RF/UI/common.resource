@@ -9,6 +9,7 @@ Library    String
 Library    RequestsLibrary
 Library    RobotEyes
 Library    DateTime
+Library    ../ImageComparisonLibrary/ImageComparisonLibrary/core.py
 Resource    ../UI/locators/form_page_locators.resource
 Resource    ../UI/locators/page2_locators.resource
 Resource    ../UI/pages/form_page.resource

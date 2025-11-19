@@ -93,8 +93,8 @@ class TestImageComparisonLibrary(unittest.TestCase):
             )
         
         error_message = str(context.exception)
-        self.assertIn("Obrázky se liší nad povolenou toleranci", error_message)
-        self.assertIn("Hammingova vzdálenost:", error_message)
+        self.assertIn("Images differ beyond allowed tolerance", error_message)
+        self.assertIn("Hamming distance:", error_message)
         
         # Verify diff file was created
         diff_files = list(self.diff_dir.glob("diff_*.png"))
@@ -110,7 +110,7 @@ class TestImageComparisonLibrary(unittest.TestCase):
             )
         
         error_message = str(context.exception)
-        self.assertIn("různé rozměry", error_message)
+        self.assertIn("different dimensions", error_message)
     
     def test_pil_image_input(self):
         """Test that PIL Image objects can be used as input."""

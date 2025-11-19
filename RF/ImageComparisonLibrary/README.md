@@ -26,6 +26,8 @@ pip install -r requirements.txt
 - Robot Framework 6.0+
 - Pillow 9.0.0+
 - imagehash 4.3.0+
+- opencv-python 4.8.0+ (pro contour detection)
+- numpy 1.24.0+
 
 ## Klíčová slova
 
@@ -37,7 +39,8 @@ Hlavní, nejpřísnější klíčové slovo pro regresní testy.
 ```robot
 Compare Layouts And Generate Diff
     [Arguments]    ${baseline_image}    ${current_image}    ${diff_directory}
-    ...           algorithm=phash    tolerance=5    pixel_tolerance=10    hash_size=8
+    ...           algorithm=phash    tolerance=5    pixel_tolerance=25    hash_size=8
+    ...           diff_mode=contours    min_contour_area=100    enable_color_coding=False
 ```
 
 **Parametry:**
@@ -46,8 +49,11 @@ Compare Layouts And Generate Diff
 - `diff_directory` (povinný): Adresář pro uložení diff obrázku při selhání
 - `algorithm` (volitelný, výchozí 'phash'): Hashovací algoritmus ('phash' nebo 'dhash')
 - `tolerance` (volitelný, výchozí 5): Maximální povolená Hammingova vzdálenost
-- `pixel_tolerance` (volitelný, výchozí 10): Tolerance barevného rozdílu (0-255)
+- `pixel_tolerance` (volitelný, výchozí 25): Tolerance barevného rozdílu (0-255) - zvýšeno pro méně false positives
 - `hash_size` (volitelný, výchozí 8): Velikost hashovací mřížky
+- `diff_mode` (volitelný, výchozí 'contours'): Režim vizualizace - 'contours' nebo 'filled'
+- `min_contour_area` (volitelný, výchozí 100): Minimální plocha kontury - filtruje šum
+- `enable_color_coding` (volitelný, výchozí False): Barevné kódování - False = jen červená
 
 **Příklady:**
 ```robot
@@ -102,6 +108,74 @@ Quick Visual Check
     ...    ${BASELINE_DIR}/homepage.png
     ...    ${RESULTS_DIR}/homepage.png
     ...    ${DIFF_DIR}
+```
+
+## Nové funkce (verze 1.1.0+)
+
+### Profesionální Diff Vizualizace s Kontúrami
+
+Knihovna nyní podporuje pokročilou vizualizaci rozdílů pomocí **tenkých obrysů** místo vyplněných oblastí:
+
+```robot
+# Nový výchozí režim - kontury s barevným kódováním
+Compare Layouts And Generate Diff
+...    ${BASELINE}    ${CURRENT}    ${DIFF_DIR}
+# Automaticky použije contours mode s color coding
+
+# Starý režim (zpětná kompatibilita)
+Compare Layouts And Generate Diff
+...    ${BASELINE}    ${CURRENT}    ${DIFF_DIR}
+...    diff_mode=filled
+```
+
+### Jednoduchá Červená Vizualizace (Default)
+
+**Defaultně používá pouze červenou barvu** pro všechny změny - čisté a jednoduché!
+
+**Volitelné Color Coding** (pokud chceš rozlišovat závažnost):
+```robot
+Compare Layouts And Generate Diff
+...    ${BASELINE}    ${CURRENT}    ${DIFF_DIR}
+...    enable_color_coding=True
+```
+- **Zelená**: Minor differences (malé změny)
+- **Žlutá**: Moderate differences (střední změny)
+- **Červená**: Severe differences (velké změny)
+
+### Detailní Statistiky v Logu
+
+```
+=== Image Comparison Statistics ===
+Total pixels: 2,073,600
+Different pixels: 15,234 (0.74%)
+  - Minor differences (green): 8,123
+  - Moderate differences (yellow): 4,567
+  - Severe differences (red): 2,544
+Number of contours detected: 12
+Largest contour area: 1,234 pixels
+Average color difference: 18.45
+```
+
+### HTML Report s Porovnáním
+
+```robot
+Compare Layouts And Generate Diff
+...    ${BASELINE}    ${CURRENT}    ${DIFF_DIR}
+...    generate_html=True
+# Vygeneruje interaktivní HTML report s baseline/current/diff vedle sebe
+```
+
+### Konfigurovatelné Parametry
+
+```robot
+# Vlastní barvy a tloušťka kontur
+Compare Layouts And Generate Diff
+...    ${BASELINE}    ${CURRENT}    ${DIFF_DIR}
+...    contour_thickness=3
+...    minor_color=(0,255,0)
+...    moderate_color=(255,255,0)
+...    severe_color=(255,0,0)
+...    min_contour_area=50
 ```
 
 ## Chování knihovny

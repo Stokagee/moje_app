@@ -22,7 +22,7 @@ if readme_path.exists():
 setup(
     name="robotframework-imagecomparisonlibrary",
     version=version["__version__"],
-    author="Your Name",
+    author="Dušan Čižmarik",
     author_email="your.email@example.com",
     description="Robot Framework library for image comparison and visual regression testing",
     long_description=long_description,

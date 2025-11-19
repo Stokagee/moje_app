@@ -1,8 +1,10 @@
 *** Settings ***
 Resource    ../RF/UI/common.resource
 
+Library    ImageComparisonLibrary
 Suite Teardown    Run Keyword And Ignore Error    Cleanup Test Artifacts
 *** Variables ***
+${TIMEOUT_TEST}    15s
 ${login_email}    dusan.cizmarik@continero.com
 ${login_password}    123456
 ${test_url}    https://dev.artima.ai/Login
@@ -17,6 +19,7 @@ ${actual_image}    C:/Users/stoka/Documents/moje_app/RF/libraries/images/baselin
 ${LOGIN_EMAIL_INPUT}    [data-testid="login-email-input"]
 ${LOGIN_PASSWORD_INPUT}    [data-testid="login-password-input"]
 ${LOGIN_SUBMIT_BUTTON}    [data-testid="login-submit-button"]
+${MAIN_DASHBOARD_H1}    "Dashboard"
 
 
 *** Test Cases ***
@@ -25,12 +28,13 @@ Přihlášení Uživatele
     Provision Browser Session    ${BROWSER}    ${HEADLESS}    ${test_url}    ${test_width}    ${test_height}
     Wait For Load State    domcontentloaded
     Add Style Tag    css    
-    ${image_for_test}=    Take Screenshot    filename=${SCREENSHOT_PATH}login_page_${actual_time_stamp}.png
     ${diff_image_path}=    Set Variable    ${RESULTS_IMAGE_PATH}login_page_diff_${actual_time_stamp}.png
-    RobotEyes.Compare Two Images    ${actual_image}    ${image_for_test}    ${diff_image_path}    tolerance=5
     Vyplnit Email Pro Přihlášení    ${login_email}
     Vyplnit Heslo Pro Přihlášení    ${login_password}
     Kliknout Na Přihlásit Tlačítko
+    ${image_for_test}=    Take Screenshot    filename=${SCREENSHOT_PATH}login_page_${actual_time_stamp}.png
+    Check Layouts Are Visually Similar    ${BASELINE_IMAGE_PATH}login_page_20251118_174339.png    ${image_for_test}    ${diff_image_path}    pixel_tolerance=15
+    Wait For Elements State    ${MAIN_DASHBOARD_H1}    ${TIMEOUT_TEST}
 
 
 *** Keywords ***
