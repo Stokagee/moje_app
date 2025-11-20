@@ -34,17 +34,115 @@ class DiffStatistics:
 
 
 class ImageComparisonLibrary:
-    """Robot Framework library for image comparison and visual regression testing.
+    """Visual regression testing library for catching unexpected UI changes.
 
-    This library provides keywords for comparing images using perceptual hashing
-    and generating visual diff images when comparisons fail.
+    = Overview =
+
+    ImageComparisonLibrary provides two main keywords for automated UI testing:
+
+    1. ``Compare Layouts And Generate Diff`` - Strict pixel-perfect verification
+    2. ``Check Layouts Are Visually Similar`` - Relaxed comparison for dynamic content
+
+    Both keywords use perceptual hashing for fast comparison and generate visual
+    diff images with highlighted changes when tests fail.
+
+    = Typical Workflow =
+
+    1. Capture baseline screenshots of your UI (one-time setup)
+    2. Run tests that capture current screenshots
+    3. Compare current vs baseline using library keywords
+    4. Review diff images in Robot Framework log.html if tests fail
+    5. Update baselines when UI changes are intentional
+
+    = Use Cases =
+
+    *Regression Testing:*
+    - Catch unintended UI changes after code updates
+    - Verify critical pages (login, checkout, forms)
+    - Automated smoke tests in CI/CD pipelines
+
+    *Cross-Browser Testing:*
+    - Compare UI rendering across different browsers
+    - Detect browser-specific layout issues
+
+    *Responsive Design:*
+    - Verify UI at different screen resolutions
+    - Compare mobile vs desktop layouts
+
+    = Algorithm Choice =
+
+    *phash (Perceptual Hash):*
+    - Default for strict comparison
+    - Good for structural changes
+    - Resistant to minor color/lighting variations
+    - Recommended for most tests
+
+    *dhash (Difference Hash):*
+    - Default for relaxed comparison
+    - Faster than phash
+    - Focuses on gradients
+    - Good for quick smoke tests
+
+    = See Also =
+
+    - GitHub: https://github.com/yourusername/ImageComparisonLibrary
+    - README.md for installation and examples
+    - IMPORTANT_PLACES.md for code structure
 
     ---
 
-    Robot Framework knihovna pro porovnávání obrázků a vizuální regresní testování.
+    = Přehled =
 
-    Tato knihovna poskytuje klíčová slova pro porovnávání obrázků pomocí perceptual
-    hashování a generování vizuálních diff obrázků při selhání porovnání.
+    ImageComparisonLibrary poskytuje dvě hlavní klíčová slova pro automatizované UI testování:
+
+    1. ``Compare Layouts And Generate Diff`` - Přísné pixel-perfect ověření
+    2. ``Check Layouts Are Visually Similar`` - Uvolněné porovnání pro dynamický obsah
+
+    Obě klíčová slova používají perceptual hashing pro rychlé porovnání a generují
+    vizuální diff obrázky se zvýrazněnými změnami, když testy selžou.
+
+    = Typický workflow =
+
+    1. Zachyťte baseline screenshoty vašeho UI (jednorázové nastavení)
+    2. Spusťte testy, které zachytí aktuální screenshoty
+    3. Porovnejte aktuální vs baseline pomocí klíčových slov knihovny
+    4. Zkontrolujte diff obrázky v Robot Framework log.html, pokud testy selžou
+    5. Aktualizujte baselines, když jsou UI změny záměrné
+
+    = Případy použití =
+
+    *Regresní testování:*
+    - Zachycení nezáměrných UI změn po aktualizacích kódu
+    - Ověření kritických stránek (přihlášení, checkout, formuláře)
+    - Automatizované smoke testy v CI/CD pipelines
+
+    *Cross-Browser testování:*
+    - Porovnání vykreslování UI napříč různými prohlížeči
+    - Detekce problémů s layoutem specifických pro prohlížeč
+
+    *Responzivní design:*
+    - Ověření UI při různých rozlišeních obrazovky
+    - Porovnání mobilních vs desktopových layoutů
+
+    = Volba algoritmu =
+
+    *phash (Perceptual Hash):*
+    - Výchozí pro přísné porovnání
+    - Dobré pro strukturální změny
+    - Odolné vůči menším barevným/světelným variacím
+    - Doporučené pro většinu testů
+
+    *dhash (Difference Hash):*
+    - Výchozí pro uvolněné porovnání
+    - Rychlejší než phash
+    - Zaměřuje se na gradienty
+    - Dobré pro rychlé smoke testy
+
+    = Viz také =
+
+    - GitHub: https://github.com/yourusername/ImageComparisonLibrary
+    - README.md pro instalaci a příklady
+    - IMPORTANT_PLACES.md pro strukturu kódu
     """
     
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
@@ -79,13 +177,66 @@ class ImageComparisonLibrary:
         embed_images_to_log: bool = True,
         add_timestamp: bool = True
     ) -> int:
-        """Compare two images using perceptual hashing and generate diff on failure.
+        """Verify that UI layout matches baseline screenshot (strict pixel-perfect mode).
 
-        This is the main, strictest keyword for regression testing. It compares
-        the baseline image against the current image using the specified hashing
-        algorithm. If the comparison fails (distance > tolerance), it generates
-        a visual diff image highlighting the differences with contour outlines
-        and optional color coding.
+        = When To Use =
+
+        Use this keyword for:
+        - *Critical UI elements:* Login pages, checkout flows, payment forms
+        - *Regression testing:* Catch unintended UI changes after code updates
+        - *CI/CD pipelines:* Automated smoke tests with binary pass/fail results
+        - *Pixel-perfect verification:* When exact visual match is required
+
+        This is the main, strictest keyword with low tolerance (default: 5).
+        For pages with dynamic content, use ``Check Layouts Are Visually Similar`` instead.
+
+        = What This Does =
+
+        1. Calculates perceptual hash of both images (phash or dhash algorithm)
+        2. Compares hashes using Hamming distance
+        3. If similar (distance ≤ tolerance): Test PASSES ✓
+        4. If different (distance > tolerance): Test FAILS and generates diff image
+        5. Diff image shows highlighted changes with semi-transparent overlays
+        6. Embeds baseline, current, and diff images into Robot Framework log.html
+
+        = Common Usage Patterns =
+
+        *Basic regression test:*
+
+        | Compare Layouts And Generate Diff | baseline.png | current.png | ${DIFF_DIR} |
+
+        *Ignore semi-transparent overlays (loaders, dialogs):*
+
+        | Compare Layouts And Generate Diff | baseline.png | current.png | ${DIFF_DIR}
+        | ...    pixel_tolerance=60    min_contour_area=5000
+
+        *Capture only major layout changes:*
+
+        | Compare Layouts And Generate Diff | baseline.png | current.png | ${DIFF_DIR}
+        | ...    tolerance=10    min_contour_area=10000
+
+        *Use faster algorithm for quick tests:*
+
+        | Compare Layouts And Generate Diff | baseline.png | current.png | ${DIFF_DIR}
+        | ...    algorithm=dhash
+
+        *Disable auto-embedding to log (reduce log.html size):*
+
+        | Compare Layouts And Generate Diff | baseline.png | current.png | ${DIFF_DIR}
+        | ...    embed_images_to_log=False
+
+        = Understanding The Output =
+
+        *When test PASSES:*
+        - Log message: "Layouts are similar. Distance: X (threshold: Y)"
+        - No diff image generated
+        - Returns Hamming distance (integer)
+
+        *When test FAILS:*
+        - AssertionError with detailed message
+        - Visual diff image saved to diff_directory
+        - Baseline, current, and diff images embedded in log.html
+        - Statistics logged (pixels changed, contours detected, etc.)
 
         Args:
             baseline_image: Reference image. Accepts str (path), pathlib.Path, or PIL.Image.Image.
@@ -116,12 +267,64 @@ class ImageComparisonLibrary:
 
         ---
 
-        Porovná dva obrázky pomocí perceptual hashování a vygeneruje diff při selhání.
+        = Kdy použít =
 
-        Toto je hlavní, nejpřísnější klíčové slovo pro regresní testování. Porovnává
-        baseline obrázek s aktuálním obrázkem pomocí zadaného hashovacího algoritmu.
-        Pokud porovnání selže (distance > tolerance), vygeneruje vizuální diff obrázek
-        s obrysovými konturami a volitelným barevným kódováním.
+        Použijte toto klíčové slovo pro:
+        - *Kritické UI elementy:* Přihlašovací stránky, checkout, platební formuláře
+        - *Regresní testování:* Zachycení nezáměrných UI změn po aktualizacích kódu
+        - *CI/CD pipelines:* Automatizované smoke testy s binárním pass/fail výsledkem
+        - *Pixel-perfect ověření:* Když je vyžadována přesná vizuální shoda
+
+        Toto je hlavní, nejpřísnější klíčové slovo s nízkou tolerancí (výchozí: 5).
+        Pro stránky s dynamickým obsahem použijte ``Check Layouts Are Visually Similar``.
+
+        = Co to dělá =
+
+        1. Vypočítá perceptual hash obou obrázků (phash nebo dhash algoritmus)
+        2. Porovná hashe pomocí Hammingovy vzdálenosti
+        3. Pokud jsou podobné (distance ≤ tolerance): Test PROJDE ✓
+        4. Pokud jsou odlišné (distance > tolerance): Test SELŽE a vygeneruje diff obrázek
+        5. Diff obrázek zobrazuje zvýrazněné změny s poloprůhledným překrytím
+        6. Vloží baseline, aktuální a diff obrázky do Robot Framework log.html
+
+        = Běžné vzory použití =
+
+        *Základní regresní test:*
+
+        | Compare Layouts And Generate Diff | baseline.png | current.png | ${DIFF_DIR} |
+
+        *Ignorovat poloprůhledné překrytí (loadery, dialogy):*
+
+        | Compare Layouts And Generate Diff | baseline.png | current.png | ${DIFF_DIR}
+        | ...    pixel_tolerance=60    min_contour_area=5000
+
+        *Zachytit pouze významné změny layoutu:*
+
+        | Compare Layouts And Generate Diff | baseline.png | current.png | ${DIFF_DIR}
+        | ...    tolerance=10    min_contour_area=10000
+
+        *Použít rychlejší algoritmus pro rychlé testy:*
+
+        | Compare Layouts And Generate Diff | baseline.png | current.png | ${DIFF_DIR}
+        | ...    algorithm=dhash
+
+        *Vypnout automatické vkládání do logu (zmenšit velikost log.html):*
+
+        | Compare Layouts And Generate Diff | baseline.png | current.png | ${DIFF_DIR}
+        | ...    embed_images_to_log=False
+
+        = Pochopení výstupu =
+
+        *Když test PROJDE:*
+        - Log zpráva: "Layouts are similar. Distance: X (threshold: Y)"
+        - Žádný diff obrázek není vygenerován
+        - Vrací Hammingovu vzdálenost (integer)
+
+        *Když test SELŽE:*
+        - AssertionError s detailní zprávou
+        - Vizuální diff obrázek uložen do diff_directory
+        - Baseline, aktuální a diff obrázky vloženy do log.html
+        - Statistiky zalogované (změněné pixely, detekované kontury, atd.)
 
         Args:
             baseline_image: Referenční obrázek. Akceptuje str (cestu), pathlib.Path, nebo PIL.Image.Image.
@@ -248,11 +451,60 @@ class ImageComparisonLibrary:
         embed_images_to_log: bool = True,
         add_timestamp: bool = True
     ) -> int:
-        """Check if two images are visually similar with relaxed tolerance.
+        """Verify UI layout with relaxed tolerance for pages with dynamic content.
 
-        This is a less strict keyword for faster, coarser comparison. It internally
-        calls compare_layouts_and_generate_diff with different default values
-        (tolerance=15, algorithm='dhash').
+        = When To Use =
+
+        Use this keyword for:
+        - *Dynamic content:* Pages with timestamps, usernames, counters, session IDs
+        - *Data-driven pages:* Dashboards, charts, graphs with changing data
+        - *Quick smoke tests:* Fast comparison without pixel-perfect requirements
+        - *A/B testing:* When minor visual differences are acceptable
+
+        This keyword uses relaxed tolerance (default: 15) and faster dhash algorithm.
+        For pixel-perfect verification, use ``Compare Layouts And Generate Diff`` instead.
+
+        = What This Does =
+
+        Same as ``Compare Layouts And Generate Diff``, but with relaxed settings:
+        1. Uses dhash algorithm (faster) instead of phash
+        2. Higher tolerance (15 instead of 5) - allows more variation
+        3. Same visual diff generation if test fails
+        4. Same embedding into Robot Framework log.html
+
+        = Common Usage Patterns =
+
+        *Basic relaxed comparison:*
+
+        | Check Layouts Are Visually Similar | baseline.png | current.png | ${DIFF_DIR} |
+
+        *Even more relaxed (ignore minor changes):*
+
+        | Check Layouts Are Visually Similar | baseline.png | current.png | ${DIFF_DIR}
+        | ...    tolerance=20
+
+        *Dashboard with changing data:*
+
+        | Check Layouts Are Visually Similar | dashboard_baseline.png | dashboard_current.png | ${DIFF_DIR}
+        | ...    tolerance=15    pixel_tolerance=80
+
+        *Quick smoke test across multiple pages:*
+
+        | FOR    ${page}    IN    @{PAGES}
+        |     Check Layouts Are Visually Similar    ${page}_baseline.png    ${page}_current.png    ${DIFF_DIR}
+        | END
+
+        = Comparison: Strict vs Relaxed =
+
+        *Compare Layouts And Generate Diff (STRICT):*
+        - Tolerance: 5 (low)
+        - Algorithm: phash (precise)
+        - Use for: Critical UI, pixel-perfect tests
+
+        *Check Layouts Are Visually Similar (RELAXED):*
+        - Tolerance: 15 (high)
+        - Algorithm: dhash (fast)
+        - Use for: Dynamic content, quick tests
 
         Args:
             baseline_image: Reference image. Accepts str (path), pathlib.Path, or PIL.Image.Image.
@@ -282,11 +534,58 @@ class ImageComparisonLibrary:
 
         ---
 
-        Zkontroluje, zda jsou dva obrázky vizuálně podobné s uvolněnou tolerancí.
+        = Kdy použít =
 
-        Toto je méně přísné klíčové slovo pro rychlejší, hrubší porovnání. Interně
-        volá compare_layouts_and_generate_diff s odlišnými výchozími hodnotami
-        (tolerance=15, algorithm='dhash').
+        Použijte toto klíčové slovo pro:
+        - *Dynamický obsah:* Stránky s časovými značkami, uživatelskými jmény, počítadly, session ID
+        - *Data-driven stránky:* Dashboardy, grafy s měnícími se daty
+        - *Rychlé smoke testy:* Rychlé porovnání bez pixel-perfect požadavků
+        - *A/B testování:* Když jsou menší vizuální rozdíly přijatelné
+
+        Toto klíčové slovo používá uvolněnou toleranci (výchozí: 15) a rychlejší dhash algoritmus.
+        Pro pixel-perfect ověření použijte ``Compare Layouts And Generate Diff``.
+
+        = Co to dělá =
+
+        Stejné jako ``Compare Layouts And Generate Diff``, ale s uvolněným nastavením:
+        1. Používá dhash algoritmus (rychlejší) místo phash
+        2. Vyšší tolerance (15 místo 5) - povoluje více variací
+        3. Stejné generování vizuálního diffu, pokud test selže
+        4. Stejné vkládání do Robot Framework log.html
+
+        = Běžné vzory použití =
+
+        *Základní uvolněné porovnání:*
+
+        | Check Layouts Are Visually Similar | baseline.png | current.png | ${DIFF_DIR} |
+
+        *Ještě více uvolněné (ignorovat menší změny):*
+
+        | Check Layouts Are Visually Similar | baseline.png | current.png | ${DIFF_DIR}
+        | ...    tolerance=20
+
+        *Dashboard s měnícími se daty:*
+
+        | Check Layouts Are Visually Similar | dashboard_baseline.png | dashboard_current.png | ${DIFF_DIR}
+        | ...    tolerance=15    pixel_tolerance=80
+
+        *Rychlý smoke test napříč více stránkami:*
+
+        | FOR    ${page}    IN    @{PAGES}
+        |     Check Layouts Are Visually Similar    ${page}_baseline.png    ${page}_current.png    ${DIFF_DIR}
+        | END
+
+        = Porovnání: Přísné vs Uvolněné =
+
+        *Compare Layouts And Generate Diff (PŘÍSNÉ):*
+        - Tolerance: 5 (nízká)
+        - Algoritmus: phash (přesný)
+        - Použití: Kritické UI, pixel-perfect testy
+
+        *Check Layouts Are Visually Similar (UVOLNĚNÉ):*
+        - Tolerance: 15 (vysoká)
+        - Algoritmus: dhash (rychlý)
+        - Použití: Dynamický obsah, rychlé testy
 
         Args:
             baseline_image: Referenční obrázek. Akceptuje str (cestu), pathlib.Path, nebo PIL.Image.Image.
