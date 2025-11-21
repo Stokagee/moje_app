@@ -16,7 +16,9 @@
       "Bash(start test_outputsreportsvisual_comparison_20251120_150653.html)",
       "mcp__sequential-thinking__sequentialthinking",
       "Bash(docker-compose build:*)",
-      "Bash(docker-compose run:*)"
+      "Bash(docker-compose run:*)",
+      "Bash(sqlite3:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
