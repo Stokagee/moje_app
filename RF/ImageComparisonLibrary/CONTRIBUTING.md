@@ -269,6 +269,29 @@ def tearDown(self):
     shutil.rmtree(self.temp_dir)
 ```
 
+#### 4. Debug skripty
+Pro vývoj a ladění nových funkcí jsou k dispozici debug skripty v `tests/debug/`:
+
+**Dostupné skripty:**
+- `test_directional_diff.py` - Kompletní test směrových rozdílů (all/added/removed modes)
+- `test_directional_simple.py` - Jednoduchý test s uživatelskými obrázky
+- `test_debug_masks.py` - Vizualizace diff masek (binary, added, removed)
+
+**Spuštění:**
+```bash
+# Z hlavní složky projektu
+python tests/debug/test_directional_diff.py
+python tests/debug/test_directional_simple.py
+python tests/debug/test_debug_masks.py
+```
+
+**Výstupy:**
+- Debug skripty ukládají výstupy do `tests/debug/outputs/`
+- Diff obrázky, masky, a další vizualizace
+- Používejte je pro ladění a ověření nových funkcí
+
+**Poznámka:** Debug skripty NEJSOU součástí automatických testů. Jsou určeny pouze pro manuální ladění a vývoj.
+
 ### Požadavky na testy před pull requestem
 
 - ✅ Všechny testy musí projít

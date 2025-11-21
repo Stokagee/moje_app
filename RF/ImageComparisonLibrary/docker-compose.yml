@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  imagelib-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount user's test images as read-only
+      - C:/Users/stoka/Documents/moje_app/RF/libraries/images:/images:ro
+      # Mount debug outputs for writing results
+      - ./tests/debug/outputs:/app/tests/debug/outputs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DISPLAY=:0
+    command: python test_robot_repro.py
+
+  # Service for running diagnostic script
+  imagelib-diagnostic:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - C:/Users/stoka/Documents/moje_app/RF/libraries/images:/images:ro
+      - ./tests/debug/outputs:/app/tests/debug/outputs
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: python test_diagnostic.py
+
+  # Service for interactive shell
+  imagelib-shell:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - C:/Users/stoka/Documents/moje_app/RF/libraries/images:/images:ro
+      - ./tests/debug/outputs:/app/tests/debug/outputs
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: /bin/bash
+    stdin_open: true
+    tty: true

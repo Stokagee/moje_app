@@ -8,10 +8,18 @@ Tento dokument poskytuje přehled klíčových částí kódu a jejich zodpověd
 ImageComparisonLibrary/
 ├── ImageComparisonLibrary/          # Hlavní balíček
 │   ├── __init__.py                 # Export knihovny a veřejné API
-│   ├── core.py                     # Hlavní implementace (1,454+ řádků)
+│   ├── core.py                     # Hlavní implementace (1,768+ řádků)
 │   └── version.py                  # Verze knihovny
 ├── tests/
-│   └── test_core.py                # Jednotkové testy (12 testů)
+│   ├── test_core.py                # Jednotkové testy (12 testů)
+│   └── debug/                      # Debug skripty a výstupy
+│       ├── test_directional_diff.py      # Test směrových rozdílů
+│       ├── test_directional_simple.py    # Jednoduchý test
+│       ├── test_debug_masks.py           # Debug masek
+│       └── outputs/                      # Výstupní složka pro debug
+│           ├── directional_diff/         # Výstupy z directional testů
+│           ├── directional_simple/       # Výstupy z simple testů
+│           └── debug_masks/              # Výstupy masek (binary, added, removed)
 ├── requirements.txt                # Závislosti projektu
 ├── setup.py                        # Instalační konfigurace
 ├── README.md                       # Hlavní dokumentace
@@ -21,6 +29,112 @@ ImageComparisonLibrary/
 ```
 
 ## 🆕 Nové Funkce
+
+### Verze 1.5.0 (2024-11-21)
+
+#### Morphological Dilation pro Lepší Detekci Elementů - NOVÉ
+**Problém:** U bílých elementů na bílém pozadí (např. input fieldy) se detekovaly jen okraje, ne celá plocha.
+- Detekované pixely: ~700 pixelů
+- Contour area: ~165 pixelů (jen malý kousek textu)
+- Výsledek: Malá modrá skvrna místo velkého červeného obdélníku
+
+**Řešení:** Morfologická dilatace rozšíří detekované okraje na celou plochu elementu.
+
+**Nový parametr: `element_fill_expansion`**
+- **Typ:** `int`
+- **Výchozí hodnota:** `15`
+- **Popis:** Velikost kernelu pro morfologickou dilataci (cv2.dilate)
+- **Použití:** Rozšíří detekované okraje elementů na jejich celou vnitřní plochu
+- **Deaktivace:** Nastavit na `0` pro původní chování (jen okraje)
+
+**Jak to funguje:**
+1. **Detekce okrajů** (stejně jako dříve):
+   - Added pixels: darker pixels (background → element)
+   - Removed pixels: lighter pixels (element → background)
+2. **Morfologická dilatace** (nové):
+   - Aplikuje `cv2.dilate()` s eliptickým kernelem (15x15 px)
+   - Rozšíří okraje o ~15 pixelů všemi směry
+   - Vyplní vnitřní plochu elementu
+3. **Constraining** (nové):
+   - Omezí na pixely s alespoň malou změnou barvy (`pixel_tolerance * 0.5`)
+   - Zabrání over-expansi do zcela nezměněných oblastí
+
+**Výsledky (Email input test):**
+- Před: 726 detected pixels → 165 px contour
+- Po: 1,123 detected pixels → **558 px contour** (+238%)
+- Contour nyní pokrývá **celý Email input box** místo jen kousku textu
+
+**Příklad použití:**
+```robot
+# Výchozí (element_fill_expansion=15, doporučeno)
+Compare Layouts And Generate Diff   baseline.png    current.png    diff/
+    ...    pixel_tolerance=15    min_contour_area=50
+    ...    # Automaticky rozšíří okraje na celý element
+
+# Pro menší expanzi (konzervativnější)
+Compare Layouts And Generate Diff   baseline.png    current.png    diff/
+    ...    element_fill_expansion=7
+
+# Deaktivovat (původní chování - jen okraje)
+Compare Layouts And Generate Diff   baseline.png    current.png    diff/
+    ...    element_fill_expansion=0
+```
+
+**Kdy použít:**
+- ✅ **Bílé elementy na bílém pozadí**: Input fieldy, buttony, cards
+- ✅ **Posunuté UI elementy**: Když se element posune o pár pixelů
+- ✅ **Element highlight mode**: Když používáte `highlight_mode='added'/'removed'`
+- ⚠️ **Deaktivovat (=0)**: Pro pixel-perfect detekci bez expanze
+
+**Bug Fix:** Hardcoded barva v filled mode
+- **Soubor:** `core.py`, řádek 1574
+- **Před:** `diff_pixels[x, y] = (255, 0, 0)  # Hardcoded red`
+- **Po:** `diff_pixels[x, y] = severe_color  # Použije parametr`
+- **Důvod:** Konzistence API - respektování `severe_color` parametru
+
+**Technické detaily:**
+- Kernel typ: `cv2.MORPH_ELLIPSE` (eliptický, ne obdélníkový)
+- Iterations: 1 (jedna iterace dilatace)
+- Fallback: Pokud `element_fill_expansion=0`, použije původní logiku (backward compatible)
+
+**Změněné metody:**
+- `_create_diff_mask()` - implementace dilatace
+- `_generate_visual_diff()` - přidán parametr
+- `compare_layouts_and_generate_diff()` - přidán parametr
+- `check_layouts_are_visually_similar()` - přidán parametr
+
+### Verze 1.4.0 (2024-11-21)
+
+#### Směrová Detekce Rozdílů - NOVÉ
+**Problém:** Když se element posune, diff ukazoval OBJE pozice (původní + novou), což bylo matoucí.
+
+**Řešení:** Dvě nové parametry pro `Compare Layouts And Generate Diff`:
+
+**1. `diff_base_image`** - Výběr vizuálního základu:
+- `'baseline'` (výchozí) - Ukáže kde elementy **BYLY** (původní pozice)
+- `'current'` - Ukáže kde elementy **JSOU** (nová pozice)
+
+**2. `highlight_mode`** - Jaké pixely zvýraznit:
+- `'all'` (výchozí) - Všechny změny (původní chování)
+- `'added'` - Pouze NOVÉ pixely (elementy které se objevily v current)
+- `'removed'` - Pouze STARÉ pixely (elementy které zmizely z baseline)
+
+**Příklad použití:**
+```robot
+Compare Layouts And Generate Diff   baseline.png    current.png    diff.png
+    ...    diff_base_image=current    highlight_mode=added
+    ...    # Ukáže POUZE posunutý element na jeho nové pozici!
+```
+
+**Jak to funguje:**
+- Detekce směru pomocí intenzity pixelů (RGB suma)
+- Přidané pixely = pixely které ztmavly (background → element border)
+- Odstraněné pixely = pixely které zesvětlaly (element border → background)
+
+**Debug skripty:**
+- `tests/debug/test_directional_diff.py` - Kompletní test všech kombinací
+- `tests/debug/test_directional_simple.py` - Jednoduchý test s user obrázky
+- `tests/debug/test_debug_masks.py` - Vizualizace masek (binary, added, removed)
 
 ### Verze 1.3.0 (2024-11-19)
 

@@ -1,0 +1,74 @@
+[
+  {
+    "test_number": 1,
+    "description": "Current Settings (User's Original)",
+    "min_contour_area": 1500,
+    "pixel_tolerance": 45,
+    "error": "Images differ beyond allowed tolerance!\n\nComparison details:\n  - Baseline image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\baseline\\login_page_20251118_174339.png\n  - Current image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\screenshot\\login_page_20251120_145142.png\n  - Algorithm used: phash (hash_size=16)\n  - Hamming distance: 12\n  - Tolerance threshold: 5\n\nVisual differences saved to: C:\\Users\\stoka\\Documents\\moje_app\\RF\\ImageComparisonLibrary\\test_outputs\\diffs\\diff_20251120_150652_572496.png",
+    "status": "ERROR"
+  },
+  {
+    "test_number": 2,
+    "description": "Lower Min Area (1000)",
+    "min_contour_area": 1000,
+    "pixel_tolerance": 45,
+    "error": "Images differ beyond allowed tolerance!\n\nComparison details:\n  - Baseline image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\baseline\\login_page_20251118_174339.png\n  - Current image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\screenshot\\login_page_20251120_145142.png\n  - Algorithm used: phash (hash_size=16)\n  - Hamming distance: 12\n  - Tolerance threshold: 5\n\nVisual differences saved to: C:\\Users\\stoka\\Documents\\moje_app\\RF\\ImageComparisonLibrary\\test_outputs\\diffs\\diff_20251120_150652_698314.png",
+    "status": "ERROR"
+  },
+  {
+    "test_number": 3,
+    "description": "Even Lower Min Area (500)",
+    "min_contour_area": 500,
+    "pixel_tolerance": 45,
+    "error": "Images differ beyond allowed tolerance!\n\nComparison details:\n  - Baseline image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\baseline\\login_page_20251118_174339.png\n  - Current image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\screenshot\\login_page_20251120_145142.png\n  - Algorithm used: phash (hash_size=16)\n  - Hamming distance: 12\n  - Tolerance threshold: 5\n\nVisual differences saved to: C:\\Users\\stoka\\Documents\\moje_app\\RF\\ImageComparisonLibrary\\test_outputs\\diffs\\diff_20251120_150652_828273.png",
+    "status": "ERROR"
+  },
+  {
+    "test_number": 4,
+    "description": "Very Low Min Area (100) - Captures Small Changes",
+    "min_contour_area": 100,
+    "pixel_tolerance": 45,
+    "error": "Images differ beyond allowed tolerance!\n\nComparison details:\n  - Baseline image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\baseline\\login_page_20251118_174339.png\n  - Current image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\screenshot\\login_page_20251120_145142.png\n  - Algorithm used: phash (hash_size=16)\n  - Hamming distance: 12\n  - Tolerance threshold: 5\n\nVisual differences saved to: C:\\Users\\stoka\\Documents\\moje_app\\RF\\ImageComparisonLibrary\\test_outputs\\diffs\\diff_20251120_150652_964735.png",
+    "status": "ERROR"
+  },
+  {
+    "test_number": 5,
+    "description": "Lower Pixel Tolerance (35)",
+    "min_contour_area": 1500,
+    "pixel_tolerance": 35,
+    "error": "Images differ beyond allowed tolerance!\n\nComparison details:\n  - Baseline image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\baseline\\login_page_20251118_174339.png\n  - Current image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\screenshot\\login_page_20251120_145142.png\n  - Algorithm used: phash (hash_size=16)\n  - Hamming distance: 12\n  - Tolerance threshold: 5\n\nVisual differences saved to: C:\\Users\\stoka\\Documents\\moje_app\\RF\\ImageComparisonLibrary\\test_outputs\\diffs\\diff_20251120_150653_089790.png",
+    "status": "ERROR"
+  },
+  {
+    "test_number": 6,
+    "description": "Balanced: Area=500, Tolerance=35",
+    "min_contour_area": 500,
+    "pixel_tolerance": 35,
+    "error": "Images differ beyond allowed tolerance!\n\nComparison details:\n  - Baseline image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\baseline\\login_page_20251118_174339.png\n  - Current image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\screenshot\\login_page_20251120_145142.png\n  - Algorithm used: phash (hash_size=16)\n  - Hamming distance: 12\n  - Tolerance threshold: 5\n\nVisual differences saved to: C:\\Users\\stoka\\Documents\\moje_app\\RF\\ImageComparisonLibrary\\test_outputs\\diffs\\diff_20251120_150653_240590.png",
+    "status": "ERROR"
+  },
+  {
+    "test_number": 7,
+    "description": "Sensitive: Area=100, Tolerance=35",
+    "min_contour_area": 100,
+    "pixel_tolerance": 35,
+    "error": "Images differ beyond allowed tolerance!\n\nComparison details:\n  - Baseline image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\baseline\\login_page_20251118_174339.png\n  - Current image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\screenshot\\login_page_20251120_145142.png\n  - Algorithm used: phash (hash_size=16)\n  - Hamming distance: 12\n  - Tolerance threshold: 5\n\nVisual differences saved to: C:\\Users\\stoka\\Documents\\moje_app\\RF\\ImageComparisonLibrary\\test_outputs\\diffs\\diff_20251120_150653_394385.png",
+    "status": "ERROR"
+  },
+  {
+    "test_number": 8,
+    "description": "Higher Pixel Tolerance (60)",
+    "min_contour_area": 1500,
+    "pixel_tolerance": 60,
+    "error": "Images differ beyond allowed tolerance!\n\nComparison details:\n  - Baseline image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\baseline\\login_page_20251118_174339.png\n  - Current image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\screenshot\\login_page_20251120_145142.png\n  - Algorithm used: phash (hash_size=16)\n  - Hamming distance: 12\n  - Tolerance threshold: 5\n\nVisual differences saved to: C:\\Users\\stoka\\Documents\\moje_app\\RF\\ImageComparisonLibrary\\test_outputs\\diffs\\diff_20251120_150653_517018.png",
+    "status": "ERROR"
+  },
+  {
+    "test_number": 9,
+    "description": "Very Sensitive: Area=500, Tolerance=25",
+    "min_contour_area": 500,
+    "pixel_tolerance": 25,
+    "error": "Images differ beyond allowed tolerance!\n\nComparison details:\n  - Baseline image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\baseline\\login_page_20251118_174339.png\n  - Current image: C:\\Users\\stoka\\Documents\\moje_app\\RF\\libraries\\images\\screenshot\\login_page_20251120_145142.png\n  - Algorithm used: phash (hash_size=16)\n  - Hamming distance: 12\n  - Tolerance threshold: 5\n\nVisual differences saved to: C:\\Users\\stoka\\Documents\\moje_app\\RF\\ImageComparisonLibrary\\test_outputs\\diffs\\diff_20251120_150653_646312.png",
+    "status": "ERROR"
+  }
+]

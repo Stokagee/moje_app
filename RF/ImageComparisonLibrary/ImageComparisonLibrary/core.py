@@ -175,7 +175,11 @@ class ImageComparisonLibrary:
         log_statistics: bool = True,
         generate_html: bool = False,
         embed_images_to_log: bool = True,
-        add_timestamp: bool = True
+        add_timestamp: bool = True,
+        # NEW PARAMETERS for directional diff support
+        diff_base_image: Literal['baseline', 'current'] = 'baseline',
+        highlight_mode: Literal['all', 'added', 'removed'] = 'all',
+        element_fill_expansion: int = 15
     ) -> int:
         """Verify that UI layout matches baseline screenshot (strict pixel-perfect mode).
 
@@ -257,6 +261,8 @@ class ImageComparisonLibrary:
             generate_html: If True, generate HTML report with side-by-side comparison. Default: False.
             embed_images_to_log: If True, embed baseline and diff images to RF log.html as base64. Default: True.
             add_timestamp: If True, add timestamp to diff image (bottom-right corner, format: dd/mm/yy hh:mm:ss). Default: True.
+            diff_base_image: Which image to use as visual base for diff. Options: 'baseline' (show where elements were), 'current' (show where elements are). Default: 'baseline'.
+            highlight_mode: Which pixels to highlight. Options: 'all' (all changes), 'added' (new pixels in current), 'removed' (old pixels from baseline). Default: 'all'.
 
         Returns:
             int: The Hamming distance between the two images.
@@ -345,6 +351,8 @@ class ImageComparisonLibrary:
             generate_html: Pokud True, vygeneruje HTML report s porovnáním. Výchozí: False.
             embed_images_to_log: Pokud True, embeduje baseline a diff obrázky do RF log.html jako base64. Výchozí: True.
             add_timestamp: Pokud True, přidá timestamp do diff obrázku (pravý dolní roh, formát: dd/mm/yy hh:mm:ss). Výchozí: True.
+            diff_base_image: Který obrázek použít jako vizuální základ pro diff. Možnosti: 'baseline' (ukáže kde elementy byly), 'current' (ukáže kde elementy jsou). Výchozí: 'baseline'.
+            highlight_mode: Které pixely zvýraznit. Možnosti: 'all' (všechny změny), 'added' (nové pixely v current), 'removed' (staré pixely z baseline). Výchozí: 'all'.
 
         Returns:
             int: Hammingova vzdálenost mezi dvěma obrázky.
@@ -405,6 +413,9 @@ class ImageComparisonLibrary:
             generate_html=generate_html,
             embed_images_to_log=embed_images_to_log,
             add_timestamp=add_timestamp,
+            diff_base_image=diff_base_image,
+            highlight_mode=highlight_mode,
+            element_fill_expansion=element_fill_expansion,
             baseline_path_for_html=baseline_path_str,
             current_path_for_html=current_path_str,
             hash_distance_for_html=distance,
@@ -449,7 +460,8 @@ class ImageComparisonLibrary:
         log_statistics: bool = True,
         generate_html: bool = False,
         embed_images_to_log: bool = True,
-        add_timestamp: bool = True
+        add_timestamp: bool = True,
+        element_fill_expansion: int = 15
     ) -> int:
         """Verify UI layout with relaxed tolerance for pages with dynamic content.
 
@@ -636,7 +648,8 @@ class ImageComparisonLibrary:
             log_statistics=log_statistics,
             generate_html=generate_html,
             embed_images_to_log=embed_images_to_log,
-            add_timestamp=add_timestamp
+            add_timestamp=add_timestamp,
+            element_fill_expansion=element_fill_expansion
         )
     
     def _load_image(self, image: Union[str, Path, Image.Image]) -> Image.Image:
@@ -727,35 +740,46 @@ class ImageComparisonLibrary:
         self,
         baseline_img: Image.Image,
         current_img: Image.Image,
-        pixel_tolerance: int
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Create binary mask and color difference arrays.
+        pixel_tolerance: int,
+        element_fill_expansion: int = 15
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Create binary masks and color difference arrays for directional diff detection.
 
         Args:
             baseline_img: Baseline PIL Image (RGB).
             current_img: Current PIL Image (RGB).
             pixel_tolerance: Threshold for marking pixel as different.
+            element_fill_expansion: Kernel size for morphological dilation to fill element interiors.
+                                    Set to 0 to disable. Default: 15.
 
         Returns:
-            Tuple of (binary_mask, color_diff_array, baseline_array)
-            - binary_mask: uint8 array, 255=different, 0=same
+            Tuple of (binary_mask, added_pixels_mask, removed_pixels_mask, color_diff_array, baseline_array, current_array)
+            - binary_mask: uint8 array, 255=different, 0=same (all changes)
+            - added_pixels_mask: uint8 array, 255=new pixels in current, 0=not new
+            - removed_pixels_mask: uint8 array, 255=old pixels from baseline, 0=not old
             - color_diff_array: float array of per-pixel color differences
             - baseline_array: numpy array of baseline image
+            - current_array: numpy array of current image
 
         ---
 
-        Vytvoří binární masku rozdílů.
+        Vytvoří binární masky a pole barevných rozdílů pro směrovou detekci změn.
 
         Args:
             baseline_img: Baseline PIL Image (RGB).
             current_img: Aktuální PIL Image (RGB).
             pixel_tolerance: Práh pro označení pixelu jako odlišný.
+            element_fill_expansion: Velikost kernelu pro morfologickou dilataci k vyplnění vnitřků elementů.
+                                    Nastavte na 0 pro deaktivaci. Výchozí: 15.
 
         Returns:
-            Tuple (binary_mask, color_diff_array, baseline_array)
-            - binary_mask: uint8 pole, 255=odlišný, 0=stejný
+            Tuple (binary_mask, added_pixels_mask, removed_pixels_mask, color_diff_array, baseline_array, current_array)
+            - binary_mask: uint8 pole, 255=odlišný, 0=stejný (všechny změny)
+            - added_pixels_mask: uint8 pole, 255=nové pixely v current, 0=ne nové
+            - removed_pixels_mask: uint8 pole, 255=staré pixely z baseline, 0=ne staré
             - color_diff_array: float pole barevných rozdílů pro každý pixel
             - baseline_array: numpy pole baseline obrázku
+            - current_array: numpy pole current obrázku
         """
         # Convert PIL images to numpy arrays (RGB)
         baseline_array = np.array(baseline_img)
@@ -775,7 +799,60 @@ class ImageComparisonLibrary:
             0
         ).astype(np.uint8)
 
-        return binary_mask, color_diff_array, baseline_array
+        # Calculate pixel intensity (sum of RGB channels) to detect directionality
+        # Higher intensity = darker/more colorful pixels (e.g., element borders)
+        # Lower intensity = lighter/less colorful pixels (e.g., white background)
+        baseline_intensity = np.sum(baseline_array.astype(np.float32), axis=2)
+        current_intensity = np.sum(current_array.astype(np.float32), axis=2)
+
+        # Added pixels: pixels that became darker/more intense in current
+        # (e.g., new element borders appeared where there was background)
+        added_edges_mask = np.where(
+            (color_diff_array > pixel_tolerance) & (current_intensity < baseline_intensity),
+            255,
+            0
+        ).astype(np.uint8)
+
+        # Removed pixels: pixels that became lighter/less intense in current
+        # (e.g., old element borders disappeared and became background)
+        removed_edges_mask = np.where(
+            (color_diff_array > pixel_tolerance) & (baseline_intensity < current_intensity),
+            255,
+            0
+        ).astype(np.uint8)
+
+        # Apply morphological dilation to fill element interiors (if enabled)
+        if element_fill_expansion > 0:
+            # Create elliptical kernel for dilation
+            dilation_kernel = cv2.getStructuringElement(
+                cv2.MORPH_ELLIPSE,
+                (element_fill_expansion, element_fill_expansion)
+            )
+
+            # Dilate added edges to fill element interiors
+            added_pixels_mask = cv2.dilate(added_edges_mask, dilation_kernel, iterations=1)
+
+            # Constrain to pixels where there's at least some color change
+            # This prevents over-expansion into completely unchanged areas
+            added_pixels_mask = np.where(
+                (added_pixels_mask == 255) & (color_diff_array > pixel_tolerance * 0.5),
+                255,
+                0
+            ).astype(np.uint8)
+
+            # Dilate removed edges similarly
+            removed_pixels_mask = cv2.dilate(removed_edges_mask, dilation_kernel, iterations=1)
+            removed_pixels_mask = np.where(
+                (removed_pixels_mask == 255) & (color_diff_array > pixel_tolerance * 0.5),
+                255,
+                0
+            ).astype(np.uint8)
+        else:
+            # No dilation - use edge masks as-is
+            added_pixels_mask = added_edges_mask
+            removed_pixels_mask = removed_edges_mask
+
+        return binary_mask, added_pixels_mask, removed_pixels_mask, color_diff_array, baseline_array, current_array
 
     def _find_contours(
         self,
@@ -869,6 +946,7 @@ class ImageComparisonLibrary:
     def _draw_contours_on_diff(
         self,
         baseline_array: np.ndarray,
+        current_array: np.ndarray,
         contours: list,
         color_diff_array: np.ndarray,
         pixel_tolerance: int,
@@ -877,12 +955,14 @@ class ImageComparisonLibrary:
         minor_color: Tuple[int, int, int] = (0, 255, 0),
         moderate_color: Tuple[int, int, int] = (0, 255, 255),
         severe_color: Tuple[int, int, int] = (0, 0, 255),
-        enable_color_coding: bool = True
+        enable_color_coding: bool = True,
+        diff_base_image: Literal['baseline', 'current'] = 'baseline'
     ) -> np.ndarray:
-        """Draw contours on baseline image with semi-transparent fill and outlines.
+        """Draw contours on chosen base image (baseline or current) with semi-transparent fill and outlines.
 
         Args:
             baseline_array: Numpy array of baseline image (RGB).
+            current_array: Numpy array of current image (RGB).
             contours: List of contours from cv2.findContours().
             color_diff_array: Array of per-pixel color differences.
             pixel_tolerance: Base tolerance for severity classification.
@@ -892,16 +972,18 @@ class ImageComparisonLibrary:
             moderate_color: RGB color for moderate differences (default: yellow).
             severe_color: RGB color for severe differences (default: red).
             enable_color_coding: If False, use only severe_color for all contours.
+            diff_base_image: Which image to use as visual base. 'baseline' or 'current'. Default: 'baseline'.
 
         Returns:
             Numpy array of diff image with filled contours and outlines (RGB).
 
         ---
 
-        Vykreslí kontury s poloprůhlednou výplní a obrysem.
+        Vykreslí kontury na zvoleném základním obrázku (baseline nebo current) s poloprůhlednou výplní a obrysem.
 
         Args:
             baseline_array: Numpy pole baseline obrázku (RGB).
+            current_array: Numpy pole current obrázku (RGB).
             contours: Seznam kontur z cv2.findContours().
             color_diff_array: Pole barevných rozdílů pro každý pixel.
             pixel_tolerance: Základní tolerance pro klasifikaci závažnosti.
@@ -911,15 +993,19 @@ class ImageComparisonLibrary:
             moderate_color: RGB barva pro střední rozdíly (výchozí: žlutá).
             severe_color: RGB barva pro velké rozdíly (výchozí: červená).
             enable_color_coding: Pokud False, použije se pouze severe_color pro všechny kontury.
+            diff_base_image: Který obrázek použít jako vizuální základ. 'baseline' nebo 'current'. Výchozí: 'baseline'.
 
         Returns:
             Numpy pole diff obrázku s vyplněnými konturami a obrysem (RGB).
         """
-        # Create copy of baseline for diff image
-        diff_image = baseline_array.copy()
+        # Choose which image to use as visual base for diff
+        base_image_array = current_array if diff_base_image == 'current' else baseline_array
+
+        # Create copy of chosen base for diff image
+        diff_image = base_image_array.copy()
 
         # Create overlay for semi-transparent fill
-        overlay = baseline_array.copy()
+        overlay = base_image_array.copy()
 
         # Color mapping for severity levels
         color_map = {
@@ -1377,6 +1463,9 @@ class ImageComparisonLibrary:
         generate_html: bool = False,
         embed_images_to_log: bool = True,
         add_timestamp: bool = True,
+        diff_base_image: Literal['baseline', 'current'] = 'baseline',
+        highlight_mode: Literal['all', 'added', 'removed'] = 'all',
+        element_fill_expansion: int = 15,
         baseline_path_for_html: Optional[str] = None,
         current_path_for_html: Optional[str] = None,
         hash_distance_for_html: Optional[int] = None,
@@ -1449,12 +1538,21 @@ class ImageComparisonLibrary:
         if current_img.mode != 'RGB':
             current_img = current_img.convert('RGB')
 
-        # Create diff mask and calculate pixel differences
-        diff_mask, color_diff_array, baseline_array = self._create_diff_mask(
+        # Create diff masks and calculate pixel differences
+        binary_mask, added_pixels_mask, removed_pixels_mask, color_diff_array, baseline_array, current_array = self._create_diff_mask(
             baseline_img,
             current_img,
-            pixel_tolerance
+            pixel_tolerance,
+            element_fill_expansion
         )
+
+        # Select appropriate mask based on highlight_mode
+        if highlight_mode == 'added':
+            diff_mask = added_pixels_mask
+        elif highlight_mode == 'removed':
+            diff_mask = removed_pixels_mask
+        else:  # 'all'
+            diff_mask = binary_mask
 
         # Find contours (for both modes, needed for statistics)
         contours = self._find_contours(diff_mask, min_contour_area)
@@ -1496,12 +1594,13 @@ class ImageComparisonLibrary:
 
                     # Mark pixel as different if it exceeds tolerance
                     if color_diff > pixel_tolerance:
-                        diff_pixels[x, y] = (255, 0, 0)  # Red for differences
+                        diff_pixels[x, y] = severe_color  # Use parameter color
 
         elif diff_mode == 'contours':
             # NEW MODE: Contour outlines with optional color coding
             diff_array = self._draw_contours_on_diff(
                 baseline_array,
+                current_array,
                 contours,
                 color_diff_array,
                 pixel_tolerance,
@@ -1510,7 +1609,8 @@ class ImageComparisonLibrary:
                 minor_color,
                 moderate_color,
                 severe_color,
-                enable_color_coding
+                enable_color_coding,
+                diff_base_image
             )
 
             # Convert numpy array back to PIL Image
