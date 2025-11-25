@@ -159,7 +159,15 @@ export default function Page2({ navigation }) {
 
   return (
     <Container>
-      <Text style={styles.title} testID="page2Title">Seznam odeslaných formulářů</Text>
+      <Text
+        style={styles.title}
+        testID="page2Title"
+        // Lokátory pro RF demonstraci
+        nativeID="page2-title"
+        accessibilityRole="header"
+        data-class="page-title"
+        data-section="list-page"
+      >Seznam odeslaných formulářů</Text>
 
       <NiceList
         data={data}

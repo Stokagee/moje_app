@@ -87,7 +87,17 @@ const FileUploader = ({ accept = '.txt,.pdf', onFileSelected, label = 'Přiloži
     return (
       <View style={styles.nativeBox}>
         <Text style={styles.label}>{label}</Text>
-        <TouchableOpacity onPress={pickDocument} testID={`${testID}-pick-button`} style={styles.pickButton}>
+        <TouchableOpacity
+          onPress={pickDocument}
+          testID={`${testID}-pick-button`}
+          style={styles.pickButton}
+          // Lokátory pro RF demonstraci
+          nativeID="file-pick-button"
+          accessibilityLabel="Vybrat soubor"
+          accessibilityRole="button"
+          data-class="btn file-picker-btn"
+          data-action="pick-file"
+        >
           <Text style={styles.pickButtonText}>Vybrat soubor</Text>
         </TouchableOpacity>
       </View>
@@ -108,6 +118,12 @@ const FileUploader = ({ accept = '.txt,.pdf', onFileSelected, label = 'Přiloži
         }}
         onClick={() => inputRef.current && inputRef.current.click()}
         testID={`${testID}-dropzone`}
+        // Lokátory pro RF demonstraci
+        nativeID="file-dropzone"
+        accessibilityLabel="Oblast pro nahrání souboru - přetáhněte nebo klikněte"
+        accessibilityRole="button"
+        data-class="dropzone file-dropzone"
+        data-action="upload-file"
       >
         <Text style={styles.dropText}>Přetáhni soubor sem nebo klikni pro výběr</Text>
       </View>

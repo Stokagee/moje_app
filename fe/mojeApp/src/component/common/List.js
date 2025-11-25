@@ -23,25 +23,53 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
   return (
     <View style={styles.container}>
       {/* Hlavička tabulky */}
-      <View style={styles.headerRow}>
-        <Text style={[styles.headerCell, styles.idColumn]}>ID</Text>
-        <Text style={[styles.headerCell, styles.nameColumn]}>Celé jméno</Text>
-        <Text style={[styles.headerCell, styles.checkboxColumn]}>Vybrané</Text>
-        <Text style={[styles.headerCell, styles.actionColumn]}>Akce</Text>
+      <View
+        style={styles.headerRow}
+        // Lokátory pro RF demonstraci
+        nativeID="list-header"
+        accessibilityRole="row"
+        data-class="table-header"
+      >
+        <Text style={[styles.headerCell, styles.idColumn]} data-column="id">ID</Text>
+        <Text style={[styles.headerCell, styles.nameColumn]} data-column="name">Celé jméno</Text>
+        <Text style={[styles.headerCell, styles.checkboxColumn]} data-column="selected">Vybrané</Text>
+        <Text style={[styles.headerCell, styles.actionColumn]} data-column="action">Akce</Text>
       </View>
 
       {/* Tělo tabulky s daty */}
       <ScrollView style={styles.scrollContainer}>
         {data.map((item) => (
-        <View key={item.id} style={styles.dataRow} testID={`list-item-${item.id}`}>
+        <View
+          key={item.id}
+          style={styles.dataRow}
+          testID={`list-item-${item.id}`}
+          // Lokátory pro RF demonstraci
+          nativeID={`list-row-${item.id}`}
+          accessibilityRole="row"
+          data-class="table-row"
+          data-row-id={item.id}
+        >
           {/* Sloupec ID */}
-          <Text style={[styles.dataCell, styles.idColumn]} testID={`list-item-${item.id}-id`} dataSet={{ testid: `list-item-${item.id}-id` }}>{item.id}</Text>
+          <Text
+            style={[styles.dataCell, styles.idColumn]}
+            testID={`list-item-${item.id}-id`}
+            dataSet={{ testid: `list-item-${item.id}-id` }}
+            // Lokátory pro RF demonstraci
+            nativeID={`list-cell-id-${item.id}`}
+            accessibilityRole="cell"
+            data-class="table-cell cell-id"
+          >{item.id}</Text>
           
           {/* Sloupec s celým jménem */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.dataCell, styles.nameColumn]}
             onPress={() => onNamePress && onNamePress(item)}
             testID={`list-item-${item.id}-name`}
+            // Lokátory pro RF demonstraci
+            nativeID={`list-cell-name-${item.id}`}
+            accessibilityLabel={item.fullName}
+            accessibilityRole="button"
+            data-class="table-cell cell-name"
           >
             <Text style={styles.nameText} numberOfLines={1}>
               {item.fullName}
@@ -53,21 +81,33 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
             <TouchableOpacity
               onPress={() => onToggle(item.id)}
               testID={`list-item-${item.id}-checkbox`}
+              // Lokátory pro RF demonstraci
+              nativeID={`list-checkbox-${item.id}`}
+              accessibilityLabel={item.selected ? "Vybráno" : "Nevybráno"}
+              accessibilityRole="checkbox"
+              data-class="checkbox"
+              data-checked={item.selected}
             >
-              <MaterialIcons 
-                name={item.selected ? 'check-box' : 'check-box-outline-blank'} 
-                size={24} 
-                color={item.selected ? '#007AFF' : '#ccc'} 
+              <MaterialIcons
+                name={item.selected ? 'check-box' : 'check-box-outline-blank'}
+                size={24}
+                color={item.selected ? '#007AFF' : '#ccc'}
               />
             </TouchableOpacity>
           </View>
           
           {/* Sloupec s tlačítkem pro smazání */}
           <View style={[styles.dataCell, styles.actionColumn]}>
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => onDelete(item.id)}
               style={styles.deleteButton}
               testID={`list-item-${item.id}-delete`}
+              // Lokátory pro RF demonstraci
+              nativeID={`list-delete-${item.id}`}
+              accessibilityLabel="Smazat položku"
+              accessibilityRole="button"
+              data-class="btn btn-delete"
+              data-action="delete"
             >
               <MaterialIcons name="delete" size={20} color="#FF3B30" />
             </TouchableOpacity>

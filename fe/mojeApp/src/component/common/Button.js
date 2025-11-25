@@ -3,9 +3,17 @@ import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 const Button = ({ title, onPress, testID, color = 'green' }) => {
   return (
-    <TouchableOpacity style={[styles.button, { backgroundColor: color }]}
-     onPress={onPress}
-     testID={testID}>
+    <TouchableOpacity
+      style={[styles.button, { backgroundColor: color }]}
+      onPress={onPress}
+      testID={testID}
+      // Lokátory pro RF demonstraci
+      nativeID={testID}
+      accessibilityLabel={title}
+      accessibilityRole="button"
+      data-class="btn btn-primary"
+      data-action="submit"
+    >
       <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
   );

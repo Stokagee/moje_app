@@ -241,8 +241,14 @@ const FormPage = ({ navigation }) => {
 
   return (
     <Container>
-      <ScrollView contentContainerStyle={styles.formWrapper}>
-        <Text style={styles.label}>Jméno</Text>
+      <ScrollView contentContainerStyle={styles.formWrapper} data-section="form-container">
+        <Text
+          style={styles.label}
+          nativeID="label-firstName"
+          accessibilityRole="text"
+          data-class="form-label"
+          data-for="firstName"
+        >Jméno</Text>
         <Input
           placeholder="Zadejte jméno"
           value={formData.firstName}
@@ -254,7 +260,13 @@ const FormPage = ({ navigation }) => {
           testID="firstName-input"
         />
 
-        <Text style={styles.label}>Příjmení</Text>
+        <Text
+          style={styles.label}
+          nativeID="label-lastName"
+          accessibilityRole="text"
+          data-class="form-label"
+          data-for="lastName"
+        >Příjmení</Text>
         <Input
           placeholder="Zadejte příjmení"
           value={formData.lastName}
@@ -266,7 +278,13 @@ const FormPage = ({ navigation }) => {
           testID="lastName-input"
         />
 
-        <Text style={styles.label}>Telefonní číslo</Text>
+        <Text
+          style={styles.label}
+          nativeID="label-phone"
+          accessibilityRole="text"
+          data-class="form-label"
+          data-for="phone"
+        >Telefonní číslo</Text>
         <Input
           placeholder="Zadejte telefon"
           value={formData.phone}
@@ -279,7 +297,13 @@ const FormPage = ({ navigation }) => {
           testID="phone-input"
         />
 
-        <Text style={styles.label}>Email</Text>
+        <Text
+          style={styles.label}
+          nativeID="label-email"
+          accessibilityRole="text"
+          data-class="form-label"
+          data-for="email"
+        >Email</Text>
         <Input
           placeholder="Zadejte email"
           value={formData.email}
@@ -293,7 +317,13 @@ const FormPage = ({ navigation }) => {
           testID="email-input"
         />
 
-        <Text style={styles.label}>Pohlaví</Text>
+        <Text
+          style={styles.label}
+          nativeID="label-gender"
+          accessibilityRole="text"
+          data-class="form-label"
+          data-for="gender"
+        >Pohlaví</Text>
         <GenderDropdown
           value={formData.gender}
           onSelect={(value) => updateFormData('gender', value)}
@@ -317,7 +347,13 @@ const FormPage = ({ navigation }) => {
         </View>
 
         {/* Instrukce */}
-        <Text style={styles.label}>Instrukce</Text>
+        <Text
+          style={styles.label}
+          nativeID="label-instructions"
+          accessibilityRole="text"
+          data-class="form-label"
+          data-for="instructions"
+        >Instrukce</Text>
         <TextArea
           value={instructions}
           onChangeText={setInstructions}

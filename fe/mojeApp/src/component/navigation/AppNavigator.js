@@ -4,6 +4,7 @@ import FormPage from '../pages/FormPage';
 import Page2 from '../pages/Page2';
 import Page3 from '../pages/Page3';
 import Page4 from '../pages/Page4';
+import NavigationMenu from '../common/HamburgerMenu';
 
 // Jednoduchá navigace pro web kompatibilitu
 export default function AppNavigator() {
@@ -30,7 +31,12 @@ export default function AppNavigator() {
 
   return (
     <View style={styles.container}>
-      {renderPage()}
+      <NavigationMenu
+        currentPage={currentPage}
+        onNavigate={navigate}
+      >
+        {renderPage()}
+      </NavigationMenu>
     </View>
   );
 }

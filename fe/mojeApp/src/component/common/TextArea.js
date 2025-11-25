@@ -14,6 +14,13 @@ const TextArea = ({ value, onChangeText, placeholder = 'Instrukce…', maxLength
         maxLength={maxLength}
         textAlignVertical="top"
         testID={testID}
+        // Lokátory pro RF demonstraci
+        nativeID={testID || "instructions-textarea"}
+        accessibilityLabel={placeholder}
+        accessibilityRole="none"
+        name="instructions"
+        data-class="form-textarea textarea-field"
+        data-field="instructions"
       />
       <View style={styles.footerRow}>
         <Text style={styles.counter}>{(value?.length || 0)} / {maxLength}</Text>

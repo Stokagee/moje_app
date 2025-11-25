@@ -58,10 +58,16 @@ const GenderDropdown = ({ value, onSelect, error, errorMessage, required, onBlur
   return (
     <View style={styles.container}>
       {/* Tlačítko pro otevření dropdown menu */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[styles.dropdownButton, error && touched && styles.dropdownButtonError]}
         onPress={toggleDropdown}
         testID={testID}
+        // Lokátory pro RF demonstraci
+        nativeID="gender-dropdown"
+        accessibilityLabel="Výběr pohlaví"
+        accessibilityRole="button"
+        data-class="dropdown gender-picker"
+        data-field="gender"
       >
         {/* Text zobrazující aktuální výběr */}
         <Text style={[styles.buttonText, !value && styles.placeholderText]}>
@@ -103,6 +109,12 @@ const GenderDropdown = ({ value, onSelect, error, errorMessage, required, onBlur
                   style={styles.option}
                   onPress={() => handleSelect(option.value)}
                   testID={`gender-option-${option.value}`}
+                  // Lokátory pro RF demonstraci
+                  nativeID={`gender-option-${option.value}`}
+                  accessibilityLabel={option.label}
+                  accessibilityRole="menuitem"
+                  data-class="dropdown-option gender-option"
+                  data-value={option.value}
                 >
                   {/* Checkbox ikona - zaškrtnutá/nezaškrtnutá */}
                   <MaterialIcons 

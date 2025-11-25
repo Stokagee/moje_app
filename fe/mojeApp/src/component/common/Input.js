@@ -106,6 +106,13 @@ const Input = ({
         testID={testID}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        // Lokátory pro RF demonstraci
+        nativeID={testID ? `input-${testID.replace('-input', '')}` : undefined}
+        accessibilityLabel={placeholder}
+        accessibilityRole="none"
+        name={testID ? testID.replace('-input', '') : undefined}
+        data-class="form-input input-field"
+        data-field={testID ? testID.replace('-input', '') : undefined}
       />
 
       {showError && currentErrorMessage && (
