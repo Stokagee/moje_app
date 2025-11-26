@@ -95,11 +95,33 @@ export default function Page4({ navigation }) {
   const renderPendingOrders = () => (
     <View
       style={[styles.section, isWideScreen && styles.sectionWide]}
+      // === PENDING ORDERS SECTION LOKÁTORY ===
       testID="pending-orders-section"
       nativeID="pending-orders-section"
-      data-class="pending-orders-section"
+      id="pending-orders"
+      data-testid="pending-orders-section"
+      data-component="orders-section"
+      data-section="pending-orders"
+      data-count={pendingOrders.length}
+      data-class="section pending-orders-section"
+      accessibilityRole="region"
+      accessibilityLabel="Čekající objednávky"
+      aria-label="Čekající objednávky"
+      className="section pending-orders-section"
     >
-      <Text style={styles.sectionTitle}>
+      <Text
+        style={styles.sectionTitle}
+        // === SECTION TITLE LOKÁTORY ===
+        testID="pending-orders-title"
+        nativeID="pending-orders-title"
+        id="pending-title"
+        data-component="section-title"
+        data-section="pending-orders"
+        data-class="section-title heading"
+        accessibilityRole="header"
+        aria-level="2"
+        className="section-title heading"
+      >
         Cekajici objednavky ({pendingOrders.length})
       </Text>
 
@@ -111,22 +133,71 @@ export default function Page4({ navigation }) {
           testID="pending-orders-empty"
         />
       ) : (
-        <ScrollView style={styles.sectionScroll}>
-          {pendingOrders.map((order) => {
+        <ScrollView
+          style={styles.sectionScroll}
+          // === PENDING ORDERS SCROLL LOKÁTORY ===
+          testID="pending-orders-scroll"
+          nativeID="pending-orders-scroll"
+          id="pending-scroll"
+          data-component="orders-scroll"
+          data-section="pending-orders"
+          data-class="section-scroll orders-scroll"
+          accessibilityRole="list"
+          aria-label="Seznam čekajících objednávek"
+          className="section-scroll orders-scroll"
+        >
+          {pendingOrders.map((order, index) => {
             const urgency = getUrgencyColor(order.created_at);
             return (
               <View
                 key={order.id}
                 style={[styles.card, { borderLeftColor: urgency.color }]}
+                // === PENDING ORDER CARD LOKÁTORY ===
                 testID={`pending-order-card-${order.id}`}
                 nativeID={`pending-order-card-${order.id}`}
-                data-class="pending-order-card"
+                id={`pending-order-${order.id}`}
+                data-testid={`pending-order-card-${order.id}`}
+                data-component="pending-order-card"
                 data-order-id={order.id}
+                data-order-vip={order.is_vip ? 'true' : 'false'}
+                data-urgency={urgency.label}
+                data-index={index}
+                data-class="card pending-order-card"
+                accessibilityRole="listitem"
+                accessibilityLabel={`Čekající objednávka ${order.id}`}
+                aria-label={`Čekající objednávka ${order.id}`}
+                className="card pending-order-card"
               >
                 {/* Header */}
-                <View style={styles.cardHeader}>
-                  <Text style={styles.cardId}>#{order.id}</Text>
-                  <View style={styles.badges}>
+                <View
+                  style={styles.cardHeader}
+                  // === CARD HEADER LOKÁTORY ===
+                  testID={`pending-order-card-${order.id}-header`}
+                  nativeID={`pending-header-${order.id}`}
+                  data-component="card-header"
+                  data-class="card-header"
+                  className="card-header"
+                >
+                  <Text
+                    style={styles.cardId}
+                    // === ORDER ID LOKÁTORY ===
+                    testID={`pending-order-card-${order.id}-id`}
+                    nativeID={`pending-id-${order.id}`}
+                    data-component="order-id"
+                    data-order-id={order.id}
+                    data-class="card-id order-id"
+                    accessibilityRole="text"
+                    className="card-id order-id"
+                  >#{order.id}</Text>
+                  <View
+                    style={styles.badges}
+                    // === BADGES CONTAINER LOKÁTORY ===
+                    testID={`pending-order-card-${order.id}-badges`}
+                    nativeID={`pending-badges-${order.id}`}
+                    data-component="badges"
+                    data-class="badges badge-group"
+                    className="badges badge-group"
+                  >
                     <PriorityBadge
                       isVip={order.is_vip}
                       testID={`pending-order-card-${order.id}-priority`}
@@ -140,42 +211,132 @@ export default function Page4({ navigation }) {
                     styles.urgencyBadge,
                     { backgroundColor: urgency.backgroundColor },
                   ]}
+                  // === URGENCY BADGE LOKÁTORY ===
                   testID={`pending-order-card-${order.id}-urgency`}
                   nativeID={`pending-order-card-${order.id}-urgency`}
-                  data-class="urgency-badge"
+                  id={`urgency-badge-${order.id}`}
+                  data-testid={`pending-order-card-${order.id}-urgency`}
+                  data-component="urgency-badge"
                   data-urgency={urgency.label}
+                  data-class="urgency-badge badge"
+                  accessibilityRole="text"
+                  accessibilityLabel={`Naléhavost: ${urgency.label}`}
+                  aria-label={`Naléhavost: ${urgency.label}`}
+                  className="urgency-badge badge"
                 >
                   <MaterialIcons
                     name="access-time"
                     size={14}
                     color={urgency.color}
+                    // === URGENCY ICON LOKÁTORY ===
+                    testID={`pending-order-card-${order.id}-urgency-icon`}
+                    nativeID={`urgency-icon-${order.id}`}
+                    data-component="icon"
+                    data-icon="access-time"
+                    accessibilityLabel="Ikona času"
                   />
-                  <Text style={[styles.urgencyText, { color: urgency.color }]}>
+                  <Text
+                    style={[styles.urgencyText, { color: urgency.color }]}
+                    // === URGENCY TEXT LOKÁTORY ===
+                    testID={`pending-order-card-${order.id}-urgency-text`}
+                    nativeID={`urgency-text-${order.id}`}
+                    data-component="urgency-text"
+                    data-class="urgency-text"
+                    className="urgency-text"
+                  >
                     {getUrgencyLabel(order.created_at)}
                   </Text>
                 </View>
 
                 {/* Info */}
-                <View style={styles.cardInfo}>
-                  <Text style={styles.infoText} numberOfLines={1}>
+                <View
+                  style={styles.cardInfo}
+                  // === CARD INFO LOKÁTORY ===
+                  testID={`pending-order-card-${order.id}-info`}
+                  nativeID={`pending-info-${order.id}`}
+                  data-component="card-info"
+                  data-class="card-info order-info"
+                  className="card-info order-info"
+                >
+                  <Text
+                    style={styles.infoText}
+                    numberOfLines={1}
+                    // === CUSTOMER NAME LOKÁTORY ===
+                    testID={`pending-order-card-${order.id}-customer`}
+                    nativeID={`pending-customer-${order.id}`}
+                    data-component="customer-name"
+                    data-customer={order.customer_name}
+                    data-class="info-text customer-name"
+                    accessibilityRole="text"
+                    accessibilityLabel={`Zákazník: ${order.customer_name}`}
+                    className="info-text customer-name"
+                  >
                     {order.customer_name}
                   </Text>
-                  <Text style={styles.addressText} numberOfLines={1}>
+                  <Text
+                    style={styles.addressText}
+                    numberOfLines={1}
+                    // === ADDRESS TEXT LOKÁTORY ===
+                    testID={`pending-order-card-${order.id}-address`}
+                    nativeID={`pending-address-${order.id}`}
+                    data-component="delivery-address"
+                    data-address={order.delivery_address}
+                    data-class="address-text delivery-address"
+                    accessibilityRole="text"
+                    accessibilityLabel={`Adresa: ${order.delivery_address}`}
+                    className="address-text delivery-address"
+                  >
                     {order.delivery_address}
                   </Text>
                 </View>
 
                 {/* Required tags */}
                 {order.required_tags && order.required_tags.length > 0 && (
-                  <View style={styles.tagsRow}>
-                    {order.required_tags.map((tag) => (
-                      <View key={tag} style={styles.tagChip}>
+                  <View
+                    style={styles.tagsRow}
+                    // === REQUIRED TAGS LOKÁTORY ===
+                    testID={`pending-order-card-${order.id}-tags`}
+                    nativeID={`pending-tags-${order.id}`}
+                    data-component="required-tags"
+                    data-tags={order.required_tags.join(',')}
+                    data-class="tags-row required-tags"
+                    accessibilityRole="group"
+                    accessibilityLabel="Požadované tagy"
+                    className="tags-row required-tags"
+                  >
+                    {order.required_tags.map((tag, tagIndex) => (
+                      <View
+                        key={tag}
+                        style={styles.tagChip}
+                        // === TAG CHIP LOKÁTORY ===
+                        testID={`pending-order-card-${order.id}-tag-${tag}`}
+                        nativeID={`pending-tag-${order.id}-${tag}`}
+                        data-component="tag-chip"
+                        data-tag={tag}
+                        data-index={tagIndex}
+                        data-class="tag-chip tag"
+                        accessibilityRole="text"
+                        accessibilityLabel={TAG_LABELS[tag] || tag}
+                        className="tag-chip tag"
+                      >
                         <MaterialIcons
                           name={TAG_ICONS[tag] || 'label'}
                           size={12}
                           color="#666"
+                          // === TAG ICON LOKÁTORY ===
+                          testID={`pending-tag-icon-${order.id}-${tag}`}
+                          data-component="tag-icon"
+                          data-icon={TAG_ICONS[tag] || 'label'}
                         />
-                        <Text style={styles.tagText}>
+                        <Text
+                          style={styles.tagText}
+                          // === TAG TEXT LOKÁTORY ===
+                          testID={`pending-tag-text-${order.id}-${tag}`}
+                          nativeID={`pending-tag-label-${order.id}-${tag}`}
+                          data-component="tag-text"
+                          data-class="tag-text"
+                          className="tag-text"
+                        >
                           {TAG_LABELS[tag] || tag}
                         </Text>
                       </View>
@@ -194,11 +355,33 @@ export default function Page4({ navigation }) {
   const renderAvailableCouriers = () => (
     <View
       style={[styles.section, isWideScreen && styles.sectionWide]}
+      // === AVAILABLE COURIERS SECTION LOKÁTORY ===
       testID="available-couriers-section"
       nativeID="available-couriers-section"
-      data-class="available-couriers-section"
+      id="available-couriers"
+      data-testid="available-couriers-section"
+      data-component="couriers-section"
+      data-section="available-couriers"
+      data-count={availableCouriers.length}
+      data-class="section available-couriers-section"
+      accessibilityRole="region"
+      accessibilityLabel="Dostupní kurýři"
+      aria-label="Dostupní kurýři"
+      className="section available-couriers-section"
     >
-      <Text style={styles.sectionTitle}>
+      <Text
+        style={styles.sectionTitle}
+        // === SECTION TITLE LOKÁTORY ===
+        testID="available-couriers-title"
+        nativeID="available-couriers-title"
+        id="couriers-title"
+        data-component="section-title"
+        data-section="available-couriers"
+        data-class="section-title heading"
+        accessibilityRole="header"
+        aria-level="2"
+        className="section-title heading"
+      >
         Dostupni kuryri ({availableCouriers.length})
       </Text>
 
@@ -210,21 +393,80 @@ export default function Page4({ navigation }) {
           testID="couriers-empty"
         />
       ) : (
-        <ScrollView style={styles.sectionScroll}>
-          {availableCouriers.map((courier) => (
+        <ScrollView
+          style={styles.sectionScroll}
+          // === COURIERS SCROLL LOKÁTORY ===
+          testID="available-couriers-scroll"
+          nativeID="available-couriers-scroll"
+          id="couriers-scroll"
+          data-component="couriers-scroll"
+          data-section="available-couriers"
+          data-class="section-scroll couriers-scroll"
+          accessibilityRole="list"
+          aria-label="Seznam dostupných kurýrů"
+          className="section-scroll couriers-scroll"
+        >
+          {availableCouriers.map((courier, index) => (
             <View
               key={courier.id}
               style={styles.card}
+              // === COURIER CARD LOKÁTORY ===
               testID={`courier-card-${courier.id}`}
               nativeID={`courier-card-${courier.id}`}
-              data-class="courier-card"
+              id={`courier-${courier.id}`}
+              data-testid={`courier-card-${courier.id}`}
+              data-component="courier-card"
               data-courier-id={courier.id}
+              data-courier-status={courier.status}
+              data-index={index}
+              data-class="card courier-card"
+              accessibilityRole="listitem"
+              accessibilityLabel={`Kurýr ${courier.name}`}
+              aria-label={`Kurýr ${courier.name}`}
+              className="card courier-card"
             >
               {/* Header */}
-              <View style={styles.cardHeader}>
-                <View style={styles.courierInfo}>
-                  <MaterialIcons name="person" size={20} color="#333" />
-                  <Text style={styles.courierName}>{courier.name}</Text>
+              <View
+                style={styles.cardHeader}
+                // === COURIER HEADER LOKÁTORY ===
+                testID={`courier-card-${courier.id}-header`}
+                nativeID={`courier-header-${courier.id}`}
+                data-component="card-header"
+                data-class="card-header courier-header"
+                className="card-header courier-header"
+              >
+                <View
+                  style={styles.courierInfo}
+                  // === COURIER INFO LOKÁTORY ===
+                  testID={`courier-card-${courier.id}-info`}
+                  nativeID={`courier-info-${courier.id}`}
+                  data-component="courier-info"
+                  data-class="courier-info"
+                  className="courier-info"
+                >
+                  <MaterialIcons
+                    name="person"
+                    size={20}
+                    color="#333"
+                    // === COURIER ICON LOKÁTORY ===
+                    testID={`courier-card-${courier.id}-icon`}
+                    nativeID={`courier-icon-${courier.id}`}
+                    data-component="icon"
+                    data-icon="person"
+                    accessibilityLabel="Ikona kurýra"
+                  />
+                  <Text
+                    style={styles.courierName}
+                    // === COURIER NAME LOKÁTORY ===
+                    testID={`courier-card-${courier.id}-name`}
+                    nativeID={`courier-name-${courier.id}`}
+                    id={`courier-name-${courier.id}`}
+                    data-component="courier-name"
+                    data-courier-name={courier.name}
+                    data-class="courier-name"
+                    accessibilityRole="text"
+                    className="courier-name"
+                  >{courier.name}</Text>
                 </View>
                 <StatusBadge
                   status={courier.status}
@@ -235,27 +477,90 @@ export default function Page4({ navigation }) {
               </View>
 
               {/* Phone */}
-              <View style={styles.phoneRow}>
-                <MaterialIcons name="phone" size={14} color="#666" />
-                <Text style={styles.phoneText}>{courier.phone}</Text>
+              <View
+                style={styles.phoneRow}
+                // === PHONE ROW LOKÁTORY ===
+                testID={`courier-card-${courier.id}-phone-row`}
+                nativeID={`courier-phone-row-${courier.id}`}
+                data-component="phone-row"
+                data-class="phone-row contact-info"
+                className="phone-row contact-info"
+              >
+                <MaterialIcons
+                  name="phone"
+                  size={14}
+                  color="#666"
+                  // === PHONE ICON LOKÁTORY ===
+                  testID={`courier-card-${courier.id}-phone-icon`}
+                  nativeID={`phone-icon-${courier.id}`}
+                  data-component="icon"
+                  data-icon="phone"
+                  accessibilityLabel="Telefon"
+                />
+                <Text
+                  style={styles.phoneText}
+                  // === PHONE TEXT LOKÁTORY ===
+                  testID={`courier-card-${courier.id}-phone`}
+                  nativeID={`courier-phone-${courier.id}`}
+                  id={`courier-phone-${courier.id}`}
+                  data-component="phone-number"
+                  data-phone={courier.phone}
+                  data-class="phone-text"
+                  accessibilityRole="text"
+                  accessibilityLabel={`Telefon: ${courier.phone}`}
+                  className="phone-text"
+                >{courier.phone}</Text>
               </View>
 
               {/* Tags */}
               {courier.tags && courier.tags.length > 0 && (
                 <View
                   style={styles.tagsRow}
+                  // === COURIER TAGS LOKÁTORY ===
                   testID={`courier-card-${courier.id}-tags`}
                   nativeID={`courier-card-${courier.id}-tags`}
-                  data-class="courier-tags"
+                  id={`courier-tags-${courier.id}`}
+                  data-testid={`courier-card-${courier.id}-tags`}
+                  data-component="courier-tags"
+                  data-tags={courier.tags.join(',')}
+                  data-class="tags-row courier-tags"
+                  accessibilityRole="group"
+                  accessibilityLabel="Schopnosti kurýra"
+                  className="tags-row courier-tags"
                 >
-                  {courier.tags.map((tag) => (
-                    <View key={tag} style={styles.tagChipBlue}>
+                  {courier.tags.map((tag, tagIndex) => (
+                    <View
+                      key={tag}
+                      style={styles.tagChipBlue}
+                      // === COURIER TAG CHIP LOKÁTORY ===
+                      testID={`courier-card-${courier.id}-tag-${tag}`}
+                      nativeID={`courier-tag-${courier.id}-${tag}`}
+                      data-component="tag-chip"
+                      data-tag={tag}
+                      data-index={tagIndex}
+                      data-class="tag-chip tag-blue"
+                      accessibilityRole="text"
+                      accessibilityLabel={TAG_LABELS[tag] || tag}
+                      className="tag-chip tag-blue"
+                    >
                       <MaterialIcons
                         name={TAG_ICONS[tag] || 'label'}
                         size={12}
                         color="#007AFF"
+                        // === TAG ICON LOKÁTORY ===
+                        testID={`courier-tag-icon-${courier.id}-${tag}`}
+                        data-component="tag-icon"
+                        data-icon={TAG_ICONS[tag] || 'label'}
                       />
-                      <Text style={[styles.tagText, { color: '#007AFF' }]}>
+                      <Text
+                        style={[styles.tagText, { color: '#007AFF' }]}
+                        // === TAG TEXT LOKÁTORY ===
+                        testID={`courier-tag-text-${courier.id}-${tag}`}
+                        nativeID={`courier-tag-label-${courier.id}-${tag}`}
+                        data-component="tag-text"
+                        data-class="tag-text tag-text-blue"
+                        className="tag-text tag-text-blue"
+                      >
                         {TAG_LABELS[tag] || tag}
                       </Text>
                     </View>
@@ -272,53 +577,169 @@ export default function Page4({ navigation }) {
   return (
     <Container>
       {/* Header */}
-      <View style={styles.header}>
+      <View
+        style={styles.header}
+        // === HEADER SECTION LOKÁTORY ===
+        testID="page4-header"
+        nativeID="page4-header"
+        id="page4-header"
+        data-component="page-header"
+        data-page="page4"
+        data-section="header"
+        data-class="page-header header-section"
+        accessibilityRole="banner"
+        aria-label="Hlavička Dispatch Dashboard"
+        className="page-header header-section"
+      >
         <Text
           style={styles.title}
+          // === PAGE TITLE LOKÁTORY ===
           testID="page4-title"
           nativeID="page4-title"
-          data-class="page-title"
+          id="page4-heading"
+          data-component="page-title"
+          data-page="page4"
+          data-class="page-title heading main-title"
+          accessibilityRole="header"
+          accessibilityLabel="Dispatch Dashboard"
+          aria-label="Dispatch Dashboard"
+          aria-level="1"
+          className="page-title heading main-title"
         >
           Dispatch Dashboard
         </Text>
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={onRefresh}
+          // === REFRESH BUTTON LOKÁTORY ===
           testID="dispatch-refresh-button"
           nativeID="dispatch-refresh-button"
-          accessibilityLabel="Obnovit data"
+          id="dispatch-refresh-btn"
+          name="dispatch-refresh"
+          data-testid="dispatch-refresh-button"
+          data-component="refresh-button"
+          data-action="refresh-dispatch"
+          data-class="btn btn-icon refresh-btn"
+          accessibilityLabel="Obnovit dispatch data"
           accessibilityRole="button"
-          data-class="btn refresh-btn"
+          accessibilityHint="Klikněte pro obnovení dat"
+          aria-label="Obnovit dispatch data"
+          className="btn btn-icon refresh-btn"
         >
-          <MaterialIcons name="refresh" size={24} color="#007AFF" />
+          <MaterialIcons
+            name="refresh"
+            size={24}
+            color="#007AFF"
+            // === REFRESH ICON LOKÁTORY ===
+            testID="dispatch-refresh-icon"
+            nativeID="dispatch-refresh-icon"
+            data-component="icon"
+            data-icon="refresh"
+            accessibilityLabel="Ikona obnovení"
+          />
         </TouchableOpacity>
       </View>
 
       {/* Stats panel */}
       <View
         style={styles.statsPanel}
+        // === STATS PANEL LOKÁTORY ===
         testID="dispatch-stats-panel"
         nativeID="dispatch-stats-panel"
-        data-class="dispatch-stats"
+        id="dispatch-stats"
+        data-component="stats-panel"
+        data-page="page4"
+        data-section="statistics"
+        data-pending={pendingOrders.length}
+        data-available={availableCouriers.length}
+        data-class="stats-panel dispatch-stats"
+        accessibilityRole="region"
+        accessibilityLabel="Statistiky dispatch"
+        aria-label="Statistiky dispatch"
+        className="stats-panel dispatch-stats"
       >
-        <View style={styles.statItem}>
+        <View
+          style={styles.statItem}
+          // === STAT ITEM - PENDING LOKÁTORY ===
+          testID="dispatch-stat-pending"
+          nativeID="dispatch-stat-pending"
+          id="stat-pending-orders"
+          data-component="stat-item"
+          data-stat="pending"
+          data-value={pendingOrders.length}
+          data-class="stat-item"
+          accessibilityRole="text"
+          accessibilityLabel={`Čekající: ${pendingOrders.length}`}
+          aria-label={`Čekající: ${pendingOrders.length}`}
+          className="stat-item"
+        >
           <Text
             style={[styles.statNumber, { color: '#fd7e14' }]}
+            // === PENDING COUNT LOKÁTORY ===
             testID="dispatch-pending-count"
+            nativeID="dispatch-pending-value"
+            data-component="stat-number"
+            data-stat="pending"
+            data-class="stat-number stat-warning"
+            className="stat-number stat-warning"
           >
             {pendingOrders.length}
           </Text>
-          <Text style={styles.statLabel}>Cekajici</Text>
+          <Text
+            style={styles.statLabel}
+            // === PENDING LABEL LOKÁTORY ===
+            testID="dispatch-pending-label"
+            nativeID="dispatch-pending-label"
+            data-component="stat-label"
+            data-class="stat-label"
+            className="stat-label"
+          >Cekajici</Text>
         </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
+        <View
+          style={styles.statDivider}
+          // === STAT DIVIDER LOKÁTORY ===
+          testID="dispatch-stat-divider"
+          nativeID="dispatch-stat-divider"
+          data-component="stat-divider"
+          data-class="stat-divider divider"
+          className="stat-divider divider"
+        />
+        <View
+          style={styles.statItem}
+          // === STAT ITEM - AVAILABLE LOKÁTORY ===
+          testID="dispatch-stat-available"
+          nativeID="dispatch-stat-available"
+          id="stat-available-couriers"
+          data-component="stat-item"
+          data-stat="available"
+          data-value={availableCouriers.length}
+          data-class="stat-item"
+          accessibilityRole="text"
+          accessibilityLabel={`Dostupní: ${availableCouriers.length}`}
+          aria-label={`Dostupní: ${availableCouriers.length}`}
+          className="stat-item"
+        >
           <Text
             style={[styles.statNumber, { color: '#28a745' }]}
+            // === AVAILABLE COUNT LOKÁTORY ===
             testID="dispatch-available-count"
+            nativeID="dispatch-available-value"
+            data-component="stat-number"
+            data-stat="available"
+            data-class="stat-number stat-success"
+            className="stat-number stat-success"
           >
             {availableCouriers.length}
           </Text>
-          <Text style={styles.statLabel}>Dostupni</Text>
+          <Text
+            style={styles.statLabel}
+            // === AVAILABLE LABEL LOKÁTORY ===
+            testID="dispatch-available-label"
+            nativeID="dispatch-available-label"
+            data-component="stat-label"
+            data-class="stat-label"
+            className="stat-label"
+          >Dostupni</Text>
         </View>
       </View>
 
@@ -331,9 +752,30 @@ export default function Page4({ navigation }) {
         contentContainerStyle={
           isWideScreen ? styles.wideContentContainer : undefined
         }
+        // === MAIN CONTENT SCROLL LOKÁTORY ===
+        testID="dispatch-main-content"
+        nativeID="dispatch-main-content"
+        id="dispatch-content"
+        data-component="main-content"
+        data-page="page4"
+        data-layout={isWideScreen ? 'wide' : 'narrow'}
+        data-class="main-content dispatch-content"
+        accessibilityRole="main"
+        aria-label="Hlavní obsah dispatch"
+        className="main-content dispatch-content"
       >
         {isWideScreen ? (
-          <View style={styles.splitView}>
+          <View
+            style={styles.splitView}
+            // === SPLIT VIEW LOKÁTORY ===
+            testID="dispatch-split-view"
+            nativeID="dispatch-split-view"
+            id="split-view"
+            data-component="split-view"
+            data-layout="wide"
+            data-class="split-view responsive-layout"
+            className="split-view responsive-layout"
+          >
             {renderPendingOrders()}
             {renderAvailableCouriers()}
           </View>

@@ -56,34 +56,98 @@ const GenderDropdown = ({ value, onSelect, error, errorMessage, required, onBlur
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      // === CONTAINER LOKÁTORY ===
+      testID="genderPicker-container"
+      nativeID="container-gender"
+      id="gender-container"
+      data-component="dropdown-container"
+      data-field="gender"
+      data-class="dropdown-wrapper gender-wrapper"
+      accessibilityRole="none"
+      className="dropdown-container gender-container"
+    >
       {/* Tlačítko pro otevření dropdown menu */}
       <TouchableOpacity
         style={[styles.dropdownButton, error && touched && styles.dropdownButtonError]}
         onPress={toggleDropdown}
+        // === TESTID - React Native standard ===
         testID={testID}
-        // Lokátory pro RF demonstraci
+        // === NATIVEID - mapuje se na id ve webu ===
         nativeID="gender-dropdown"
-        accessibilityLabel="Výběr pohlaví"
-        accessibilityRole="button"
-        data-class="dropdown gender-picker"
+        // === ID - explicitní HTML id ===
+        id="gender-select"
+        // === NAME - název pole ===
+        name="gender"
+        // === DATA-* atributy pro CSS selektory ===
+        data-testid={testID}
+        data-component="dropdown"
         data-field="gender"
+        data-expanded={isVisible ? 'true' : 'false'}
+        data-selected={value || 'none'}
+        data-required={required ? 'true' : 'false'}
+        data-class="dropdown gender-picker"
+        // === ACCESSIBILITY atributy ===
+        accessibilityLabel="Výběr pohlaví"
+        accessibilityRole="combobox"
+        accessibilityHint="Klikněte pro výběr pohlaví"
+        accessibilityState={{ expanded: isVisible }}
+        // === ARIA atributy (web) ===
+        aria-label="Pohlaví"
+        aria-expanded={isVisible}
+        aria-haspopup="listbox"
+        aria-required={required}
+        aria-invalid={error && touched}
+        // === CLASSNAME pro CSS selektory ===
+        className={`dropdown gender-picker ${isVisible ? 'dropdown-open' : 'dropdown-closed'} ${error && touched ? 'dropdown-error' : ''}`}
       >
         {/* Text zobrazující aktuální výběr */}
-        <Text style={[styles.buttonText, !value && styles.placeholderText]}>
+        <Text
+          style={[styles.buttonText, !value && styles.placeholderText]}
+          // === DROPDOWN TEXT LOKÁTORY ===
+          testID="genderPicker-text"
+          nativeID="gender-selected-text"
+          id="gender-display"
+          data-component="dropdown-text"
+          data-selected-value={value || ''}
+          data-class="dropdown-value"
+          accessibilityRole="text"
+          className="dropdown-text gender-value"
+        >
           {getDisplayText()}
         </Text>
         {/* Ikona šipky (mění se podle stavu menu) */}
-        <MaterialIcons 
-          name={isVisible ? 'arrow-drop-up' : 'arrow-drop-down'} 
-          size={24} 
-          color="#666" 
+        <MaterialIcons
+          name={isVisible ? 'arrow-drop-up' : 'arrow-drop-down'}
+          size={24}
+          color="#666"
+          testID="genderPicker-arrow"
+          nativeID="gender-arrow-icon"
+          data-component="dropdown-arrow"
+          data-expanded={isVisible ? 'true' : 'false'}
+          accessibilityLabel={isVisible ? 'Zavřít menu' : 'Otevřít menu'}
         />
       </TouchableOpacity>
 
       {/* Error message */}
       {error && touched && errorMessage && (
-        <Text style={styles.errorText}>{errorMessage}</Text>
+        <Text
+          style={styles.errorText}
+          // === ERROR TEXT LOKÁTORY ===
+          testID="genderPicker-error"
+          nativeID="gender-error"
+          id="error-gender"
+          data-component="error-message"
+          data-field="gender"
+          data-class="error-text validation-error"
+          accessibilityRole="alert"
+          accessibilityLabel={`Chyba: ${errorMessage}`}
+          aria-live="polite"
+          className="error-text validation-error gender-error"
+        >
+          {errorMessage}
+        </Text>
       )}
 
       {/* Modalní okno s dropdown menu */}
@@ -94,36 +158,101 @@ const GenderDropdown = ({ value, onSelect, error, errorMessage, required, onBlur
         onRequestClose={handleClose}
       >
         {/* Překryv pro kliknutí mimo menu */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={handleClose}
+          // === OVERLAY LOKÁTORY ===
+          testID="genderPicker-modal-overlay"
+          nativeID="gender-modal-overlay"
+          id="gender-overlay"
+          data-component="modal-overlay"
+          data-class="overlay dropdown-overlay"
+          accessibilityLabel="Zavřít menu"
+          accessibilityRole="none"
+          className="modal-overlay dropdown-overlay"
         >
           {/* Kontejner s obsahem menu */}
-          <View style={styles.modalContent}>
-            <ScrollView style={styles.optionsContainer}>
+          <View
+            style={styles.modalContent}
+            // === MODAL CONTENT LOKÁTORY ===
+            testID="genderPicker-modal-content"
+            nativeID="gender-modal-content"
+            id="gender-listbox"
+            data-component="dropdown-listbox"
+            data-class="dropdown-menu gender-menu"
+            accessibilityRole="listbox"
+            aria-label="Seznam možností pohlaví"
+            className="dropdown-menu gender-menu"
+          >
+            <ScrollView
+              style={styles.optionsContainer}
+              // === OPTIONS CONTAINER LOKÁTORY ===
+              testID="genderPicker-options-list"
+              nativeID="gender-options-scroll"
+              data-component="options-scroll"
+              data-class="options-container"
+              accessibilityRole="menu"
+              className="options-container gender-options"
+            >
               {/* Mapování možností pohlaví */}
-              {options.map((option) => (
+              {options.map((option, index) => (
                 <TouchableOpacity
                   key={option.value}
                   style={styles.option}
                   onPress={() => handleSelect(option.value)}
+                  // === TESTID - React Native standard ===
                   testID={`gender-option-${option.value}`}
-                  // Lokátory pro RF demonstraci
+                  // === NATIVEID - mapuje se na id ve webu ===
                   nativeID={`gender-option-${option.value}`}
-                  accessibilityLabel={option.label}
-                  accessibilityRole="menuitem"
-                  data-class="dropdown-option gender-option"
+                  // === ID - explicitní HTML id ===
+                  id={`option-${option.value}`}
+                  // === NAME - název možnosti ===
+                  name={`gender-${option.value}`}
+                  // === DATA-* atributy pro CSS selektory ===
+                  data-testid={`gender-option-${option.value}`}
+                  data-component="dropdown-option"
                   data-value={option.value}
+                  data-index={index}
+                  data-selected={value === option.value ? 'true' : 'false'}
+                  data-class="dropdown-option gender-option"
+                  // === ACCESSIBILITY atributy ===
+                  accessibilityLabel={option.label}
+                  accessibilityRole="option"
+                  accessibilityHint={`Vybrat ${option.label}`}
+                  accessibilityState={{ selected: value === option.value }}
+                  // === ARIA atributy (web) ===
+                  aria-label={option.label}
+                  aria-selected={value === option.value}
+                  // === CLASSNAME pro CSS selektory ===
+                  className={`dropdown-option gender-option option-${option.value} ${value === option.value ? 'option-selected' : ''}`}
                 >
                   {/* Checkbox ikona - zaškrtnutá/nezaškrtnutá */}
-                  <MaterialIcons 
-                    name={value === option.value ? 'check-box' : 'check-box-outline-blank'} 
-                    size={24} 
-                    color={value === option.value ? '#007AFF' : '#666'} 
+                  <MaterialIcons
+                    name={value === option.value ? 'check-box' : 'check-box-outline-blank'}
+                    size={24}
+                    color={value === option.value ? '#007AFF' : '#666'}
+                    testID={`gender-option-${option.value}-checkbox`}
+                    nativeID={`gender-checkbox-${option.value}`}
+                    data-component="checkbox-icon"
+                    data-checked={value === option.value ? 'true' : 'false'}
+                    accessibilityLabel={value === option.value ? 'Zaškrtnuto' : 'Nezaškrtnuto'}
                   />
                   {/* Text možnosti */}
-                  <Text style={styles.optionText}>{option.label}</Text>
+                  <Text
+                    style={styles.optionText}
+                    // === OPTION TEXT LOKÁTORY ===
+                    testID={`gender-option-${option.value}-text`}
+                    nativeID={`gender-text-${option.value}`}
+                    id={`text-${option.value}`}
+                    data-component="option-text"
+                    data-value={option.value}
+                    data-class="option-label"
+                    accessibilityRole="text"
+                    className="option-text option-label"
+                  >
+                    {option.label}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>

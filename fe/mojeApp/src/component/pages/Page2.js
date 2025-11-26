@@ -150,8 +150,33 @@ export default function Page2({ navigation }) {
   if (loading) {
     return (
       <Container>
-        <View style={styles.center}>
-          <Text>Načítání dat...</Text>
+        <View
+          style={styles.center}
+          // === LOADING CONTAINER LOKÁTORY ===
+          testID="page2-loading-container"
+          nativeID="page2-loading"
+          id="loading-section"
+          data-component="loading-container"
+          data-page="page2"
+          data-state="loading"
+          data-class="loading-container center-content"
+          accessibilityRole="progressbar"
+          accessibilityLabel="Načítání dat"
+          aria-label="Načítání dat"
+          aria-busy="true"
+          className="loading-container center-content"
+        >
+          <Text
+            // === LOADING TEXT LOKÁTORY ===
+            testID="page2-loading-text"
+            nativeID="page2-loading-text"
+            id="loading-text"
+            data-component="loading-text"
+            data-class="loading-message"
+            accessibilityRole="text"
+            aria-live="polite"
+            className="loading-message"
+          >Načítání dat...</Text>
         </View>
       </Container>
     );
@@ -161,12 +186,19 @@ export default function Page2({ navigation }) {
     <Container>
       <Text
         style={styles.title}
+        // === PAGE TITLE LOKÁTORY ===
         testID="page2Title"
-        // Lokátory pro RF demonstraci
         nativeID="page2-title"
-        accessibilityRole="header"
-        data-class="page-title"
+        id="page2-heading"
+        data-component="page-title"
+        data-page="page2"
         data-section="list-page"
+        data-class="page-title heading main-title"
+        accessibilityRole="header"
+        accessibilityLabel="Seznam odeslaných formulářů"
+        aria-label="Seznam odeslaných formulářů"
+        aria-level="1"
+        className="page-title heading main-title"
       >Seznam odeslaných formulářů</Text>
 
       <NiceList
@@ -176,17 +208,34 @@ export default function Page2({ navigation }) {
         onNamePress={handleNamePress}
       />
 
-      <View style={styles.buttonContainer}>
+      <View
+        style={styles.buttonContainer}
+        // === BUTTON CONTAINER LOKÁTORY ===
+        testID="page2-buttons"
+        nativeID="page2-button-container"
+        id="button-group"
+        data-component="button-container"
+        data-page="page2"
+        data-class="button-container button-group actions"
+        accessibilityRole="group"
+        accessibilityLabel="Akční tlačítka"
+        aria-label="Akční tlačítka"
+        className="button-container button-group actions"
+      >
         <Button
           title="Aktualizovat"
           onPress={loadData}
           testID="refreshButton"
+          variant="primary"
+          action="refresh"
         />
         <Button
           title="Zpět na formulář"
           onPress={() => navigation.navigate('FormPage')}
           color="#666"
           testID="backButton"
+          variant="secondary"
+          action="navigate-back"
         />
       </View>
 

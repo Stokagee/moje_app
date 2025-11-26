@@ -43,91 +43,266 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
       onRequestClose={onClose}
     >
       {/* Překryvná vrstva - při kliknutí mimo modal se zavře */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.overlay}
         activeOpacity={1}
         onPress={onClose}
-        testID="easter-egg-modal-overlay"
+        // === OVERLAY LOKÁTORY ===
+        testID="info-modal-overlay"
+        nativeID="info-modal-overlay"
+        id="modal-overlay"
+        data-component="modal-overlay"
+        data-modal="info"
+        data-class="modal-overlay info-overlay"
+        accessibilityLabel="Zavřít modal"
+        accessibilityRole="none"
+        aria-label="Klikněte pro zavření"
+        className="modal-overlay info-overlay"
       >
         {/* Obsah modalu - při kliknutí na obsah se modal NEzavře */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalContainer}
           activeOpacity={1}
           onPress={(e) => e.stopPropagation()}
-          testID="easter-egg-modal-container"
+          // === MODAL CONTAINER LOKÁTORY ===
+          testID="info-modal-container"
+          nativeID="info-modal-content"
+          id="info-modal"
+          name="info-modal"
+          data-testid="info-modal-container"
+          data-component="modal-container"
+          data-modal="info"
+          data-variant={variant}
+          data-class="modal-container info-modal"
+          accessibilityRole="dialog"
+          accessibilityLabel="Detail uživatele"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          className="modal-container info-modal"
         >
           {/* Volitelný banner se zprávou (např. tajná hláška) */}
           {message ? (
-            <View style={[styles.banner, styles[`banner_${variant}`]]} testID="easter-egg-modal-banner">
-              <MaterialIcons name="emoji-emotions" size={22} color={variant === 'success' ? '#1e7e34' : variant === 'warning' ? '#8a6d3b' : '#0c5460'} style={{ marginRight: 8 }} />
-              <Text style={[styles.bannerText, styles[`bannerText_${variant}`]]}>{message}</Text>
+            <View
+              style={[styles.banner, styles[`banner_${variant}`]]}
+              // === BANNER LOKÁTORY ===
+              testID="info-modal-banner"
+              nativeID="info-modal-banner"
+              id="modal-banner"
+              data-component="modal-banner"
+              data-variant={variant}
+              data-class={`modal-banner banner-${variant}`}
+              accessibilityRole="status"
+              accessibilityLabel={`Zpráva: ${message}`}
+              aria-live="polite"
+              className={`modal-banner banner-${variant}`}
+            >
+              <MaterialIcons
+                name="emoji-emotions"
+                size={22}
+                color={variant === 'success' ? '#1e7e34' : variant === 'warning' ? '#8a6d3b' : '#0c5460'}
+                style={{ marginRight: 8 }}
+                testID="info-modal-banner-icon"
+                nativeID="banner-icon"
+                data-component="banner-icon"
+              />
+              <Text
+                style={[styles.bannerText, styles[`bannerText_${variant}`]]}
+                // === BANNER TEXT LOKÁTORY ===
+                testID="info-modal-banner-text"
+                nativeID="banner-message"
+                id="banner-text"
+                data-component="banner-text"
+                data-class="banner-message"
+                accessibilityRole="text"
+                className="banner-text banner-message"
+              >
+                {message}
+              </Text>
             </View>
           ) : null}
-          
+
           {/* Hlavička modalu s titulem a tlačítkem zavřít */}
-          <View style={styles.header}>
-            <Text style={styles.title}>Detail uživatele</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton} testID="easter-egg-modal-close">
-              <MaterialIcons name="close" size={24} color="#666" />
+          <View
+            style={styles.header}
+            // === HEADER LOKÁTORY ===
+            testID="info-modal-header"
+            nativeID="modal-header"
+            id="modal-header"
+            data-component="modal-header"
+            data-class="modal-header"
+            accessibilityRole="header"
+            className="modal-header"
+          >
+            <Text
+              style={styles.title}
+              // === TITLE LOKÁTORY ===
+              testID="info-modal-title"
+              nativeID="modal-title"
+              id="modal-title"
+              data-component="modal-title"
+              data-class="modal-title"
+              accessibilityRole="header"
+              className="modal-title"
+            >
+              Detail uživatele
+            </Text>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeButton}
+              // === CLOSE BUTTON LOKÁTORY ===
+              testID="info-modal-close"
+              nativeID="modal-close-btn"
+              id="close-modal"
+              name="close"
+              data-testid="info-modal-close"
+              data-component="close-button"
+              data-action="close"
+              data-class="btn btn-close modal-close"
+              accessibilityLabel="Zavřít modal"
+              accessibilityRole="button"
+              accessibilityHint="Klikněte pro zavření"
+              aria-label="Zavřít"
+              className="btn btn-close modal-close"
+            >
+              <MaterialIcons
+                name="close"
+                size={24}
+                color="#666"
+                testID="info-modal-close-icon"
+                nativeID="close-icon"
+                data-component="close-icon"
+              />
             </TouchableOpacity>
           </View>
 
           {/* Oddělovač pod hlavičkou */}
-          <View style={styles.divider} />
+          <View
+            style={styles.divider}
+            testID="info-modal-divider-top"
+            nativeID="divider-top"
+            data-component="divider"
+            data-class="divider"
+            className="divider"
+          />
 
           {/* Tělo modalu s informacemi */}
-          <View style={styles.content}>
-            
+          <View
+            style={styles.content}
+            // === CONTENT LOKÁTORY ===
+            testID="info-modal-content"
+            nativeID="modal-body"
+            id="modal-content"
+            data-component="modal-content"
+            data-class="modal-body info-content"
+            accessibilityRole="main"
+            className="modal-body info-content"
+          >
+
             {/* Řádek s jménem a příjmením */}
-            <View style={styles.infoRow} testID="info-name-row" dataSet={{ testid: 'info-name-row' }}>
-              <MaterialIcons name="person" size={20} color="#007AFF" style={styles.icon} />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.label} testID="info-name-label" dataSet={{ testid: 'info-name-label' }}>Jméno a příjmení</Text>
-                <Text style={styles.value} testID="info-name-value" dataSet={{ testid: 'info-name-value' }}>
+            <View
+              style={styles.infoRow}
+              testID="info-name-row"
+              nativeID="info-row-name"
+              id="row-name"
+              data-component="info-row"
+              data-field="name"
+              data-class="info-row row-name"
+              accessibilityRole="group"
+              accessibilityLabel="Jméno a příjmení"
+              className="info-row row-name"
+            >
+              <MaterialIcons name="person" size={20} color="#007AFF" style={styles.icon} testID="info-name-icon" nativeID="icon-person" data-component="row-icon" />
+              <View style={styles.infoTextContainer} data-component="info-text-container">
+                <Text style={styles.label} testID="info-name-label" nativeID="label-name" id="label-name" data-component="info-label" data-field="name" data-class="info-label" accessibilityRole="text" className="info-label">Jméno a příjmení</Text>
+                <Text style={styles.value} testID="info-name-value" nativeID="value-name" id="value-name" name="fullName" data-component="info-value" data-field="name" data-value={`${userData.first_name} ${userData.last_name}`} data-class="info-value" accessibilityRole="text" className="info-value">
                   {userData.first_name || 'Neznámé'} {userData.last_name || 'Neznámé'}
                 </Text>
               </View>
             </View>
 
             {/* Řádek s telefonním číslem */}
-            <View style={styles.infoRow} testID="info-phone-row" dataSet={{ testid: 'info-phone-row' }}>
-              <MaterialIcons name="phone" size={20} color="#007AFF" style={styles.icon} />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.label} testID="info-phone-label" dataSet={{ testid: 'info-phone-label' }}>Telefonní číslo</Text>
-                <Text style={styles.value} testID="info-phone-value" dataSet={{ testid: 'info-phone-value' }}>
+            <View
+              style={styles.infoRow}
+              testID="info-phone-row"
+              nativeID="info-row-phone"
+              id="row-phone"
+              data-component="info-row"
+              data-field="phone"
+              data-class="info-row row-phone"
+              accessibilityRole="group"
+              accessibilityLabel="Telefonní číslo"
+              className="info-row row-phone"
+            >
+              <MaterialIcons name="phone" size={20} color="#007AFF" style={styles.icon} testID="info-phone-icon" nativeID="icon-phone" data-component="row-icon" />
+              <View style={styles.infoTextContainer} data-component="info-text-container">
+                <Text style={styles.label} testID="info-phone-label" nativeID="label-phone" id="label-phone" data-component="info-label" data-field="phone" data-class="info-label" accessibilityRole="text" className="info-label">Telefonní číslo</Text>
+                <Text style={styles.value} testID="info-phone-value" nativeID="value-phone" id="value-phone" name="phone" data-component="info-value" data-field="phone" data-value={userData.phone} data-class="info-value" accessibilityRole="text" className="info-value">
                   {formatPhoneNumber(userData.phone)}
                 </Text>
               </View>
             </View>
 
             {/* Řádek s emailem */}
-            <View style={styles.infoRow} testID="info-email-row" dataSet={{ testid: 'info-email-row' }}>
-              <MaterialIcons name="email" size={20} color="#007AFF" style={styles.icon} />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.label} testID="info-email-label" dataSet={{ testid: 'info-email-label' }}>Email</Text>
-                <Text style={styles.value} testID="info-email-value" dataSet={{ testid: 'info-email-value' }}>
+            <View
+              style={styles.infoRow}
+              testID="info-email-row"
+              nativeID="info-row-email"
+              id="row-email"
+              data-component="info-row"
+              data-field="email"
+              data-class="info-row row-email"
+              accessibilityRole="group"
+              accessibilityLabel="Email"
+              className="info-row row-email"
+            >
+              <MaterialIcons name="email" size={20} color="#007AFF" style={styles.icon} testID="info-email-icon" nativeID="icon-email" data-component="row-icon" />
+              <View style={styles.infoTextContainer} data-component="info-text-container">
+                <Text style={styles.label} testID="info-email-label" nativeID="label-email" id="label-email" data-component="info-label" data-field="email" data-class="info-label" accessibilityRole="text" className="info-label">Email</Text>
+                <Text style={styles.value} testID="info-email-value" nativeID="value-email" id="value-email" name="email" data-component="info-value" data-field="email" data-value={userData.email} data-class="info-value" accessibilityRole="text" className="info-value">
                   {userData.email || 'Není uveden'}
                 </Text>
               </View>
             </View>
 
             {/* Řádek s pohlavím */}
-            <View style={styles.infoRow} testID="info-gender-row" dataSet={{ testid: 'info-gender-row' }}>
-              <MaterialIcons name="wc" size={20} color="#007AFF" style={styles.icon} />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.label} testID="info-gender-label" dataSet={{ testid: 'info-gender-label' }}>Pohlaví</Text>
-                <Text style={styles.value} testID="info-gender-value" dataSet={{ testid: 'info-gender-value' }}>
+            <View
+              style={styles.infoRow}
+              testID="info-gender-row"
+              nativeID="info-row-gender"
+              id="row-gender"
+              data-component="info-row"
+              data-field="gender"
+              data-class="info-row row-gender"
+              accessibilityRole="group"
+              accessibilityLabel="Pohlaví"
+              className="info-row row-gender"
+            >
+              <MaterialIcons name="wc" size={20} color="#007AFF" style={styles.icon} testID="info-gender-icon" nativeID="icon-gender" data-component="row-icon" />
+              <View style={styles.infoTextContainer} data-component="info-text-container">
+                <Text style={styles.label} testID="info-gender-label" nativeID="label-gender" id="label-gender" data-component="info-label" data-field="gender" data-class="info-label" accessibilityRole="text" className="info-label">Pohlaví</Text>
+                <Text style={styles.value} testID="info-gender-value" nativeID="value-gender" id="value-gender" name="gender" data-component="info-value" data-field="gender" data-value={userData.gender} data-class="info-value" accessibilityRole="text" className="info-value">
                   {getGenderText(userData.gender)}
                 </Text>
               </View>
             </View>
 
             {/* Stav souboru */}
-            <View style={styles.infoRow} testID="info-file-row" dataSet={{ testid: 'info-file-row' }}>
-              <MaterialIcons name="attach-file" size={20} color="#007AFF" style={styles.icon} />
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.label} testID="info-file-label" dataSet={{ testid: 'info-file-label' }}>Soubor</Text>
-                <Text style={styles.value} testID="info-file-status" dataSet={{ testid: 'info-file-status' }}>
+            <View
+              style={styles.infoRow}
+              testID="info-file-row"
+              nativeID="info-row-file"
+              id="row-file"
+              data-component="info-row"
+              data-field="file"
+              data-class="info-row row-file"
+              accessibilityRole="group"
+              accessibilityLabel="Soubor"
+              className="info-row row-file"
+            >
+              <MaterialIcons name="attach-file" size={20} color="#007AFF" style={styles.icon} testID="info-file-icon" nativeID="icon-file" data-component="row-icon" />
+              <View style={styles.infoTextContainer} data-component="info-text-container">
+                <Text style={styles.label} testID="info-file-label" nativeID="label-file" id="label-file" data-component="info-label" data-field="file" data-class="info-label" accessibilityRole="text" className="info-label">Soubor</Text>
+                <Text style={styles.value} testID="info-file-status" nativeID="value-file" id="value-file" name="file" data-component="info-value" data-field="file" data-has-file={userData._hasFile ? 'true' : 'false'} data-class="info-value" accessibilityRole="text" className="info-value">
                   {userData._hasFile ? 'Nahrán' : 'Nenahrán'}
                 </Text>
               </View>
@@ -135,17 +310,40 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
 
             {/* Dlouhé instrukce se scrollbarem, pokud jsou k dispozici */}
             {userData._instructions ? (
-              <View style={{ maxHeight: 160 }} testID="info-instructions-section" dataSet={{ testid: 'info-instructions-section' }}>
-                <Text style={[styles.label, { marginBottom: 6 }]} testID="info-instructions-label" dataSet={{ testid: 'info-instructions-label' }}>Instrukce</Text>
-                <ScrollView style={styles.instructionsBox} testID="info-instructions-box" dataSet={{ testid: 'info-instructions-box' }}>
-                  <Text style={styles.instructionsText} testID="info-instructions-text" dataSet={{ testid: 'info-instructions-text' }}>{userData._instructions}</Text>
+              <View
+                style={{ maxHeight: 160 }}
+                testID="info-instructions-section"
+                nativeID="info-section-instructions"
+                id="section-instructions"
+                data-component="info-section"
+                data-field="instructions"
+                data-has-content="true"
+                data-class="info-section instructions-section"
+                accessibilityRole="group"
+                accessibilityLabel="Instrukce"
+                className="info-section instructions-section"
+              >
+                <Text style={[styles.label, { marginBottom: 6 }]} testID="info-instructions-label" nativeID="label-instructions" id="label-instructions" data-component="info-label" data-field="instructions" data-class="info-label" accessibilityRole="text" className="info-label">Instrukce</Text>
+                <ScrollView style={styles.instructionsBox} testID="info-instructions-box" nativeID="instructions-scroll" id="instructions-box" data-component="instructions-box" data-class="instructions-box scroll" accessibilityRole="scrollbar" className="instructions-box">
+                  <Text style={styles.instructionsText} testID="info-instructions-text" nativeID="instructions-content" id="instructions-text" name="instructions" data-component="info-value" data-field="instructions" data-class="instructions-text" accessibilityRole="text" className="instructions-text">{userData._instructions}</Text>
                 </ScrollView>
               </View>
             ) : (
-              <View testID="info-instructions-section" dataSet={{ testid: 'info-instructions-section' }}>
-                <Text style={[styles.label, { marginBottom: 6 }]} testID="info-instructions-label" dataSet={{ testid: 'info-instructions-label' }}>Instrukce</Text>
-                <View style={styles.instructionsBox} testID="info-instructions-box" dataSet={{ testid: 'info-instructions-box' }}>
-                  <Text style={styles.instructionsText} testID="info-instructions-text" dataSet={{ testid: 'info-instructions-text' }}>Žádné instrukce</Text>
+              <View
+                testID="info-instructions-section"
+                nativeID="info-section-instructions"
+                id="section-instructions"
+                data-component="info-section"
+                data-field="instructions"
+                data-has-content="false"
+                data-class="info-section instructions-section empty"
+                accessibilityRole="group"
+                accessibilityLabel="Instrukce"
+                className="info-section instructions-section empty"
+              >
+                <Text style={[styles.label, { marginBottom: 6 }]} testID="info-instructions-label" nativeID="label-instructions" id="label-instructions" data-component="info-label" data-field="instructions" data-class="info-label" accessibilityRole="text" className="info-label">Instrukce</Text>
+                <View style={styles.instructionsBox} testID="info-instructions-box" nativeID="instructions-empty" id="instructions-box" data-component="instructions-box" data-class="instructions-box empty" className="instructions-box empty">
+                  <Text style={styles.instructionsText} testID="info-instructions-text" nativeID="instructions-empty-text" id="instructions-text" data-component="info-value" data-field="instructions" data-empty="true" data-class="instructions-text empty" accessibilityRole="text" className="instructions-text empty">Žádné instrukce</Text>
                 </View>
               </View>
             )}
@@ -153,12 +351,58 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
           </View>
 
           {/* Oddělovač nad tlačítkem */}
-          <View style={styles.divider} />
+          <View
+            style={styles.divider}
+            testID="info-modal-divider-bottom"
+            nativeID="divider-bottom"
+            data-component="divider"
+            data-class="divider"
+            className="divider"
+          />
 
           {/* Patička modalu s tlačítkem OK */}
-          <View style={styles.footer}>
-            <TouchableOpacity onPress={onClose} style={styles.okButton} testID="info-modal-ok">
-              <Text style={styles.okButtonText}>OK</Text>
+          <View
+            style={styles.footer}
+            // === FOOTER LOKÁTORY ===
+            testID="info-modal-footer"
+            nativeID="modal-footer"
+            id="modal-footer"
+            data-component="modal-footer"
+            data-class="modal-footer"
+            accessibilityRole="contentinfo"
+            className="modal-footer"
+          >
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.okButton}
+              // === OK BUTTON LOKÁTORY ===
+              testID="info-modal-ok"
+              nativeID="modal-ok-btn"
+              id="ok-button"
+              name="ok"
+              data-testid="info-modal-ok"
+              data-component="ok-button"
+              data-action="confirm"
+              data-class="btn btn-primary btn-ok"
+              accessibilityLabel="OK - Zavřít modal"
+              accessibilityRole="button"
+              accessibilityHint="Klikněte pro potvrzení a zavření"
+              aria-label="OK"
+              className="btn btn-primary btn-ok"
+            >
+              <Text
+                style={styles.okButtonText}
+                // === OK BUTTON TEXT LOKÁTORY ===
+                testID="info-modal-ok-text"
+                nativeID="ok-btn-text"
+                id="ok-text"
+                data-component="button-text"
+                data-class="button-label ok-label"
+                accessibilityRole="text"
+                className="button-label ok-label"
+              >
+                OK
+              </Text>
             </TouchableOpacity>
           </View>
 

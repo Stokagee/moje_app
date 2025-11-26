@@ -18,7 +18,7 @@ import { MaterialIcons } from '@expo/vector-icons';
  */
 const EmptyState = ({
   icon = 'inbox',
-  title = 'Zadna data',
+  title = 'Žádná data',
   message,
   action,
   testID = 'empty-state',
@@ -26,25 +26,69 @@ const EmptyState = ({
   return (
     <View
       style={styles.container}
+      // === TESTID - React Native standard ===
       testID={testID}
+      // === NATIVEID - mapuje se na id ve webu ===
       nativeID={testID}
+      // === ID - explicitní HTML id ===
+      id="empty-state"
+      // === NAME - název komponenty ===
+      name="empty-state"
+      // === DATA-* atributy pro CSS selektory ===
+      data-testid={testID}
+      data-component="empty-state"
+      data-has-action={action ? 'true' : 'false'}
+      data-class="empty-state empty-container"
+      // === ACCESSIBILITY atributy ===
       accessibilityLabel={title}
-      accessibilityRole="text"
-      data-class="empty-state"
+      accessibilityRole="status"
+      accessibilityHint={message || 'Žádná data k zobrazení'}
+      // === ARIA atributy (web) ===
+      aria-label={title}
+      aria-live="polite"
+      // === CLASSNAME pro CSS selektory ===
+      className="empty-state empty-container"
     >
       <MaterialIcons
         name={icon}
         size={64}
         color="#ccc"
+        // === ICON LOKÁTORY ===
         testID={`${testID}-icon`}
+        nativeID="empty-state-icon"
+        id="empty-icon"
+        data-component="empty-icon"
+        data-icon={icon}
+        data-class="empty-icon"
+        accessibilityLabel={`Ikona: ${icon}`}
       />
 
-      <Text style={styles.title} testID={`${testID}-title`}>
+      <Text
+        style={styles.title}
+        // === TITLE LOKÁTORY ===
+        testID={`${testID}-title`}
+        nativeID="empty-state-title"
+        id="empty-title"
+        data-component="empty-title"
+        data-class="empty-title heading"
+        accessibilityRole="header"
+        className="empty-title heading"
+      >
         {title}
       </Text>
 
       {message && (
-        <Text style={styles.message} testID={`${testID}-message`}>
+        <Text
+          style={styles.message}
+          // === MESSAGE LOKÁTORY ===
+          testID={`${testID}-message`}
+          nativeID="empty-state-message"
+          id="empty-message"
+          data-component="empty-message"
+          data-class="empty-message description"
+          accessibilityRole="text"
+          className="empty-message description"
+        >
           {message}
         </Text>
       )}
@@ -53,13 +97,34 @@ const EmptyState = ({
         <TouchableOpacity
           style={styles.actionButton}
           onPress={action.onPress}
+          // === ACTION BUTTON LOKÁTORY ===
           testID={`${testID}-action`}
-          nativeID={`${testID}-action`}
+          nativeID="empty-state-action"
+          id="empty-action-btn"
+          name="empty-action"
+          data-testid={`${testID}-action`}
+          data-component="action-button"
+          data-action="empty-action"
+          data-class="btn btn-primary empty-action"
           accessibilityLabel={action.label}
           accessibilityRole="button"
-          data-class="btn empty-state-action"
+          accessibilityHint="Klikněte pro akci"
+          aria-label={action.label}
+          className="btn btn-primary empty-action"
         >
-          <Text style={styles.actionText}>{action.label}</Text>
+          <Text
+            style={styles.actionText}
+            // === ACTION TEXT LOKÁTORY ===
+            testID={`${testID}-action-text`}
+            nativeID="empty-action-text"
+            id="action-label"
+            data-component="button-text"
+            data-class="button-label action-label"
+            accessibilityRole="text"
+            className="button-label action-label"
+          >
+            {action.label}
+          </Text>
         </TouchableOpacity>
       )}
     </View>

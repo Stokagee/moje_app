@@ -41,12 +41,29 @@ const StatusBadge = ({ status, statusConfig, size = 'medium', testID }) => {
           paddingVertical: currentSize.paddingVertical,
         },
       ]}
+      // === TESTID - React Native standard ===
       testID={testID}
-      nativeID={testID}
-      accessibilityLabel={config.label}
-      accessibilityRole="text"
-      data-class="status-badge"
+      // === NATIVEID - mapuje se na id ve webu ===
+      nativeID={testID || `status-badge-${status}`}
+      // === ID - explicitní HTML id ===
+      id={`badge-${status}`}
+      // === NAME - název badge ===
+      name={`status-${status}`}
+      // === DATA-* atributy pro CSS selektory ===
+      data-testid={testID}
+      data-component="status-badge"
       data-status={status}
+      data-size={size}
+      data-label={config.label}
+      data-class={`status-badge badge-${status} badge-${size}`}
+      // === ACCESSIBILITY atributy ===
+      accessibilityLabel={`Status: ${config.label}`}
+      accessibilityRole="text"
+      accessibilityHint={`Aktuální stav: ${config.label}`}
+      // === ARIA atributy (web) ===
+      aria-label={`Status: ${config.label}`}
+      // === CLASSNAME pro CSS selektory ===
+      className={`status-badge badge-${status} badge-${size}`}
     >
       <Text
         style={[
@@ -56,6 +73,15 @@ const StatusBadge = ({ status, statusConfig, size = 'medium', testID }) => {
             fontSize: currentSize.fontSize,
           },
         ]}
+        // === BADGE TEXT LOKÁTORY ===
+        testID={testID ? `${testID}-text` : `status-badge-${status}-text`}
+        nativeID={`status-text-${status}`}
+        id={`status-label-${status}`}
+        data-component="badge-text"
+        data-status={status}
+        data-class="badge-text status-label"
+        accessibilityRole="text"
+        className="badge-text status-label"
       >
         {config.label}
       </Text>

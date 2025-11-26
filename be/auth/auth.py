@@ -11,9 +11,10 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import jwt
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, APIKeyCookie
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+from sqlalchemy.orm import Session
 
 from config import (
     SECRET_KEY,
@@ -22,7 +23,8 @@ from config import (
     SESSION_COOKIE_NAME,
     SESSION_MAX_AGE,
 )
-from fake_users import verify_user, get_user
+from database import get_db
+from crud import get_user
 
 
 # ============================================================
@@ -86,6 +88,7 @@ def verify_session_token(token: str) -> Optional[str]:
 
 async def get_current_user_session(
     session_token: str = Depends(cookie_scheme),
+    db: Session = Depends(get_db),
 ) -> dict:
     """
     FastAPI dependency pro session-based autentizaci.
@@ -108,14 +111,14 @@ async def get_current_user_session(
             detail="Neplatná nebo expirovaná session",
         )
 
-    user = get_user(username)
+    user = get_user(db, username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Uživatel neexistuje",
         )
 
-    return {"username": user["username"], "email": user["email"]}
+    return {"username": user.username, "email": user.email}
 
 
 # ============================================================
@@ -191,6 +194,7 @@ def verify_jwt_token(token: str) -> Optional[str]:
 
 async def get_current_user_jwt(
     token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
 ) -> dict:
     """
     FastAPI dependency pro JWT autentizaci.
@@ -210,11 +214,11 @@ async def get_current_user_jwt(
     if not username:
         raise credentials_exception
 
-    user = get_user(username)
+    user = get_user(db, username)
     if not user:
         raise credentials_exception
 
-    return {"username": user["username"], "email": user["email"]}
+    return {"username": user.username, "email": user.email}
 
 
 # ============================================================
@@ -247,6 +251,7 @@ oauth2_html_scheme = OAuth2PasswordBearer(tokenUrl="/oauth2/token", auto_error=F
 
 async def get_current_user_oauth2(
     token: str = Depends(oauth2_html_scheme),
+    db: Session = Depends(get_db),
 ) -> dict:
     """
     FastAPI dependency pro OAuth2 HTML autentizaci.
@@ -268,11 +273,11 @@ async def get_current_user_oauth2(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = get_user(username)
+    user = get_user(db, username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Uživatel neexistuje",
         )
 
-    return {"username": user["username"], "email": user["email"]}
+    return {"username": user.username, "email": user.email}

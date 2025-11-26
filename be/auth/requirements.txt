@@ -1,7 +1,22 @@
-fastapi>=0.104.0
+# FastAPI a server
+fastapi>=0.115.0
 uvicorn>=0.24.0
+
+# Autentizace
 pyjwt>=2.8.0
 bcrypt>=4.0.0
-python-multipart>=0.0.6
 itsdangerous>=2.1.0
+
+# Formuláře a šablony
+python-multipart>=0.0.6
 jinja2>=3.1.0
+
+# Databáze
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+
+# Konfigurace
+python-dotenv>=1.0.0
+
+# Validace
+email-validator>=2.0.0

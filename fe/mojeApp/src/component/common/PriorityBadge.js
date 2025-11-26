@@ -28,15 +28,53 @@ const PriorityBadge = ({ priority, isVip, testID }) => {
   return (
     <View
       style={styles.badge}
+      // === TESTID - React Native standard ===
       testID={testID}
-      nativeID={testID}
-      accessibilityLabel="VIP objednavka"
-      accessibilityRole="text"
-      data-class="priority-badge vip"
+      // === NATIVEID - mapuje se na id ve webu ===
+      nativeID={testID || 'priority-badge-vip'}
+      // === ID - explicitní HTML id ===
+      id="priority-vip"
+      // === NAME - název badge ===
+      name="priority-high"
+      // === DATA-* atributy pro CSS selektory ===
+      data-testid={testID}
+      data-component="priority-badge"
       data-priority="high"
+      data-vip="true"
+      data-class="priority-badge vip-badge"
+      // === ACCESSIBILITY atributy ===
+      accessibilityLabel="VIP objednávka"
+      accessibilityRole="text"
+      accessibilityHint="Tato objednávka má vysokou prioritu"
+      // === ARIA atributy (web) ===
+      aria-label="VIP objednávka"
+      // === CLASSNAME pro CSS selektory ===
+      className="priority-badge vip-badge badge-high"
     >
-      <MaterialIcons name="star" size={14} color="#ffc107" />
-      <Text style={styles.text}>VIP</Text>
+      <MaterialIcons
+        name="star"
+        size={14}
+        color="#ffc107"
+        // === ICON LOKÁTORY ===
+        testID={testID ? `${testID}-icon` : 'priority-badge-vip-icon'}
+        nativeID="priority-star-icon"
+        data-component="priority-icon"
+        data-icon="star"
+        accessibilityLabel="Hvězdička VIP"
+      />
+      <Text
+        style={styles.text}
+        // === VIP TEXT LOKÁTORY ===
+        testID={testID ? `${testID}-text` : 'priority-badge-vip-text'}
+        nativeID="priority-vip-text"
+        id="vip-label"
+        data-component="priority-text"
+        data-class="priority-label vip-text"
+        accessibilityRole="text"
+        className="priority-label vip-text"
+      >
+        VIP
+      </Text>
     </View>
   );
 };

@@ -7,23 +7,34 @@ Vyukova ukazka demonstrujici rozdily mezi tremi pristupy k autentizaci.
 ```bash
 cd be/auth
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+uvicorn main:app --reload --port 8001
 ```
 
 ## Dostupne URL
 
 | URL | Popis |
 |-----|-------|
-| http://localhost:8000/docs | Swagger UI dokumentace |
-| http://localhost:8000/redoc | ReDoc dokumentace |
-| http://localhost:8000/oauth2/login | Vlastni HTML login stranka |
+| http://localhost:8001/docs | Swagger UI dokumentace |
+| http://localhost:8001/redoc | ReDoc dokumentace |
+| http://localhost:8001/oauth2/login | Vlastni HTML login stranka |
 
-## Testovaci ucty
+## Vychozi admin ucet
 
-| Username | Heslo |
-|----------|-------|
-| admin | admin123 |
-| user | user123 |
+Ucet se vytvori automaticky pri startu aplikace. Nastaveni v `.env`:
+
+```env
+DEFAULT_ADMIN_USERNAME=admin
+DEFAULT_ADMIN_PASSWORD=admin123
+DEFAULT_ADMIN_EMAIL=admin@example.com
+```
+
+## Registrace novych uzivatelu
+
+```bash
+curl -X POST "http://localhost:8001/register" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"novyuser","password":"heslo123","email":"user@example.com"}'
+```
 
 ---
 
@@ -45,14 +56,14 @@ uvicorn main:app --reload --port 8000
 **Priklad (curl):**
 ```bash
 # Login - ulozi cookie do souboru
-curl -c cookies.txt -X POST "http://localhost:8000/session/login" \
+curl -c cookies.txt -X POST "http://localhost:8001/session/login" \
   -d "username=admin&password=admin123"
 
 # Pouziti cookie
-curl -b cookies.txt "http://localhost:8000/session/me"
+curl -b cookies.txt "http://localhost:8001/session/me"
 
 # Logout
-curl -b cookies.txt -X POST "http://localhost:8000/session/logout"
+curl -b cookies.txt -X POST "http://localhost:8001/session/logout"
 ```
 
 **Vyhody:**
@@ -82,11 +93,11 @@ curl -b cookies.txt -X POST "http://localhost:8000/session/logout"
 **Priklad (curl):**
 ```bash
 # Login - ziskej token
-TOKEN=$(curl -s -X POST "http://localhost:8000/jwt/login" \
+TOKEN=$(curl -s -X POST "http://localhost:8001/jwt/login" \
   -d "username=admin&password=admin123" | jq -r '.access_token')
 
 # Pouziti tokenu
-curl -H "Authorization: Bearer $TOKEN" "http://localhost:8000/jwt/me"
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:8001/jwt/me"
 ```
 
 **Vyhody:**
@@ -118,11 +129,11 @@ curl -H "Authorization: Bearer $TOKEN" "http://localhost:8000/jwt/me"
 **Priklad (curl):**
 ```bash
 # Ziskej token
-TOKEN=$(curl -s -X POST "http://localhost:8000/oauth2/token" \
+TOKEN=$(curl -s -X POST "http://localhost:8001/oauth2/token" \
   -d "username=admin&password=admin123" | jq -r '.access_token')
 
 # Pouziti tokenu
-curl -H "Authorization: Bearer $TOKEN" "http://localhost:8000/oauth2/me"
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:8001/oauth2/me"
 ```
 
 **Vyhody:**
@@ -149,17 +160,48 @@ curl -H "Authorization: Bearer $TOKEN" "http://localhost:8000/oauth2/me"
 
 ---
 
+## Konfigurace (.env)
+
+Vsechna nastaveni jsou centralizovana v `.env` souboru:
+
+```env
+# Databaze (PostgreSQL z docker-compose)
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/moje_app
+
+# JWT/Session
+SECRET_KEY=super-secret-key-change-in-production-123!
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+SESSION_COOKIE_NAME=session_id
+SESSION_MAX_AGE=3600
+
+# OAuth2 (pro budouci rozsireni)
+OAUTH2_CLIENT_ID=my-app-client
+OAUTH2_CLIENT_SECRET=my-app-secret
+
+# Vychozi admin ucet
+DEFAULT_ADMIN_USERNAME=admin
+DEFAULT_ADMIN_PASSWORD=admin123
+DEFAULT_ADMIN_EMAIL=admin@example.com
+```
+
+---
+
 ## Struktura projektu
 
 ```
 auth/
-├── main.py           # FastAPI aplikace
-├── config.py         # Konfigurace (SECRET_KEY, etc.)
-├── fake_users.py     # In-memory uzivatele
+├── main.py           # FastAPI aplikace + DB init
+├── config.py         # Konfigurace z .env
+├── database.py       # SQLAlchemy pripojeni
+├── models.py         # User model
+├── crud.py           # Databazove operace
 ├── schemas.py        # Pydantic schemata
 ├── auth.py           # Autentizacni logika (3 typy)
 ├── routes.py         # API endpointy
 ├── requirements.txt  # Zavislosti
+├── .env              # Lokalni konfigurace
+├── .env.example      # Sablona konfigurace
 ├── templates/
 │   └── login.html    # OAuth2 login stranka
 └── README.md         # Tato dokumentace
@@ -167,13 +209,35 @@ auth/
 
 ---
 
+## Databazova tabulka
+
+Uzivatele jsou ulozeni v PostgreSQL tabulce `auth_users`:
+
+| Sloupec | Typ | Popis |
+|---------|-----|-------|
+| id | INTEGER | Primarni klic |
+| username | VARCHAR(50) | Unikatni uzivatelske jmeno |
+| email | VARCHAR(100) | Unikatni email |
+| hashed_password | VARCHAR(255) | Bcrypt hash hesla |
+| is_active | BOOLEAN | Aktivni ucet |
+| created_at | DATETIME | Datum vytvoreni |
+
+---
+
+## Pozadavky
+
+- Python 3.10+
+- PostgreSQL (bezi v docker-compose)
+- Zavislosti v `requirements.txt`
+
+---
+
 ## Bezpecnostni poznamky
 
 Toto je **vyukova ukazka** - v produkci je potreba:
 
-1. **SECRET_KEY** - pouzit silny nahodny klic, ne hardcoded
+1. **SECRET_KEY** - pouzit silny nahodny klic
 2. **HTTPS** - vzdy pouzivat sifrovane spojeni
 3. **CORS** - omezit `allow_origins` na konkretni domeny
 4. **Rate limiting** - ochrana proti brute-force utokum
 5. **Refresh tokeny** - pro dlouhodobe sessions
-6. **Databaze** - uzivatele ukladat do skutecne DB, ne in-memory

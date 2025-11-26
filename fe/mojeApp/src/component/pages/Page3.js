@@ -88,8 +88,35 @@ export default function Page3({ navigation }) {
   if (!loading && orders.length === 0) {
     return (
       <Container>
-        <View style={styles.header}>
-          <Text style={styles.title} testID="page3-title">
+        <View
+          style={styles.header}
+          // === EMPTY STATE HEADER LOKÁTORY ===
+          testID="page3-empty-header"
+          nativeID="page3-empty-header"
+          id="empty-header"
+          data-component="page-header"
+          data-page="page3"
+          data-state="empty"
+          data-class="page-header header-section"
+          accessibilityRole="banner"
+          aria-label="Hlavička stránky"
+          className="page-header header-section"
+        >
+          <Text
+            style={styles.title}
+            // === EMPTY STATE TITLE LOKÁTORY ===
+            testID="page3-title"
+            nativeID="page3-title-empty"
+            id="page3-title-empty"
+            data-component="page-title"
+            data-page="page3"
+            data-state="empty"
+            data-class="page-title heading"
+            accessibilityRole="header"
+            aria-label="Správa objednávek"
+            aria-level="1"
+            className="page-title heading"
+          >
             Sprava objednavek
           </Text>
         </View>
@@ -110,55 +137,230 @@ export default function Page3({ navigation }) {
   return (
     <Container>
       {/* Header s nazvem a tlacitkem refresh */}
-      <View style={styles.header}>
+      <View
+        style={styles.header}
+        // === HEADER SECTION LOKÁTORY ===
+        testID="page3-header"
+        nativeID="page3-header"
+        id="page3-header"
+        data-component="page-header"
+        data-page="page3"
+        data-section="header"
+        data-class="page-header header-section"
+        accessibilityRole="banner"
+        aria-label="Hlavička stránky objednávek"
+        className="page-header header-section"
+      >
         <Text
           style={styles.title}
+          // === PAGE TITLE LOKÁTORY ===
           testID="page3-title"
           nativeID="page3-title"
-          data-class="page-title"
+          id="page3-heading"
+          data-component="page-title"
+          data-page="page3"
+          data-class="page-title heading main-title"
+          accessibilityRole="header"
+          accessibilityLabel="Správa objednávek"
+          aria-label="Správa objednávek"
+          aria-level="1"
+          className="page-title heading main-title"
         >
           Sprava objednavek
         </Text>
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={onRefresh}
+          // === REFRESH BUTTON LOKÁTORY ===
           testID="orders-refresh-button"
           nativeID="orders-refresh-button"
-          accessibilityLabel="Obnovit seznam"
+          id="refresh-btn"
+          name="refresh"
+          data-testid="orders-refresh-button"
+          data-component="refresh-button"
+          data-action="refresh-orders"
+          data-class="btn btn-icon refresh-btn"
+          accessibilityLabel="Obnovit seznam objednávek"
           accessibilityRole="button"
-          data-class="btn refresh-btn"
+          accessibilityHint="Klikněte pro obnovení seznamu"
+          aria-label="Obnovit seznam objednávek"
+          className="btn btn-icon refresh-btn"
         >
-          <MaterialIcons name="refresh" size={24} color="#007AFF" />
+          <MaterialIcons
+            name="refresh"
+            size={24}
+            color="#007AFF"
+            // === REFRESH ICON LOKÁTORY ===
+            testID="refresh-icon"
+            nativeID="refresh-icon"
+            data-component="icon"
+            data-icon="refresh"
+            accessibilityLabel="Ikona obnovení"
+          />
         </TouchableOpacity>
       </View>
 
       {/* Statistiky */}
       <View
         style={styles.statsRow}
+        // === STATS PANEL LOKÁTORY ===
         testID="orders-stats-panel"
-        data-class="stats-panel"
+        nativeID="orders-stats-panel"
+        id="stats-section"
+        data-component="stats-panel"
+        data-page="page3"
+        data-section="statistics"
+        data-class="stats-panel stats-row"
+        accessibilityRole="region"
+        accessibilityLabel="Statistiky objednávek"
+        aria-label="Statistiky objednávek"
+        className="stats-panel stats-row"
       >
-        <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{stats.total}</Text>
-          <Text style={styles.statLabel}>Celkem</Text>
+        <View
+          style={styles.statBox}
+          // === STAT BOX - TOTAL LOKÁTORY ===
+          testID="stat-box-total"
+          nativeID="stat-total"
+          id="stat-total"
+          data-component="stat-box"
+          data-stat="total"
+          data-value={stats.total}
+          data-class="stat-box stat-item"
+          accessibilityRole="text"
+          accessibilityLabel={`Celkem: ${stats.total}`}
+          aria-label={`Celkem: ${stats.total}`}
+          className="stat-box stat-item"
+        >
+          <Text
+            style={styles.statNumber}
+            // === STAT NUMBER - TOTAL LOKÁTORY ===
+            testID="stat-number-total"
+            nativeID="stat-value-total"
+            data-component="stat-number"
+            data-stat="total"
+            data-class="stat-number"
+            className="stat-number"
+          >{stats.total}</Text>
+          <Text
+            style={styles.statLabel}
+            // === STAT LABEL - TOTAL LOKÁTORY ===
+            testID="stat-label-total"
+            nativeID="stat-label-total"
+            data-component="stat-label"
+            data-class="stat-label"
+            className="stat-label"
+          >Celkem</Text>
         </View>
-        <View style={styles.statBox}>
-          <Text style={[styles.statNumber, { color: '#fd7e14' }]}>
+        <View
+          style={styles.statBox}
+          // === STAT BOX - PENDING LOKÁTORY ===
+          testID="stat-box-pending"
+          nativeID="stat-pending"
+          id="stat-pending"
+          data-component="stat-box"
+          data-stat="pending"
+          data-value={stats.pending}
+          data-class="stat-box stat-item"
+          accessibilityRole="text"
+          accessibilityLabel={`Čekající: ${stats.pending}`}
+          aria-label={`Čekající: ${stats.pending}`}
+          className="stat-box stat-item"
+        >
+          <Text
+            style={[styles.statNumber, { color: '#fd7e14' }]}
+            // === STAT NUMBER - PENDING LOKÁTORY ===
+            testID="stat-number-pending"
+            nativeID="stat-value-pending"
+            data-component="stat-number"
+            data-stat="pending"
+            data-class="stat-number stat-warning"
+            className="stat-number stat-warning"
+          >
             {stats.pending}
           </Text>
-          <Text style={styles.statLabel}>Cekajici</Text>
+          <Text
+            style={styles.statLabel}
+            // === STAT LABEL - PENDING LOKÁTORY ===
+            testID="stat-label-pending"
+            nativeID="stat-label-pending"
+            data-component="stat-label"
+            data-class="stat-label"
+            className="stat-label"
+          >Cekajici</Text>
         </View>
-        <View style={styles.statBox}>
-          <Text style={[styles.statNumber, { color: '#007bff' }]}>
+        <View
+          style={styles.statBox}
+          // === STAT BOX - ACTIVE LOKÁTORY ===
+          testID="stat-box-active"
+          nativeID="stat-active"
+          id="stat-active"
+          data-component="stat-box"
+          data-stat="active"
+          data-value={stats.active}
+          data-class="stat-box stat-item"
+          accessibilityRole="text"
+          accessibilityLabel={`Aktivní: ${stats.active}`}
+          aria-label={`Aktivní: ${stats.active}`}
+          className="stat-box stat-item"
+        >
+          <Text
+            style={[styles.statNumber, { color: '#007bff' }]}
+            // === STAT NUMBER - ACTIVE LOKÁTORY ===
+            testID="stat-number-active"
+            nativeID="stat-value-active"
+            data-component="stat-number"
+            data-stat="active"
+            data-class="stat-number stat-info"
+            className="stat-number stat-info"
+          >
             {stats.active}
           </Text>
-          <Text style={styles.statLabel}>Aktivni</Text>
+          <Text
+            style={styles.statLabel}
+            // === STAT LABEL - ACTIVE LOKÁTORY ===
+            testID="stat-label-active"
+            nativeID="stat-label-active"
+            data-component="stat-label"
+            data-class="stat-label"
+            className="stat-label"
+          >Aktivni</Text>
         </View>
-        <View style={styles.statBox}>
-          <Text style={[styles.statNumber, { color: '#28a745' }]}>
+        <View
+          style={styles.statBox}
+          // === STAT BOX - COMPLETED LOKÁTORY ===
+          testID="stat-box-completed"
+          nativeID="stat-completed"
+          id="stat-completed"
+          data-component="stat-box"
+          data-stat="completed"
+          data-value={stats.completed}
+          data-class="stat-box stat-item"
+          accessibilityRole="text"
+          accessibilityLabel={`Dokončeno: ${stats.completed}`}
+          aria-label={`Dokončeno: ${stats.completed}`}
+          className="stat-box stat-item"
+        >
+          <Text
+            style={[styles.statNumber, { color: '#28a745' }]}
+            // === STAT NUMBER - COMPLETED LOKÁTORY ===
+            testID="stat-number-completed"
+            nativeID="stat-value-completed"
+            data-component="stat-number"
+            data-stat="completed"
+            data-class="stat-number stat-success"
+            className="stat-number stat-success"
+          >
             {stats.completed}
           </Text>
-          <Text style={styles.statLabel}>Dokonceno</Text>
+          <Text
+            style={styles.statLabel}
+            // === STAT LABEL - COMPLETED LOKÁTORY ===
+            testID="stat-label-completed"
+            nativeID="stat-label-completed"
+            data-component="stat-label"
+            data-class="stat-label"
+            className="stat-label"
+          >Dokonceno</Text>
         </View>
       </View>
 
@@ -168,24 +370,69 @@ export default function Page3({ navigation }) {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        // === ORDERS LIST LOKÁTORY ===
         testID="orders-list"
         nativeID="orders-list"
-        data-class="orders-list"
+        id="orders-scroll"
+        data-component="orders-list"
+        data-page="page3"
+        data-count={orders.length}
+        data-class="orders-list scroll-container"
+        accessibilityRole="list"
+        accessibilityLabel="Seznam objednávek"
+        aria-label="Seznam objednávek"
+        className="orders-list scroll-container"
       >
-        {orders.map((order) => (
+        {orders.map((order, index) => (
           <View
             key={order.id}
             style={styles.orderCard}
+            // === ORDER CARD LOKÁTORY ===
             testID={`order-card-${order.id}`}
             nativeID={`order-card-${order.id}`}
-            accessibilityRole="listitem"
-            data-class="order-card"
+            id={`order-${order.id}`}
+            data-testid={`order-card-${order.id}`}
+            data-component="order-card"
             data-order-id={order.id}
+            data-order-status={order.status}
+            data-order-vip={order.is_vip ? 'true' : 'false'}
+            data-index={index}
+            data-class="order-card card list-item"
+            accessibilityRole="listitem"
+            accessibilityLabel={`Objednávka ${order.id} - ${order.customer_name}`}
+            aria-label={`Objednávka ${order.id}`}
+            className="order-card card list-item"
           >
             {/* Horni radek: ID, Status, Priority */}
-            <View style={styles.cardHeader}>
-              <Text style={styles.orderId}>#{order.id}</Text>
-              <View style={styles.badges}>
+            <View
+              style={styles.cardHeader}
+              // === CARD HEADER LOKÁTORY ===
+              testID={`order-card-${order.id}-header`}
+              nativeID={`order-header-${order.id}`}
+              data-component="card-header"
+              data-class="card-header order-header"
+              className="card-header order-header"
+            >
+              <Text
+                style={styles.orderId}
+                // === ORDER ID TEXT LOKÁTORY ===
+                testID={`order-card-${order.id}-id`}
+                nativeID={`order-id-${order.id}`}
+                data-component="order-id"
+                data-order-id={order.id}
+                data-class="order-id"
+                accessibilityRole="text"
+                className="order-id"
+              >#{order.id}</Text>
+              <View
+                style={styles.badges}
+                // === BADGES CONTAINER LOKÁTORY ===
+                testID={`order-card-${order.id}-badges`}
+                nativeID={`order-badges-${order.id}`}
+                data-component="badges-container"
+                data-class="badges badge-group"
+                className="badges badge-group"
+              >
                 <PriorityBadge
                   isVip={order.is_vip}
                   testID={`order-card-${order.id}-priority`}
@@ -200,22 +447,86 @@ export default function Page3({ navigation }) {
             </View>
 
             {/* Info o zakaznikovi */}
-            <View style={styles.cardBody}>
-              <View style={styles.infoRow}>
-                <MaterialIcons name="person" size={16} color="#666" />
+            <View
+              style={styles.cardBody}
+              // === CARD BODY LOKÁTORY ===
+              testID={`order-card-${order.id}-body`}
+              nativeID={`order-body-${order.id}`}
+              data-component="card-body"
+              data-class="card-body order-info"
+              className="card-body order-info"
+            >
+              <View
+                style={styles.infoRow}
+                // === CUSTOMER ROW LOKÁTORY ===
+                testID={`order-card-${order.id}-customer-row`}
+                nativeID={`order-customer-row-${order.id}`}
+                data-component="info-row"
+                data-info="customer"
+                data-class="info-row customer-row"
+                className="info-row customer-row"
+              >
+                <MaterialIcons
+                  name="person"
+                  size={16}
+                  color="#666"
+                  // === CUSTOMER ICON LOKÁTORY ===
+                  testID={`order-card-${order.id}-customer-icon`}
+                  nativeID={`customer-icon-${order.id}`}
+                  data-component="icon"
+                  data-icon="person"
+                  accessibilityLabel="Zákazník"
+                />
                 <Text
                   style={styles.infoText}
+                  // === CUSTOMER TEXT LOKÁTORY ===
                   testID={`order-card-${order.id}-customer`}
+                  nativeID={`order-customer-${order.id}`}
+                  id={`customer-name-${order.id}`}
+                  data-component="customer-name"
+                  data-customer={order.customer_name}
+                  data-class="info-text customer-name"
+                  accessibilityRole="text"
+                  accessibilityLabel={`Zákazník: ${order.customer_name}`}
+                  className="info-text customer-name"
                   numberOfLines={1}
                 >
                   {order.customer_name}
                 </Text>
               </View>
-              <View style={styles.infoRow}>
-                <MaterialIcons name="location-on" size={16} color="#666" />
+              <View
+                style={styles.infoRow}
+                // === ADDRESS ROW LOKÁTORY ===
+                testID={`order-card-${order.id}-address-row`}
+                nativeID={`order-address-row-${order.id}`}
+                data-component="info-row"
+                data-info="address"
+                data-class="info-row address-row"
+                className="info-row address-row"
+              >
+                <MaterialIcons
+                  name="location-on"
+                  size={16}
+                  color="#666"
+                  // === ADDRESS ICON LOKÁTORY ===
+                  testID={`order-card-${order.id}-address-icon`}
+                  nativeID={`address-icon-${order.id}`}
+                  data-component="icon"
+                  data-icon="location-on"
+                  accessibilityLabel="Adresa"
+                />
                 <Text
                   style={styles.infoText}
+                  // === ADDRESS TEXT LOKÁTORY ===
                   testID={`order-card-${order.id}-address`}
+                  nativeID={`order-address-${order.id}`}
+                  id={`delivery-address-${order.id}`}
+                  data-component="delivery-address"
+                  data-address={order.delivery_address}
+                  data-class="info-text delivery-address"
+                  accessibilityRole="text"
+                  accessibilityLabel={`Adresa: ${order.delivery_address}`}
+                  className="info-text delivery-address"
                   numberOfLines={1}
                 >
                   {order.delivery_address}
@@ -224,8 +535,27 @@ export default function Page3({ navigation }) {
             </View>
 
             {/* Cas vytvoreni */}
-            <View style={styles.cardFooter}>
-              <Text style={styles.timestamp}>
+            <View
+              style={styles.cardFooter}
+              // === CARD FOOTER LOKÁTORY ===
+              testID={`order-card-${order.id}-footer`}
+              nativeID={`order-footer-${order.id}`}
+              data-component="card-footer"
+              data-class="card-footer order-footer"
+              className="card-footer order-footer"
+            >
+              <Text
+                style={styles.timestamp}
+                // === TIMESTAMP LOKÁTORY ===
+                testID={`order-card-${order.id}-timestamp`}
+                nativeID={`order-timestamp-${order.id}`}
+                data-component="timestamp"
+                data-created={order.created_at}
+                data-class="timestamp order-time"
+                accessibilityRole="text"
+                accessibilityLabel={`Vytvořeno: ${new Date(order.created_at).toLocaleString('cs-CZ')}`}
+                className="timestamp order-time"
+              >
                 {new Date(order.created_at).toLocaleString('cs-CZ')}
               </Text>
             </View>

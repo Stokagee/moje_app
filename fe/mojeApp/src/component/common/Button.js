@@ -1,20 +1,66 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-const Button = ({ title, onPress, testID, color = 'green' }) => {
+const Button = ({
+  title,
+  onPress,
+  testID,
+  color = 'green',
+  variant = 'primary',  // primary, secondary, danger, success
+  action = 'submit',    // submit, cancel, delete, refresh, back
+  disabled = false
+}) => {
+  // Extrahování názvu akce z testID
+  const buttonName = testID ? testID.replace('Button', '') : action;
+
   return (
     <TouchableOpacity
-      style={[styles.button, { backgroundColor: color }]}
+      style={[
+        styles.button,
+        { backgroundColor: color },
+        disabled && styles.disabled
+      ]}
       onPress={onPress}
+      disabled={disabled}
+      // === TESTID - React Native standard ===
       testID={testID}
-      // Lokátory pro RF demonstraci
-      nativeID={testID}
+      // === NATIVEID - mapuje se na id ve webu ===
+      nativeID={`btn-${buttonName}`}
+      // === ID - explicitní HTML id ===
+      id={`button-${buttonName}`}
+      // === NAME - název tlačítka ===
+      name={buttonName}
+      // === DATA-* atributy pro CSS selektory ===
+      data-testid={testID}
+      data-component="button"
+      data-action={action}
+      data-variant={variant}
+      data-disabled={disabled ? 'true' : 'false'}
+      data-class={`btn btn-${variant}`}
+      // === ACCESSIBILITY atributy ===
       accessibilityLabel={title}
       accessibilityRole="button"
-      data-class="btn btn-primary"
-      data-action="submit"
+      accessibilityHint={`Klikněte pro ${action}`}
+      accessibilityState={{ disabled: disabled }}
+      // === ARIA atributy (web) ===
+      aria-label={title}
+      aria-disabled={disabled}
+      aria-pressed={false}
+      // === CLASSNAME pro CSS selektory ===
+      className={`btn btn-${variant} btn-${buttonName} ${disabled ? 'btn-disabled' : ''}`}
     >
-      <Text style={styles.buttonText}>{title}</Text>
+      <Text
+        style={styles.buttonText}
+        // === BUTTON TEXT LOKÁTORY ===
+        testID={testID ? `${testID}-text` : undefined}
+        nativeID={`btn-text-${buttonName}`}
+        data-component="button-text"
+        data-class="button-label"
+        accessibilityRole="text"
+        className="button-text button-label"
+      >
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -30,6 +76,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white', // barva textu: zajišťuje dobrý kontrast na barevném pozadí
     fontWeight: 'bold', // typografie: tučné písmo pro lepší čitelnost labelu
+  },
+  disabled: {
+    opacity: 0.5, // snížená průhlednost pro disabled stav
   },
 });
 

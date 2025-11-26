@@ -8,7 +8,13 @@
       "mcp__context7__get-library-docs",
       "Bash(pip install:*)",
       "Bash(uvicorn:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(timeout /t 3)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(lsof:*)",
+      "Bash(ss:*)",
+      "Bash(docker logs:*)"
     ],
     "deny": [],
     "ask": []

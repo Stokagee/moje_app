@@ -11,9 +11,11 @@ from fastapi import APIRouter, Depends, HTTPException, Response, Request, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session
 
 from schemas import UserCreate, UserOut, Token, Message
-from fake_users import create_user, verify_user, get_all_users
+from database import get_db
+from crud import create_user, verify_user, get_all_users
 from auth import (
     # Session
     create_session_token,
@@ -39,28 +41,27 @@ templates = Jinja2Templates(directory="templates")
 # ============================================================
 
 @router.post("/register", response_model=UserOut, tags=["Registrace"])
-def register(user_data: UserCreate):
+def register(user_data: UserCreate, db: Session = Depends(get_db)):
     """
     Registrace nového uživatele.
 
-    Vytvoří uživatele v in-memory databázi.
+    Vytvoří uživatele v PostgreSQL databázi.
     Heslo je automaticky zahashováno pomocí bcrypt.
 
-    **Testovací účty (už existují):**
-    - admin / admin123
-    - user / user123
+    **Defaultní admin účet se vytvoří automaticky při startu.**
     """
     try:
-        user = create_user(user_data.username, user_data.password, user_data.email)
-        return UserOut(username=user["username"], email=user["email"])
+        user = create_user(db, user_data.username, user_data.password, user_data.email)
+        return UserOut(username=user.username, email=user.email)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/users", response_model=list[UserOut], tags=["Registrace"])
-def list_users():
+def list_users(db: Session = Depends(get_db)):
     """Seznam všech registrovaných uživatelů."""
-    return get_all_users()
+    users = get_all_users(db)
+    return [UserOut(username=u.username, email=u.email) for u in users]
 
 
 # ============================================================
@@ -71,6 +72,7 @@ def list_users():
 def session_login(
     response: Response,
     form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
 ):
     """
     Přihlášení pomocí session cookie.
@@ -79,12 +81,8 @@ def session_login(
     1. Server ověří username + password
     2. Vytvoří podepsanou session cookie
     3. Cookie se automaticky posílá s každým dalším requestem
-
-    **Testovací účty:**
-    - admin / admin123
-    - user / user123
     """
-    user = verify_user(form_data.username, form_data.password)
+    user = verify_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=401,
@@ -92,7 +90,7 @@ def session_login(
         )
 
     # Vytvoř session token a nastav cookie
-    session_token = create_session_token(user["username"])
+    session_token = create_session_token(user.username)
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=session_token,
@@ -100,7 +98,7 @@ def session_login(
         samesite="lax",  # CSRF ochrana
     )
 
-    return Message(message=f"Přihlášen jako {user['username']}")
+    return Message(message=f"Přihlášen jako {user.username}")
 
 
 @router.post("/session/logout", response_model=Message, tags=["1. Session Auth"])
@@ -127,7 +125,10 @@ def session_me(user: dict = Depends(get_current_user_session)):
 # ============================================================
 
 @router.post("/jwt/login", response_model=Token, tags=["2. JWT Auth"])
-def jwt_login(form_data: OAuth2PasswordRequestForm = Depends()):
+def jwt_login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
     """
     Přihlášení pomocí JWT tokenu.
 
@@ -136,14 +137,10 @@ def jwt_login(form_data: OAuth2PasswordRequestForm = Depends()):
     2. Vrátí JWT token
     3. Klient posílá token v hlavičce: `Authorization: Bearer <token>`
 
-    **Testovací účty:**
-    - admin / admin123
-    - user / user123
-
     **Swagger UI:**
     Klikni na "Authorize" tlačítko vpravo nahoře a zadej credentials.
     """
-    user = verify_user(form_data.username, form_data.password)
+    user = verify_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=401,
@@ -151,7 +148,7 @@ def jwt_login(form_data: OAuth2PasswordRequestForm = Depends()):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = create_jwt_token(user["username"])
+    access_token = create_jwt_token(user.username)
     return Token(access_token=access_token, token_type="bearer")
 
 
@@ -187,6 +184,7 @@ def oauth2_login_page(request: Request, error: str = None):
 def oauth2_token(
     username: str = Form(...),
     password: str = Form(...),
+    db: Session = Depends(get_db),
 ):
     """
     Zpracuje login z HTML formuláře.
@@ -194,14 +192,14 @@ def oauth2_token(
     **Poznámka:** Toto je endpoint pro HTML formulář,
     přijímá data jako form-data (ne JSON).
     """
-    user = verify_user(username, password)
+    user = verify_user(db, username, password)
     if not user:
         raise HTTPException(
             status_code=401,
             detail="Neplatné přihlašovací údaje",
         )
 
-    access_token = create_jwt_token(user["username"])
+    access_token = create_jwt_token(user.username)
     return Token(access_token=access_token, token_type="bearer")
 
 

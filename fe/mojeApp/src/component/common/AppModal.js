@@ -14,20 +14,140 @@ const AppModal = ({
 }) => {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop} testID={`${testID}-backdrop`}>
-        <View style={styles.box} testID={`${testID}-box`}>
-          {title ? <Text style={styles.title} testID={`${testID}-title`}>{title}</Text> : null}
-          {message ? <Text style={styles.message} testID={`${testID}-message`}>{message}</Text> : null}
+      <View
+        style={styles.backdrop}
+        // === BACKDROP LOKÁTORY ===
+        testID={`${testID}-backdrop`}
+        nativeID={`${testID}-backdrop`}
+        id={`modal-backdrop-${testID}`}
+        data-testid={`${testID}-backdrop`}
+        data-component="modal-backdrop"
+        data-modal={testID}
+        data-class="modal-backdrop overlay"
+        accessibilityRole="none"
+        aria-hidden="true"
+        className="modal-backdrop overlay"
+      >
+        <View
+          style={styles.box}
+          // === MODAL BOX LOKÁTORY ===
+          testID={`${testID}-box`}
+          nativeID={`${testID}-container`}
+          id={`modal-${testID}`}
+          name={testID}
+          data-testid={`${testID}-box`}
+          data-component="modal-box"
+          data-modal={testID}
+          data-class="modal-box modal-container"
+          accessibilityRole="dialog"
+          accessibilityLabel={title}
+          aria-modal="true"
+          aria-labelledby={`${testID}-title`}
+          aria-describedby={`${testID}-message`}
+          className="modal-box modal-container"
+        >
+          {title ? (
+            <Text
+              style={styles.title}
+              // === TITLE LOKÁTORY ===
+              testID={`${testID}-title`}
+              nativeID={`${testID}-title`}
+              id={`${testID}-title`}
+              data-component="modal-title"
+              data-class="modal-title heading"
+              accessibilityRole="header"
+              className="modal-title heading"
+            >
+              {title}
+            </Text>
+          ) : null}
+          {message ? (
+            <Text
+              style={styles.message}
+              // === MESSAGE LOKÁTORY ===
+              testID={`${testID}-message`}
+              nativeID={`${testID}-message`}
+              id={`${testID}-message`}
+              data-component="modal-message"
+              data-class="modal-message body"
+              accessibilityRole="text"
+              className="modal-message body"
+            >
+              {message}
+            </Text>
+          ) : null}
 
-          <View style={styles.actions}>
+          <View
+            style={styles.actions}
+            // === ACTIONS CONTAINER LOKÁTORY ===
+            testID={`${testID}-actions`}
+            nativeID={`${testID}-actions`}
+            id={`${testID}-buttons`}
+            data-component="modal-actions"
+            data-class="modal-actions button-group"
+            accessibilityRole="group"
+            className="modal-actions button-group"
+          >
             {secondaryText && onSecondary ? (
-              <TouchableOpacity style={[styles.button, styles.secondary]} onPress={onSecondary} testID={`${testID}-secondary`}>
-                <Text style={[styles.buttonText, styles.secondaryText]}>{secondaryText}</Text>
+              <TouchableOpacity
+                style={[styles.button, styles.secondary]}
+                onPress={onSecondary}
+                // === SECONDARY BUTTON LOKÁTORY ===
+                testID={`${testID}-secondary`}
+                nativeID={`${testID}-btn-secondary`}
+                id={`${testID}-secondary-btn`}
+                name="secondary"
+                data-testid={`${testID}-secondary`}
+                data-component="modal-button"
+                data-action="secondary"
+                data-variant="secondary"
+                data-class="btn btn-secondary modal-btn"
+                accessibilityLabel={secondaryText}
+                accessibilityRole="button"
+                aria-label={secondaryText}
+                className="btn btn-secondary modal-btn"
+              >
+                <Text
+                  style={[styles.buttonText, styles.secondaryText]}
+                  testID={`${testID}-secondary-text`}
+                  nativeID={`${testID}-secondary-label`}
+                  data-component="button-text"
+                  data-class="button-label"
+                  className="button-label"
+                >
+                  {secondaryText}
+                </Text>
               </TouchableOpacity>
             ) : null}
 
-            <TouchableOpacity style={[styles.button, styles.primary]} onPress={onPrimary} testID={`${testID}-primary`}>
-              <Text style={[styles.buttonText, styles.primaryText]}>{primaryText}</Text>
+            <TouchableOpacity
+              style={[styles.button, styles.primary]}
+              onPress={onPrimary}
+              // === PRIMARY BUTTON LOKÁTORY ===
+              testID={`${testID}-primary`}
+              nativeID={`${testID}-btn-primary`}
+              id={`${testID}-primary-btn`}
+              name="primary"
+              data-testid={`${testID}-primary`}
+              data-component="modal-button"
+              data-action="primary"
+              data-variant="primary"
+              data-class="btn btn-primary modal-btn"
+              accessibilityLabel={primaryText}
+              accessibilityRole="button"
+              aria-label={primaryText}
+              className="btn btn-primary modal-btn"
+            >
+              <Text
+                style={[styles.buttonText, styles.primaryText]}
+                testID={`${testID}-primary-text`}
+                nativeID={`${testID}-primary-label`}
+                data-component="button-text"
+                data-class="button-label"
+                className="button-label"
+              >
+                {primaryText}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

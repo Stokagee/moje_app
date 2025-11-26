@@ -44,7 +44,7 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
   // Renderování položek menu (společné pro mobil i desktop)
   const renderMenuItems = () => (
     <>
-      {menuItems.map((item) => (
+      {menuItems.map((item, index) => (
         <TouchableOpacity
           key={item.page}
           style={[
@@ -52,24 +52,57 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
             currentPage === item.page && styles.menuItemActive,
           ]}
           onPress={() => handleNavigate(item.page)}
+          // === TESTID - React Native standard ===
           testID={`menu-item-${item.page}`}
-          // Lokátory pro RF demonstraci
+          // === NATIVEID - mapuje se na id ve webu ===
           nativeID={`menu-item-${item.page}`}
+          // === ID - explicitní HTML id ===
+          id={`nav-item-${item.page}`}
+          // === NAME - název položky ===
+          name={`menu-${item.page}`}
+          // === DATA-* atributy pro CSS selektory ===
+          data-testid={`menu-item-${item.page}`}
+          data-component="menu-item"
+          data-page={item.page}
+          data-index={index}
+          data-active={currentPage === item.page ? 'true' : 'false'}
+          data-class={`menu-item nav-item ${currentPage === item.page ? 'menu-item-active' : ''}`}
+          // === ACCESSIBILITY atributy ===
           accessibilityLabel={item.label}
           accessibilityRole="menuitem"
-          data-class="menu-item"
-          data-page={item.page}
+          accessibilityState={{ selected: currentPage === item.page }}
+          accessibilityHint={`Navigovat na ${item.label}`}
+          // === ARIA atributy (web) ===
+          aria-label={item.label}
+          aria-current={currentPage === item.page ? 'page' : undefined}
+          // === CLASSNAME pro CSS selektory ===
+          className={`menu-item nav-item ${currentPage === item.page ? 'menu-item-active' : ''}`}
         >
           <MaterialIcons
             name={item.icon}
             size={24}
             color={currentPage === item.page ? '#007AFF' : '#333'}
+            // === ICON LOKÁTORY ===
+            testID={`menu-item-${item.page}-icon`}
+            nativeID={`menu-icon-${item.page}`}
+            data-component="menu-icon"
+            data-icon={item.icon}
+            accessibilityLabel={`Ikona ${item.label}`}
           />
           <Text
             style={[
               styles.menuItemText,
               currentPage === item.page && styles.menuItemTextActive,
             ]}
+            // === MENU ITEM TEXT LOKÁTORY ===
+            testID={`menu-item-${item.page}-text`}
+            nativeID={`menu-label-${item.page}`}
+            id={`nav-label-${item.page}`}
+            data-component="menu-label"
+            data-page={item.page}
+            data-class="menu-label nav-label"
+            accessibilityRole="text"
+            className="menu-label nav-label"
           >
             {item.label}
           </Text>
@@ -81,23 +114,63 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
   // DESKTOP: Permanentní sidebar
   if (!isMobile) {
     return (
-      <View style={styles.desktopContainer}>
+      <View
+        style={styles.desktopContainer}
+        // === DESKTOP CONTAINER LOKÁTORY ===
+        testID="desktop-layout"
+        nativeID="desktop-layout"
+        id="layout-desktop"
+        data-component="desktop-layout"
+        data-layout="desktop"
+        data-class="desktop-container layout-wrapper"
+        className="desktop-container layout-wrapper"
+      >
         {/* Sidebar */}
         <View
           style={styles.sidebar}
+          // === SIDEBAR LOKÁTORY ===
           testID="desktop-sidebar"
           nativeID="desktop-sidebar"
+          id="sidebar"
+          name="sidebar"
+          data-testid="desktop-sidebar"
+          data-component="sidebar"
+          data-layout="desktop"
+          data-class="sidebar desktop-nav navigation"
           accessibilityRole="navigation"
-          data-class="sidebar desktop-nav"
+          aria-label="Hlavní navigace"
+          className="sidebar desktop-nav navigation"
         >
           {/* Logo/Nadpis */}
-          <View style={styles.sidebarHeader}>
-            <MaterialIcons name="apps" size={32} color="#007AFF" />
+          <View
+            style={styles.sidebarHeader}
+            // === SIDEBAR HEADER LOKÁTORY ===
+            testID="sidebar-header"
+            nativeID="sidebar-header"
+            id="nav-header"
+            data-component="sidebar-header"
+            data-class="sidebar-header nav-header"
+            className="sidebar-header nav-header"
+          >
+            <MaterialIcons
+              name="apps"
+              size={32}
+              color="#007AFF"
+              testID="sidebar-logo-icon"
+              nativeID="sidebar-logo"
+              data-component="sidebar-logo"
+              accessibilityLabel="Logo aplikace"
+            />
             <Text
               style={styles.sidebarTitle}
+              // === SIDEBAR TITLE LOKÁTORY ===
               testID="sidebar-title"
               nativeID="sidebar-title"
-              data-class="sidebar-title"
+              id="nav-title"
+              data-component="sidebar-title"
+              data-class="sidebar-title nav-title"
+              accessibilityRole="header"
+              className="sidebar-title nav-title"
             >
               Menu
             </Text>
@@ -106,17 +179,33 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
           {/* Položky menu */}
           <View
             style={styles.sidebarMenu}
+            // === SIDEBAR MENU LOKÁTORY ===
             testID="sidebar-menu"
             nativeID="sidebar-menu"
+            id="nav-menu"
+            data-component="sidebar-menu"
+            data-class="sidebar-menu nav-list"
             accessibilityRole="menu"
-            data-class="sidebar-menu"
+            aria-label="Navigační menu"
+            className="sidebar-menu nav-list"
           >
             {renderMenuItems()}
           </View>
         </View>
 
         {/* Obsah stránky */}
-        <View style={styles.desktopContent}>
+        <View
+          style={styles.desktopContent}
+          // === DESKTOP CONTENT LOKÁTORY ===
+          testID="desktop-content"
+          nativeID="desktop-content"
+          id="main-content"
+          data-component="page-content"
+          data-class="desktop-content main-content"
+          accessibilityRole="main"
+          aria-label="Hlavní obsah"
+          className="desktop-content main-content"
+        >
           {children}
         </View>
       </View>
@@ -125,19 +214,49 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
 
   // MOBILNÍ: Hamburger menu
   return (
-    <View style={styles.mobileContainer}>
+    <View
+      style={styles.mobileContainer}
+      // === MOBILE CONTAINER LOKÁTORY ===
+      testID="mobile-layout"
+      nativeID="mobile-layout"
+      id="layout-mobile"
+      data-component="mobile-layout"
+      data-layout="mobile"
+      data-class="mobile-container layout-wrapper"
+      className="mobile-container layout-wrapper"
+    >
       {/* Hamburger tlačítko */}
       <TouchableOpacity
         style={styles.hamburgerButton}
         onPress={toggleMenu}
+        // === HAMBURGER BUTTON LOKÁTORY ===
         testID="hamburger-button"
         nativeID="hamburger-button"
+        id="hamburger-btn"
+        name="hamburger"
+        data-testid="hamburger-button"
+        data-component="hamburger-button"
+        data-action="toggle-menu"
+        data-menu-open={isOpen ? 'true' : 'false'}
+        data-class="btn hamburger-btn toggle-menu"
         accessibilityLabel="Otevřít menu"
         accessibilityRole="button"
-        data-class="btn hamburger-btn"
-        data-action="toggle-menu"
+        accessibilityState={{ expanded: isOpen }}
+        accessibilityHint="Klikněte pro otevření navigačního menu"
+        aria-label="Otevřít menu"
+        aria-expanded={isOpen}
+        aria-controls="mobile-menu"
+        className="btn hamburger-btn toggle-menu"
       >
-        <MaterialIcons name="menu" size={28} color="#333" />
+        <MaterialIcons
+          name="menu"
+          size={28}
+          color="#333"
+          testID="hamburger-icon"
+          nativeID="hamburger-icon"
+          data-component="hamburger-icon"
+          accessibilityLabel="Menu ikona"
+        />
       </TouchableOpacity>
 
       {/* Obsah stránky */}
@@ -150,38 +269,79 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
         animationType="fade"
         onRequestClose={toggleMenu}
       >
-        <View style={styles.modalContainer}>
+        <View
+          style={styles.modalContainer}
+          // === MODAL CONTAINER LOKÁTORY ===
+          testID="mobile-menu-modal"
+          nativeID="mobile-menu-container"
+          id="mobile-menu"
+          data-component="mobile-menu-modal"
+          data-class="modal-container menu-modal"
+          className="modal-container menu-modal"
+        >
           {/* Overlay pro zavření menu */}
           <TouchableOpacity
             style={styles.overlay}
             activeOpacity={1}
             onPress={toggleMenu}
+            // === OVERLAY LOKÁTORY ===
             testID="menu-overlay"
             nativeID="menu-overlay"
+            id="menu-backdrop"
+            data-testid="menu-overlay"
+            data-component="menu-overlay"
+            data-action="close-menu"
+            data-class="overlay menu-overlay backdrop"
             accessibilityLabel="Zavřít menu"
-            data-class="overlay menu-overlay"
+            accessibilityRole="none"
+            aria-label="Klikněte pro zavření menu"
+            className="overlay menu-overlay backdrop"
           />
 
           {/* Menu panel */}
           <View
             style={styles.menuPanel}
+            // === MENU PANEL LOKÁTORY ===
             testID="hamburger-menu-panel"
             nativeID="hamburger-menu-panel"
+            id="side-menu"
+            name="mobile-nav"
+            data-testid="hamburger-menu-panel"
+            data-component="menu-panel"
+            data-layout="mobile"
+            data-class="menu-panel side-menu mobile-nav"
             accessibilityRole="menu"
-            data-class="menu-panel side-menu"
+            aria-label="Navigační menu"
+            className="menu-panel side-menu mobile-nav"
           >
             {/* Zavírací tlačítko */}
             <TouchableOpacity
               style={styles.closeButton}
               onPress={toggleMenu}
+              // === CLOSE BUTTON LOKÁTORY ===
               testID="menu-close-button"
               nativeID="menu-close-button"
+              id="close-menu-btn"
+              name="close-menu"
+              data-testid="menu-close-button"
+              data-component="close-button"
+              data-action="close-menu"
+              data-class="btn btn-close close-menu"
               accessibilityLabel="Zavřít menu"
               accessibilityRole="button"
-              data-class="btn close-btn"
-              data-action="close-menu"
+              accessibilityHint="Klikněte pro zavření menu"
+              aria-label="Zavřít menu"
+              className="btn btn-close close-menu"
             >
-              <MaterialIcons name="close" size={28} color="#333" />
+              <MaterialIcons
+                name="close"
+                size={28}
+                color="#333"
+                testID="close-menu-icon"
+                nativeID="close-icon"
+                data-component="close-icon"
+                accessibilityLabel="Zavřít"
+              />
             </TouchableOpacity>
 
             {/* Položky menu */}

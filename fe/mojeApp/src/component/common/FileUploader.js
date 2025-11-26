@@ -85,28 +85,101 @@ const FileUploader = ({ accept = '.txt,.pdf', onFileSelected, label = 'Přiloži
       }
     };
     return (
-      <View style={styles.nativeBox}>
-        <Text style={styles.label}>{label}</Text>
+      <View
+        style={styles.nativeBox}
+        // === CONTAINER LOKÁTORY (NATIVE) ===
+        testID={`${testID}-container`}
+        nativeID="file-uploader-container"
+        id="file-uploader"
+        data-component="file-uploader"
+        data-platform="native"
+        data-class="file-uploader-wrapper"
+        accessibilityRole="none"
+        className="file-uploader-container native"
+      >
+        <Text
+          style={styles.label}
+          // === LABEL LOKÁTORY ===
+          testID={`${testID}-label`}
+          nativeID="file-uploader-label"
+          id="file-label"
+          data-component="label"
+          data-for="file-input"
+          data-class="form-label file-label"
+          accessibilityRole="text"
+          className="form-label file-label"
+        >
+          {label}
+        </Text>
         <TouchableOpacity
           onPress={pickDocument}
-          testID={`${testID}-pick-button`}
           style={styles.pickButton}
-          // Lokátory pro RF demonstraci
+          // === TESTID - React Native standard ===
+          testID={`${testID}-pick-button`}
+          // === NATIVEID - mapuje se na id ve webu ===
           nativeID="file-pick-button"
+          // === ID - explicitní HTML id ===
+          id="file-picker-btn"
+          // === NAME - název tlačítka ===
+          name="file-picker"
+          // === DATA-* atributy pro CSS selektory ===
+          data-testid={`${testID}-pick-button`}
+          data-component="file-picker-button"
+          data-action="pick-file"
+          data-accept={accept}
+          data-class="btn file-picker-btn"
+          // === ACCESSIBILITY atributy ===
           accessibilityLabel="Vybrat soubor"
           accessibilityRole="button"
-          data-class="btn file-picker-btn"
-          data-action="pick-file"
+          accessibilityHint="Klikněte pro výběr souboru z úložiště"
+          // === ARIA atributy (web) ===
+          aria-label="Vybrat soubor"
+          // === CLASSNAME pro CSS selektory ===
+          className="btn file-picker-btn"
         >
-          <Text style={styles.pickButtonText}>Vybrat soubor</Text>
+          <Text
+            style={styles.pickButtonText}
+            // === BUTTON TEXT LOKÁTORY ===
+            testID={`${testID}-pick-button-text`}
+            nativeID="file-pick-button-text"
+            data-component="button-text"
+            data-class="button-label"
+            accessibilityRole="text"
+            className="button-text"
+          >
+            Vybrat soubor
+          </Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View>
-      <Text style={styles.label}>{label}</Text>
+    <View
+      // === CONTAINER LOKÁTORY (WEB) ===
+      testID={`${testID}-container`}
+      nativeID="file-uploader-container"
+      id="file-uploader"
+      data-component="file-uploader"
+      data-platform="web"
+      data-class="file-uploader-wrapper"
+      accessibilityRole="none"
+      className="file-uploader-container web"
+    >
+      <Text
+        style={styles.label}
+        // === LABEL LOKÁTORY ===
+        testID={`${testID}-label`}
+        nativeID="file-uploader-label"
+        id="file-label"
+        data-component="label"
+        data-for="file-input"
+        data-class="form-label file-label"
+        accessibilityRole="text"
+        className="form-label file-label"
+      >
+        {label}
+      </Text>
       <View
         style={[styles.dropZone, dragOver && styles.dropZoneActive]}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -117,15 +190,44 @@ const FileUploader = ({ accept = '.txt,.pdf', onFileSelected, label = 'Přiloži
           handleFiles(e.dataTransfer.files);
         }}
         onClick={() => inputRef.current && inputRef.current.click()}
+        // === TESTID - React Native standard ===
         testID={`${testID}-dropzone`}
-        // Lokátory pro RF demonstraci
+        // === NATIVEID - mapuje se na id ve webu ===
         nativeID="file-dropzone"
+        // === ID - explicitní HTML id ===
+        id="file-dropzone"
+        // === NAME - název oblasti ===
+        name="dropzone"
+        // === DATA-* atributy pro CSS selektory ===
+        data-testid={`${testID}-dropzone`}
+        data-component="dropzone"
+        data-action="upload-file"
+        data-dragover={dragOver ? 'true' : 'false'}
+        data-accept={accept}
+        data-class="dropzone file-dropzone"
+        // === ACCESSIBILITY atributy ===
         accessibilityLabel="Oblast pro nahrání souboru - přetáhněte nebo klikněte"
         accessibilityRole="button"
-        data-class="dropzone file-dropzone"
-        data-action="upload-file"
+        accessibilityHint="Přetáhněte soubor nebo klikněte pro výběr"
+        // === ARIA atributy (web) ===
+        aria-label="Oblast pro nahrání souboru"
+        aria-describedby="dropzone-hint"
+        // === CLASSNAME pro CSS selektory ===
+        className={`dropzone file-dropzone ${dragOver ? 'dropzone-active' : ''}`}
       >
-        <Text style={styles.dropText}>Přetáhni soubor sem nebo klikni pro výběr</Text>
+        <Text
+          style={styles.dropText}
+          // === DROP TEXT LOKÁTORY ===
+          testID={`${testID}-dropzone-text`}
+          nativeID="dropzone-hint"
+          id="dropzone-hint"
+          data-component="dropzone-hint"
+          data-class="dropzone-text hint"
+          accessibilityRole="text"
+          className="dropzone-text hint"
+        >
+          Přetáhni soubor sem nebo klikni pro výběr
+        </Text>
       </View>
       <input
         ref={inputRef}
@@ -133,7 +235,13 @@ const FileUploader = ({ accept = '.txt,.pdf', onFileSelected, label = 'Přiloži
         accept={accept}
         style={{ display: 'none' }}
         onChange={(e) => handleFiles(e.target.files)}
+        // === INPUT (HIDDEN) LOKÁTORY ===
         data-testid={`${testID}-input`}
+        id="file-input"
+        name="file"
+        aria-label="Vybrat soubor"
+        aria-hidden="true"
+        className="file-input hidden"
       />
     </View>
   );
@@ -168,7 +276,17 @@ const styles = StyleSheet.create({
   hint: {
     color: '#777',
     fontSize: 12,
-  }
+  },
+  pickButton: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  pickButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
 });
 
 export default FileUploader;

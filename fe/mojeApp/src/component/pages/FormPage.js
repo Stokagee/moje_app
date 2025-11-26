@@ -241,13 +241,33 @@ const FormPage = ({ navigation }) => {
 
   return (
     <Container>
-      <ScrollView contentContainerStyle={styles.formWrapper} data-section="form-container">
+      <ScrollView
+        contentContainerStyle={styles.formWrapper}
+        // === FORM CONTAINER LOKÁTORY ===
+        testID="form-page-container"
+        nativeID="form-container"
+        id="form-section"
+        data-component="form-container"
+        data-page="form"
+        data-section="form-container"
+        data-class="form-wrapper page-content"
+        accessibilityRole="form"
+        aria-label="Registrační formulář"
+        className="form-wrapper page-content"
+      >
         <Text
           style={styles.label}
+          // === LABEL - firstName LOKÁTORY ===
+          testID="label-firstName"
           nativeID="label-firstName"
-          accessibilityRole="text"
-          data-class="form-label"
+          id="label-firstName"
+          data-component="form-label"
           data-for="firstName"
+          data-required="true"
+          data-class="form-label label-text"
+          accessibilityRole="text"
+          aria-label="Jméno"
+          className="form-label label-text"
         >Jméno</Text>
         <Input
           placeholder="Zadejte jméno"
@@ -262,10 +282,17 @@ const FormPage = ({ navigation }) => {
 
         <Text
           style={styles.label}
+          // === LABEL - lastName LOKÁTORY ===
+          testID="label-lastName"
           nativeID="label-lastName"
-          accessibilityRole="text"
-          data-class="form-label"
+          id="label-lastName"
+          data-component="form-label"
           data-for="lastName"
+          data-required="true"
+          data-class="form-label label-text"
+          accessibilityRole="text"
+          aria-label="Příjmení"
+          className="form-label label-text"
         >Příjmení</Text>
         <Input
           placeholder="Zadejte příjmení"
@@ -280,10 +307,17 @@ const FormPage = ({ navigation }) => {
 
         <Text
           style={styles.label}
+          // === LABEL - phone LOKÁTORY ===
+          testID="label-phone"
           nativeID="label-phone"
-          accessibilityRole="text"
-          data-class="form-label"
+          id="label-phone"
+          data-component="form-label"
           data-for="phone"
+          data-required="true"
+          data-class="form-label label-text"
+          accessibilityRole="text"
+          aria-label="Telefonní číslo"
+          className="form-label label-text"
         >Telefonní číslo</Text>
         <Input
           placeholder="Zadejte telefon"
@@ -299,10 +333,17 @@ const FormPage = ({ navigation }) => {
 
         <Text
           style={styles.label}
+          // === LABEL - email LOKÁTORY ===
+          testID="label-email"
           nativeID="label-email"
-          accessibilityRole="text"
-          data-class="form-label"
+          id="label-email"
+          data-component="form-label"
           data-for="email"
+          data-required="true"
+          data-class="form-label label-text"
+          accessibilityRole="text"
+          aria-label="Email"
+          className="form-label label-text"
         >Email</Text>
         <Input
           placeholder="Zadejte email"
@@ -319,10 +360,17 @@ const FormPage = ({ navigation }) => {
 
         <Text
           style={styles.label}
+          // === LABEL - gender LOKÁTORY ===
+          testID="label-gender"
           nativeID="label-gender"
-          accessibilityRole="text"
-          data-class="form-label"
+          id="label-gender"
+          data-component="form-label"
           data-for="gender"
+          data-required="true"
+          data-class="form-label label-text"
+          accessibilityRole="text"
+          aria-label="Pohlaví"
+          className="form-label label-text"
         >Pohlaví</Text>
         <GenderDropdown
           value={formData.gender}
@@ -335,24 +383,57 @@ const FormPage = ({ navigation }) => {
         />
 
         {/* Nahrání souboru */}
-        <View style={{ marginTop: 12, marginBottom: 12 }}>
+        <View
+          style={{ marginTop: 12, marginBottom: 12 }}
+          // === FILE UPLOAD SECTION LOKÁTORY ===
+          testID="file-upload-section"
+          nativeID="file-upload-section"
+          id="file-section"
+          data-component="file-upload-section"
+          data-section="file-upload"
+          data-class="file-section upload-container"
+          accessibilityRole="group"
+          accessibilityLabel="Sekce nahrání souboru"
+          aria-label="Sekce nahrání souboru"
+          className="file-section upload-container"
+        >
           <FileUploader
             accept=".txt,.pdf"
             onFileSelected={(file) => setSelectedFile(file)}
             label="Přiložit soubor (.txt, .pdf)"
           />
           {selectedFile ? (
-            <Text style={{ color: '#555', marginTop: 6 }}>Vybráno: {selectedFile.name}</Text>
+            <Text
+              style={{ color: '#555', marginTop: 6 }}
+              // === SELECTED FILE TEXT LOKÁTORY ===
+              testID="selected-file-text"
+              nativeID="selected-file-text"
+              id="selected-file"
+              data-component="selected-file"
+              data-filename={selectedFile.name}
+              data-class="selected-file file-name"
+              accessibilityRole="text"
+              accessibilityLabel={`Vybraný soubor: ${selectedFile.name}`}
+              aria-label={`Vybraný soubor: ${selectedFile.name}`}
+              className="selected-file file-name"
+            >Vybráno: {selectedFile.name}</Text>
           ) : null}
         </View>
 
         {/* Instrukce */}
         <Text
           style={styles.label}
+          // === LABEL - instructions LOKÁTORY ===
+          testID="label-instructions"
           nativeID="label-instructions"
-          accessibilityRole="text"
-          data-class="form-label"
+          id="label-instructions"
+          data-component="form-label"
           data-for="instructions"
+          data-required="false"
+          data-class="form-label label-text"
+          accessibilityRole="text"
+          aria-label="Instrukce"
+          className="form-label label-text"
         >Instrukce</Text>
         <TextArea
           value={instructions}

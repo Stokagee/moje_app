@@ -189,6 +189,93 @@
         .links a:hover {
             text-decoration: underline;
         }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            color: #10b981;
+            margin-bottom: 15px;
+        }
+
+        .modal-content.error h2 {
+            color: #dc2626;
+        }
+
+        #tokenText {
+            width: 100%;
+            height: 100px;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            margin: 10px 0;
+            resize: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .modal-buttons button:hover {
+            transform: translateY(-2px);
+        }
+
+        #closeModal {
+            background: #6b7280;
+            color: white;
+        }
+
+        #copyToken {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .token-info {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 10px;
+        }
+
+        .token-info code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -261,12 +348,30 @@
         </div>
     </div>
 
+    <!-- Modal pro zobrazeni tokenu (pro Robot Framework) -->
+    <div id="tokenModal" class="modal" style="display: none;">
+        <div class="modal-content" id="modalContent">
+            <h2 id="modalTitle">Prihlaseni uspesne!</h2>
+            <p>Vas JWT token:</p>
+            <textarea id="tokenText" data-testid="token-value" readonly></textarea>
+            <p class="token-info">Token je take v URL jako <code>?token=...</code></p>
+            <div class="modal-buttons">
+                <button id="closeModal" data-testid="close-modal">Zavrit</button>
+                <button id="copyToken" data-testid="copy-token">Kopirovat token</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Zachytíme form submit a zobrazíme token
+        // Zachytíme form submit a zobrazíme token v modalu
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
+            const modal = document.getElementById('tokenModal');
+            const modalContent = document.getElementById('modalContent');
+            const modalTitle = document.getElementById('modalTitle');
+            const tokenText = document.getElementById('tokenText');
 
             try {
                 const response = await fetch('/oauth2/token', {
@@ -277,15 +382,56 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Úspěšné přihlášení - zobrazíme token
-                    alert('Prihlaseni uspesne!\\n\\nVas JWT token:\\n' + data.access_token +
-                          '\\n\\nPouzijte ho v hlavicce:\\nAuthorization: Bearer ' + data.access_token);
+                    // Uspesne prihlaseni
+                    modalContent.classList.remove('error');
+                    modalTitle.textContent = 'Prihlaseni uspesne!';
+                    tokenText.value = data.access_token;
+
+                    // Pridat token do URL (pro Robot Framework)
+                    const newUrl = window.location.pathname + '?token=' + encodeURIComponent(data.access_token);
+                    window.history.pushState({}, '', newUrl);
+
+                    // Zobrazit modal
+                    modal.style.display = 'flex';
                 } else {
-                    // Chyba
-                    alert('Chyba: ' + (data.detail || 'Neplatne udaje'));
+                    // Chyba prihlaseni
+                    modalContent.classList.add('error');
+                    modalTitle.textContent = 'Chyba prihlaseni';
+                    tokenText.value = 'Chyba: ' + (data.detail || 'Neplatne udaje');
+                    modal.style.display = 'flex';
                 }
             } catch (error) {
-                alert('Chyba pripojeni: ' + error.message);
+                // Chyba pripojeni
+                modalContent.classList.add('error');
+                modalTitle.textContent = 'Chyba pripojeni';
+                tokenText.value = 'Chyba: ' + error.message;
+                modal.style.display = 'flex';
+            }
+        });
+
+        // Zavreni modalu
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('tokenModal').style.display = 'none';
+        });
+
+        // Kopirovani tokenu do schranky
+        document.getElementById('copyToken').addEventListener('click', function() {
+            const tokenText = document.getElementById('tokenText');
+            tokenText.select();
+            tokenText.setSelectionRange(0, 99999); // Pro mobilni zarizeni
+            document.execCommand('copy');
+
+            // Vizualni feedback
+            this.textContent = 'Zkopirovano!';
+            setTimeout(() => {
+                this.textContent = 'Kopirovat token';
+            }, 2000);
+        });
+
+        // Zavreni modalu kliknutim mimo
+        document.getElementById('tokenModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
             }
         });
     </script>

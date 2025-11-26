@@ -12,7 +12,9 @@ const Input = ({
   required,
   onValidation,
   validationType, // 'email', 'phone', etc.
-  touched = false
+  touched = false,
+  label,           // label pro aria-label
+  page = 'form'    // název stránky pro data-page
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [hasBeenTouched, setHasBeenTouched] = useState(touched);
@@ -91,8 +93,19 @@ const Input = ({
   const showError = shouldShowError();
   const currentErrorMessage = getErrorMessage();
 
+  // Extrahování názvu pole z testID
+  const fieldName = testID ? testID.replace('-input', '') : undefined;
+
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      // === CONTAINER LOKÁTORY ===
+      testID={testID ? `${testID}-container` : undefined}
+      nativeID={fieldName ? `container-${fieldName}` : undefined}
+      data-component="input-container"
+      data-field={fieldName}
+      accessibilityRole="none"
+    >
       <TextInput
         style={[
           styles.input,
@@ -103,20 +116,54 @@ const Input = ({
         value={value}
         onChangeText={onChangeText}
         keyboardType={keyboardType}
-        testID={testID}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        // Lokátory pro RF demonstraci
-        nativeID={testID ? `input-${testID.replace('-input', '')}` : undefined}
-        accessibilityLabel={placeholder}
-        accessibilityRole="none"
-        name={testID ? testID.replace('-input', '') : undefined}
+        // === TESTID - React Native standard ===
+        testID={testID}
+        // === NATIVEID - mapuje se na id ve webu ===
+        nativeID={fieldName ? `input-${fieldName}` : undefined}
+        // === ID - explicitní HTML id ===
+        id={fieldName}
+        // === NAME - název formulářového pole ===
+        name={fieldName}
+        // === DATA-* atributy pro CSS selektory ===
+        data-testid={testID}
+        data-field={fieldName}
+        data-component="text-input"
+        data-page={page}
+        data-type={validationType || 'text'}
+        data-required={required ? 'true' : 'false'}
         data-class="form-input input-field"
-        data-field={testID ? testID.replace('-input', '') : undefined}
+        // === ACCESSIBILITY atributy ===
+        accessibilityLabel={placeholder}
+        accessibilityRole="text"
+        accessibilityHint={required ? 'Povinné pole' : 'Volitelné pole'}
+        accessibilityState={{ disabled: false }}
+        // === ARIA atributy (web) ===
+        aria-label={label || placeholder}
+        aria-describedby={fieldName ? `${fieldName}-error` : undefined}
+        aria-required={required}
+        aria-invalid={showError}
+        aria-placeholder={placeholder}
+        // === CLASSNAME pro CSS selektory ===
+        className={`form-input input-text ${fieldName}-field ${validationType ? `input-${validationType}` : ''}`}
       />
 
       {showError && currentErrorMessage && (
-        <Text style={styles.errorText} testID={`${testID}-error`}>
+        <Text
+          style={styles.errorText}
+          // === ERROR TEXT LOKÁTORY ===
+          testID={`${testID}-error`}
+          nativeID={fieldName ? `${fieldName}-error` : undefined}
+          id={fieldName ? `error-${fieldName}` : undefined}
+          data-component="error-message"
+          data-field={fieldName}
+          data-class="error-text validation-error"
+          accessibilityRole="alert"
+          accessibilityLabel={`Chyba: ${currentErrorMessage}`}
+          aria-live="polite"
+          className="error-text validation-error"
+        >
           {currentErrorMessage}
         </Text>
       )}
