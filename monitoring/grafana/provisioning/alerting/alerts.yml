@@ -1,0 +1,79 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: error_alerts
+    folder: Alerts
+    interval: 1m
+    rules:
+      # Alert pri vice nez 3 ERROR logu za 5 minut
+      - uid: error-detection
+        title: ERROR Log Detected
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: loki
+            model:
+              expr: 'count_over_time({service=~"backend|frontend|db"} |~ "(?i)error" [5m])'
+              queryType: instant
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    params: [3]
+                    type: gt
+        noDataState: OK
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          summary: "Detekovano vice nez 3 ERROR logy za 5 minut"
+        labels:
+          severity: warning
+
+      # Alert pri CRITICAL logu
+      - uid: critical-detection
+        title: CRITICAL Log Detected
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 60
+              to: 0
+            datasourceUid: loki
+            model:
+              expr: 'count_over_time({service=~"backend|frontend|db"} |~ "(?i)(critical|fatal|exception)" [1m])'
+              queryType: instant
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+        noDataState: OK
+        execErrState: Alerting
+        for: 0s
+        annotations:
+          summary: "Detekovan CRITICAL/FATAL log!"
+        labels:
+          severity: critical

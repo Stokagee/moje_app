@@ -1,27 +1,64 @@
-import logging
-from .config import settings
+"""
+Loguru logging s přímým posíláním do Loki.
+
+Použití:
+    from app.core.logging import logger
+
+    logger.info("Zpráva")
+    logger.warning("Varování")
+    logger.error("Chyba")
+"""
+import sys
+import os
+from loguru import logger
+
+# Odeber defaultní handler
+logger.remove()
+
+# === Console handler (vždy) ===
+logger.add(
+    sys.stderr,
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+    level=os.getenv("LOG_LEVEL", "INFO"),
+    colorize=True,
+)
+
+# === Loki handler (pokud je URL nastavena) ===
+LOKI_URL = os.getenv("LOKI_URL")
+
+if LOKI_URL:
+    from loki_logger_handler.loki_logger_handler import LokiLoggerHandler
+    from loki_logger_handler.formatters.loguru_formatter import LoguruFormatter
+
+    loki_handler = LokiLoggerHandler(
+        url=LOKI_URL,
+        labels={
+            "application": os.getenv("APP_NAME", "moje-app"),
+            "environment": os.getenv("ENVIRONMENT", "development"),
+            "service": "backend",
+        },
+        label_keys={},
+        timeout=10,
+        default_formatter=LoguruFormatter(),
+    )
+
+    logger.add(
+        loki_handler,
+        serialize=True,
+        level=os.getenv("LOG_LEVEL", "INFO"),
+    )
+    logger.info("Loki logging enabled", loki_url=LOKI_URL)
+else:
+    logger.warning("LOKI_URL not set - logging only to console")
+
 
 def setup_logging():
-    """Konfiguruje logování pro aplikaci."""
-    log_level = getattr(logging, settings.LOG_LEVEL, logging.INFO)
+    """Dummy funkce pro zpětnou kompatibilitu s main.py."""
+    pass
 
-    # Vytvoření root loggeru
-    logger = logging.getLogger()
-    logger.setLevel(log_level)
 
-    # Formátování
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    # Handler pro konzoli
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-
-    # Handler pro soubor (pokud je nastaven)
-    if settings.LOG_FILE:
-        file_handler = logging.FileHandler(settings.LOG_FILE, encoding='utf-8')
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-
-    # Potlačení příliš podrobných logů z některých knihoven
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+def get_logger(name: str = None):
+    """Získej logger s kontextem."""
+    if name:
+        return logger.bind(module=name)
+    return logger
