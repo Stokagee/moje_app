@@ -20,6 +20,18 @@ class APIClient:
         headers = {"Content-Type": "application/json"}
         return self.session.post(url, json=data, headers=headers)
 
+    def put(self, endpoint: str, data: Optional[Dict] = None) -> requests.Response:
+        """PUT request"""
+        url = f"{self.base_url}{endpoint}"
+        headers = {"Content-Type": "application/json"}
+        return self.session.put(url, json=data, headers=headers)
+
+    def patch(self, endpoint: str, data: Optional[Dict] = None) -> requests.Response:
+        """PATCH request"""
+        url = f"{self.base_url}{endpoint}"
+        headers = {"Content-Type": "application/json"}
+        return self.session.patch(url, json=data, headers=headers)
+
     def delete(self, endpoint: str) -> requests.Response:
         """DELETE request"""
         url = f"{self.base_url}{endpoint}"

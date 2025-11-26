@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth2 Login - Auth Demo</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .auth-type-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #374151;
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .test-accounts {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .test-accounts h3 {
+            color: #374151;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .account-item {
+            display: flex;
+            justify-content: space-between;
+            background: #f3f4f6;
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .account-item span {
+            color: #6b7280;
+        }
+
+        .account-item code {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .info-box h4 {
+            color: #1e40af;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #3b82f6;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .info-box code {
+            background: #dbeafe;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .links {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            margin: 0 10px;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <span class="auth-type-badge">OAuth2 HTML</span>
+            <h1>Prihlaseni</h1>
+            <p>Vlastni login stranka s Jinja2 sablonou</p>
+        </div>
+
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="/oauth2/token" method="post" id="loginForm">
+            <div class="form-group">
+                <label for="username">Uzivatelske jmeno</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Zadejte username"
+                    required
+                    autocomplete="username"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Heslo</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Zadejte heslo"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="submit-btn">Prihlasit se</button>
+        </form>
+
+        <div class="test-accounts">
+            <h3>Testovaci ucty:</h3>
+            <div class="account-item">
+                <span>Username:</span> <code>admin</code>
+                <span>Heslo:</span> <code>admin123</code>
+            </div>
+            <div class="account-item">
+                <span>Username:</span> <code>user</code>
+                <span>Heslo:</span> <code>user123</code>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h4>Jak to funguje?</h4>
+            <p>
+                1. Formular odesle POST na <code>/oauth2/token</code><br>
+                2. Server overi credentials<br>
+                3. Vrati JWT token v JSON response<br>
+                4. Token pouzijte v hlavicce: <code>Authorization: Bearer &lt;token&gt;</code>
+            </p>
+        </div>
+
+        <div class="links">
+            <a href="/docs">Swagger UI</a>
+            <a href="/redoc">ReDoc</a>
+        </div>
+    </div>
+
+    <script>
+        // Zachytíme form submit a zobrazíme token
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch('/oauth2/token', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Úspěšné přihlášení - zobrazíme token
+                    alert('Prihlaseni uspesne!\\n\\nVas JWT token:\\n' + data.access_token +
+                          '\\n\\nPouzijte ho v hlavicce:\\nAuthorization: Bearer ' + data.access_token);
+                } else {
+                    // Chyba
+                    alert('Chyba: ' + (data.detail || 'Neplatne udaje'));
+                }
+            } catch (error) {
+                alert('Chyba pripojeni: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

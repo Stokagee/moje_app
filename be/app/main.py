@@ -21,9 +21,114 @@ Base.metadata.create_all(bind=engine)
 setup_logging()
 
 app = FastAPI(
-    title="Moje App API",
-    version="1.0.0",
-    description="API pro formuláře a Food Delivery službu"
+    title="Food Delivery API",
+    version="2.0.0",
+    description="""
+# Food Delivery API - Systém pro správu rozvozové služby
+
+Toto API poskytuje kompletní řešení pro správu **kurýrů**, **objednávek** a **dispečinku**
+rozvozové služby jídla.
+
+## Hlavní funkce
+
+### Kurýři (`/couriers`)
+- Vytváření, úprava a mazání kurýrů
+- Správa GPS polohy v reálném čase
+- Stavy kurýrů: **available** (volný), **busy** (zaneprázdněný), **offline** (nedostupný)
+- Systém tagů pro specializace (např. `bike`, `car`, `vip`, `fragile_ok`, `fast`)
+
+### Objednávky (`/orders`)
+- Kompletní životní cyklus objednávky
+- Stavy: **CREATED** → **SEARCHING** → **ASSIGNED** → **PICKED** → **DELIVERED**
+- Podpora VIP objednávek s prioritním zpracováním
+- Požadavky na tagy kurýra (např. objednávka vyžadující `fragile_ok`)
+
+### Dispečink (`/dispatch`)
+- **Automatický dispatch**: Algoritmus vybírá nejbližšího vhodného kurýra
+- **Manuální dispatch**: Operátor může přiřadit konkrétního kurýra
+- Fázový algoritmus: 2km → 5km radius
+- VIP objednávky preferují kurýry s tagem `vip`
+- Historie všech přiřazení v logu
+
+## Stavový diagram objednávky
+
+```
+CREATED ──────────────────────────────────────┐
+    │                                          │
+    ▼                                          │
+SEARCHING (hledá se kurýr)                     │
+    │                                          │
+    ▼                                          ▼
+ASSIGNED (kurýr přijal) ──────────────────► CANCELLED
+    │                                          ▲
+    ▼                                          │
+PICKED (vyzvednuto) ───────────────────────────┤
+    │                                          │
+    ▼                                          │
+DELIVERED (doručeno)                           │
+```
+
+## Stavový diagram kurýra
+
+```
+offline ◄───────────────────────────────────────┐
+    │                                            │
+    ▼                                            │
+available (čeká na objednávku) ◄────────────────┤
+    │                                            │
+    ▼ (dispatch)                                 │ (deliver/cancel)
+busy (doručuje) ─────────────────────────────────┘
+```
+
+## Algoritmus automatického dispatchnutí
+
+1. Najde všechny **available** kurýry s platnou GPS polohou
+2. Odfiltruje kurýry, kteří nemají požadované tagy
+3. Pro VIP objednávky preferuje kurýry s tagem `vip`
+4. **Fáze 1**: Hledá kurýry do 2 km od místa vyzvednutí
+5. **Fáze 2**: Pokud nikdo není, rozšíří na 5 km
+6. Vybere nejbližšího kurýra podle GPS vzdálenosti
+7. Přiřadí kurýra a změní jeho stav na `busy`
+
+## Příklady použití
+
+### Kompletní workflow doručení
+1. `POST /couriers` - Vytvoř kurýra
+2. `PATCH /couriers/{id}/status` - Nastav `available`
+3. `PATCH /couriers/{id}/location` - Aktualizuj GPS
+4. `POST /orders` - Vytvoř objednávku
+5. `POST /dispatch/auto/{order_id}` - Přiřaď kurýra
+6. `POST /orders/{id}/pickup` - Kurýr vyzvednul
+7. `POST /orders/{id}/deliver` - Kurýr doručil
+
+---
+**Kontakt**: support@fooddelivery.cz | **Verze**: 2.0.0
+""",
+    openapi_tags=[
+        {
+            "name": "couriers",
+            "description": "Správa kurýrů - vytváření, editace, lokace a stavy. Kurýr je osoba, která doručuje objednávky zákazníkům.",
+        },
+        {
+            "name": "orders",
+            "description": "Správa objednávek - vytváření, lifecycle a doručení. Objednávka představuje požadavek na doručení od místa vyzvednutí k zákazníkovi.",
+        },
+        {
+            "name": "dispatch",
+            "description": "Dispečink - přiřazování kurýrů k objednávkám. Automatické i manuální přiřazení s logováním historie.",
+        },
+        {
+            "name": "form",
+            "description": "Formuláře - legacy API pro práci s formuláři (není součástí Food Delivery).",
+        },
+    ],
+    contact={
+        "name": "Food Delivery Support",
+        "email": "support@fooddelivery.cz",
+    },
+    license_info={
+        "name": "MIT",
+    },
 )
 
 # CORS - allow requests from mobile apps and development clients

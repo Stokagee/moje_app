@@ -28,8 +28,8 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
   const menuItems = [
     { page: 'FormPage', label: 'Formulář', icon: 'edit' },
     { page: 'Page2', label: 'Seznam', icon: 'list' },
-    { page: 'Page3', label: 'Stránka 3', icon: 'info' },
-    { page: 'Page4', label: 'Stránka 4', icon: 'settings' },
+    { page: 'Page3', label: 'Objednavky', icon: 'receipt' },
+    { page: 'Page4', label: 'Dispatch', icon: 'local-shipping' },
   ];
 
   const toggleMenu = () => {

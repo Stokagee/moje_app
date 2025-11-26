@@ -1,0 +1,141 @@
+ info = === PROJECT INFO ===
+          id = 1
+project_name = Food Delivery API
+ description = API system pro přiřazování kurýrů k objednávkám s podporou tagů, priorit, GPS a časových validací
+api_base_url = http://localhost:8000/api/v1
+last_updated = 2024-11-25
+ info = === MODELS ===
+            id = 1
+    model_name = Courier
+    table_name = couriers
+description_cz = Kurýr s GPS pozicí, tagy a statusem
+description_en = Courier with GPS position, tags and status
+
+            id = 2
+    model_name = Order
+    table_name = orders
+description_cz = Objednávka s cílovou adresou, prioritou a požadovanými tagy
+description_en = Order with delivery address, priority and required tags
+
+            id = 3
+    model_name = DispatchLog
+    table_name = dispatch_logs
+description_cz = Log přiřazování kurýrů k objednávkám
+description_en = Log of courier assignments to orders
+ info = === ENDPOINTS ===
+          method = POST
+            path = /api/v1/couriers
+handler_function = create_courier
+  description_cz = Registrovat nového kurýra
+
+          method = GET
+            path = /api/v1/couriers
+handler_function = get_couriers
+  description_cz = Seznam kurýrů s filtrováním
+
+          method = GET
+            path = /api/v1/couriers/{id}
+handler_function = get_courier
+  description_cz = Detail kurýra
+
+          method = PUT
+            path = /api/v1/couriers/{id}
+handler_function = update_courier
+  description_cz = Aktualizovat kurýra
+
+          method = DELETE
+            path = /api/v1/couriers/{id}
+handler_function = delete_courier
+  description_cz = Smazat kurýra
+
+          method = PUT
+            path = /api/v1/couriers/{id}/location
+handler_function = update_location
+  description_cz = Aktualizovat GPS pozici
+
+          method = PUT
+            path = /api/v1/couriers/{id}/status
+handler_function = update_status
+  description_cz = Změnit status kurýra
+
+          method = POST
+            path = /api/v1/couriers/{id}/respond
+handler_function = respond_to_offer
+  description_cz = Přijmout/odmítnout nabídku
+
+          method = POST
+            path = /api/v1/orders
+handler_function = create_order
+  description_cz = Vytvořit objednávku
+
+          method = GET
+            path = /api/v1/orders
+handler_function = get_orders
+  description_cz = Seznam objednávek
+
+          method = GET
+            path = /api/v1/orders/{id}
+handler_function = get_order
+  description_cz = Detail objednávky
+
+          method = PUT
+            path = /api/v1/orders/{id}/status
+handler_function = update_order_status
+  description_cz = Změnit status objednávky
+
+          method = GET
+            path = /api/v1/orders/{id}/dispatch-log
+handler_function = get_dispatch_log
+  description_cz = Historie přiřazování
+
+          method = DELETE
+            path = /api/v1/orders/{id}
+handler_function = cancel_order
+  description_cz = Zrušit objednávku
+
+          method = GET
+            path = /api/v1/dispatch/pending
+handler_function = get_pending_orders
+  description_cz = Objednávky čekající na kurýra
+
+          method = POST
+            path = /api/v1/dispatch/manual/{order_id}
+handler_function = manual_assign
+  description_cz = Manuální přiřazení kurýra
+
+          method = POST
+            path = /api/v1/dispatch/find-courier
+handler_function = find_courier
+  description_cz = Najít vhodného kurýra
+ info = === BUSINESS LOGIC ===
+           id = 1
+   logic_name = Dispatch Algorithm
+ service_file = dispatch_service.py
+  description = Algoritmus pro přiřazování kurýrů k objednávkám
+    algorithm = 1. Filtrovat kurýry (AVAILABLE, matching tags, v radiusu)
+2. Seřadit (VIP kurýři první, pak podle vzdálenosti)
+3. Nabídnout kurýrovi (DispatchLog OFFERED)
+4. Čekat na odpověď (timeout)
+5. Zpracovat: ACCEPTED → přiřadit, REJECTED/TIMEOUT → další
+configuration = {"phase_1": {"radius_km": 2.0, "timeout_sec": 30}, "phase_2": {"radius_km": 5.0, "timeout_sec": 45}, "max_phases": 2}
+
+           id = 2
+   logic_name = Haversine Distance
+ service_file = dispatch_service.py
+  description = Výpočet vzdálenosti mezi GPS body
+    algorithm = R = 6371 km (radius Země)
+dlat = lat2 - lat1
+dlon = lon2 - lon1
+a = sin²(dlat/2) + cos(lat1) * cos(lat2) * sin²(dlon/2)
+c = 2 * asin(sqrt(a))
+distance = R * c
+configuration = 
+
+           id = 3
+   logic_name = Tag Matching
+ service_file = dispatch_service.py
+  description = Filtrování kurýrů podle tagů
+    algorithm = Kurýr musí mít VŠECHNY tagy z required_tags objednávky.
+Příklad: order.required_tags = ["car", "fragile_ok"]
+kurýr.tags musí obsahovat oba tagy.
+configuration = 
