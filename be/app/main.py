@@ -118,8 +118,20 @@ busy (doručuje) ─────────────────────
             "description": "Dispečink - přiřazování kurýrů k objednávkám. Automatické i manuální přiřazení s logováním historie.",
         },
         {
-            "name": "form",
-            "description": "Formuláře - legacy API pro práci s formuláři (není součástí Food Delivery).",
+            "name": "Formuláře",
+            "description": "CRUD operace nad formuláři - vytváření, čtení, mazání záznamů. Obsahuje easter egg mini hru.",
+        },
+        {
+            "name": "Přílohy",
+            "description": "Nahrávání a správa souborových příloh k formulářům. Podporuje PDF a TXT, max 1 MB.",
+        },
+        {
+            "name": "Instrukce",
+            "description": "Textové instrukce k formulářům - vytvoření, aktualizace, čtení.",
+        },
+        {
+            "name": "Mini hra",
+            "description": "Easter egg funkce - vyhodnocení tajných jmen (neo, trinity, morpheus, jan, pavla, matrix).",
         },
     ],
     contact={
@@ -142,7 +154,7 @@ app.add_middleware(
 )
 
 # Přidání routerů
-app.include_router(form_data_router, prefix="/api/v1", tags=["form"])
+app.include_router(form_data_router, prefix="/api/v1")
 app.include_router(couriers_router, prefix="/api/v1", tags=["couriers"])
 app.include_router(orders_router, prefix="/api/v1", tags=["orders"])
 app.include_router(dispatch_router, prefix="/api/v1", tags=["dispatch"])

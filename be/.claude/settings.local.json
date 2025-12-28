@@ -14,7 +14,8 @@
       "Bash(findstr:*)",
       "Bash(lsof:*)",
       "Bash(ss:*)",
-      "Bash(docker logs:*)"
+      "Bash(docker logs:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []
