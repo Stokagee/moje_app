@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Path, Body
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from app.schemas.form_data import (
     FormDataCreate,
     FormData as FormDataSchema,
@@ -100,6 +101,9 @@ def create_form_data_endpoint(
         response: FormDataResponse = FormDataResponse(**base_kwargs)
         logger.info(f"Záznam úspěšně vytvořen s ID {created_data.id}; easter_egg={egg}")
         return response
+    except IntegrityError as e:
+        logger.warning(f"Duplicate email attempt: {form_data.email}")
+        raise HTTPException(status_code=400, detail="Email již existuje v systému")
     except Exception as e:
         logger.error(f"Chyba při vytváření záznamu: {str(e)}")
         raise HTTPException(status_code=500, detail="Nepodařilo se uložit data")

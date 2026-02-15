@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     LOG_FILE: str = os.getenv("LOG_FILE", "app.log")
     # Volitelně: seznam tajných jmen/slov pro mini hru, oddělený čárkami
     SECRET_TOKENS: str = os.getenv("SECRET_TOKENS", "")
+    # Loki logging configuration
+    LOKI_URL: str = os.getenv("LOKI_URL", "")
+    APP_NAME: str = os.getenv("APP_NAME", "moje-app-backend")
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
 
     # Keep env_file configured for cases where .env should be read directly
     model_config = {

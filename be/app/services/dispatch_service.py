@@ -93,8 +93,8 @@ def auto_dispatch_order(db: Session, order_id: int) -> Tuple[bool, str, Optional
 
     Algorithm:
     1. Check order exists and is in valid status
-    2. Phase 1: Search within 2km radius
-    3. Phase 2: If no match, expand to 5km radius
+    2. Phase 1: Search within 750km radius
+    3. Phase 2: If no match, expand to 1500km radius
     4. VIP orders prioritize VIP couriers
     5. Assign closest matching courier
 
@@ -111,37 +111,37 @@ def auto_dispatch_order(db: Session, order_id: int) -> Tuple[bool, str, Optional
     required_tags = order.required_tags or []
     prefer_vip = order.is_vip
 
-    # Phase 1: Search within 2km
-    couriers_2km = find_couriers_in_radius(
+    # Phase 1: Search within 750km
+    couriers_750km = find_couriers_in_radius(
         db,
         order.pickup_lat,
         order.pickup_lng,
-        radius_km=2.0,
+        radius_km=750.0,
         required_tags=required_tags,
         prefer_vip=prefer_vip
     )
 
-    if couriers_2km:
-        best_courier, distance = couriers_2km[0]
-        return _assign_courier_to_order(db, order, best_courier, distance, "auto_assigned_2km")
+    if couriers_750km:
+        best_courier, distance = couriers_750km[0]
+        return _assign_courier_to_order(db, order, best_courier, distance, "auto_assigned_750km")
 
-    # Phase 2: Expand to 5km
-    couriers_5km = find_couriers_in_radius(
+    # Phase 2: Expand to 1500km
+    couriers_1500km = find_couriers_in_radius(
         db,
         order.pickup_lat,
         order.pickup_lng,
-        radius_km=5.0,
+        radius_km=1500.0,
         required_tags=required_tags,
         prefer_vip=prefer_vip
     )
 
-    if couriers_5km:
-        best_courier, distance = couriers_5km[0]
-        return _assign_courier_to_order(db, order, best_courier, distance, "auto_assigned_5km")
+    if couriers_1500km:
+        best_courier, distance = couriers_1500km[0]
+        return _assign_courier_to_order(db, order, best_courier, distance, "auto_assigned_1500km")
 
     # No courier found - set order to SEARCHING status
     order_crud.set_order_searching(db, order_id)
-    return False, "No available courier found within 5km radius", None
+    return False, "No available courier found within 1500km radius", None
 
 
 def _assign_courier_to_order(

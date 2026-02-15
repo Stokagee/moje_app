@@ -90,7 +90,7 @@ const GenderDropdown = ({ value, onSelect, error, errorMessage, required, onBlur
         data-class="dropdown gender-picker"
         // === ACCESSIBILITY atributy ===
         accessibilityLabel="Výběr pohlaví"
-        accessibilityRole="combobox"
+        accessibilityRole="button"
         accessibilityHint="Klikněte pro výběr pohlaví"
         accessibilityState={{ expanded: isVisible }}
         // === ARIA atributy (web) ===
@@ -181,7 +181,7 @@ const GenderDropdown = ({ value, onSelect, error, errorMessage, required, onBlur
             id="gender-listbox"
             data-component="dropdown-listbox"
             data-class="dropdown-menu gender-menu"
-            accessibilityRole="listbox"
+            accessibilityRole="none"
             aria-label="Seznam možností pohlaví"
             className="dropdown-menu gender-menu"
           >
@@ -192,7 +192,7 @@ const GenderDropdown = ({ value, onSelect, error, errorMessage, required, onBlur
               nativeID="gender-options-scroll"
               data-component="options-scroll"
               data-class="options-container"
-              accessibilityRole="menu"
+              accessibilityRole="none"
               className="options-container gender-options"
             >
               {/* Mapování možností pohlaví */}
@@ -218,7 +218,7 @@ const GenderDropdown = ({ value, onSelect, error, errorMessage, required, onBlur
                   data-class="dropdown-option gender-option"
                   // === ACCESSIBILITY atributy ===
                   accessibilityLabel={option.label}
-                  accessibilityRole="option"
+                  accessibilityRole="button"
                   accessibilityHint={`Vybrat ${option.label}`}
                   accessibilityState={{ selected: value === option.value }}
                   // === ARIA atributy (web) ===

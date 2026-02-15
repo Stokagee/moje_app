@@ -41,7 +41,7 @@ const EmptyState = ({
       data-class="empty-state empty-container"
       // === ACCESSIBILITY atributy ===
       accessibilityLabel={title}
-      accessibilityRole="status"
+      accessibilityRole="none"
       accessibilityHint={message || 'Žádná data k zobrazení'}
       // === ARIA atributy (web) ===
       aria-label={title}

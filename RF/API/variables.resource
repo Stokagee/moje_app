@@ -14,7 +14,7 @@ ${API_VERIFY_SSL}       ${False}
 ${DEFAULT_SESSION}      mysession
 
 # Test Data
-${DEFAULT_GENDER}       muž
+${DEFAULT_GENDER}       male
 ${TEST_EMAIL_PREFIX}    test_rf
 
 # Easter Egg Test Data

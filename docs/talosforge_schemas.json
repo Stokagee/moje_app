@@ -1,0 +1,318 @@
+{
+  "POST /api/v1/form/": {
+    "properties": {
+      "first_name": {
+        "type": "string",
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "First Name",
+        "description": "Køestní jméno",
+        "example": "Jan"
+      },
+      "last_name": {
+        "type": "string",
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "Last Name",
+        "description": "Pøíjmení",
+        "example": "Novák"
+      },
+      "phone": {
+        "type": "string",
+        "maxLength": 15,
+        "minLength": 9,
+        "title": "Phone",
+        "description": "Telefonní èíslo (9-15 znakù)",
+        "example": "123456789"
+      },
+      "gender": {
+        "type": "string",
+        "title": "Gender",
+        "description": "Pohlaví: male, female nebo other",
+        "example": "male"
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "title": "Email",
+        "description": "Emailová adresa (musí být unikátní v systému)",
+        "example": "jan.novak@example.com"
+      }
+    },
+    "type": "object",
+    "required": [
+      "first_name",
+      "last_name",
+      "phone",
+      "gender",
+      "email"
+    ],
+    "title": "FormDataCreate",
+    "description": "Schéma pro vytvoøení nového formuláøe."
+  },
+  "POST /api/v1/form/evaluate-name": {
+    "properties": {
+      "text": {
+        "type": "string",
+        "maxLength": 200,
+        "minLength": 1,
+        "title": "Text",
+        "description": "Text k ovìøení (jméno, slovo)",
+        "example": "neo"
+      }
+    },
+    "type": "object",
+    "required": [
+      "text"
+    ],
+    "title": "NameInput",
+    "description": "Vstup pro vyhodnocení tajného jména v mini høe."
+  },
+  "POST /api/v1/form/{form_id}/attachment": {
+    "properties": {
+      "filename": {
+        "type": "string",
+        "maxLength": 255,
+        "minLength": 1,
+        "title": "Filename",
+        "description": "Název souboru vèetnì pøípony",
+        "example": "dokument.pdf"
+      },
+      "content_type": {
+        "type": "string",
+        "title": "Content Type",
+        "description": "MIME typ souboru (application/pdf, text/plain)",
+        "example": "application/pdf"
+      },
+      "instructions": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 5000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Instructions",
+        "description": "Volitelné instrukce k pøíloze",
+        "example": "Naskenovaný formuláø k podpisu"
+      },
+      "data_base64": {
+        "type": "string",
+        "title": "Data Base64",
+        "description": "Obsah souboru zakódovaný v base64. Maximální velikost po dekódování: 1 MB.",
+        "example": "JVBERi0xLjQKJeLjz9MKMyAwIG9iago8PC..."
+      }
+    },
+    "type": "object",
+    "required": [
+      "filename",
+      "content_type",
+      "data_base64"
+    ],
+    "title": "AttachmentCreate",
+    "description": "Schéma pro nahrání nové pøílohy (data jako base64)."
+  },
+  "POST /api/v1/couriers/": {
+    "properties": {
+      "name": {
+        "type": "string",
+        "maxLength": 100,
+        "minLength": 2,
+        "title": "Name",
+        "description": "Celé jméno kurýra",
+        "example": "Jan Novák"
+      },
+      "phone": {
+        "type": "string",
+        "maxLength": 20,
+        "minLength": 9,
+        "title": "Phone",
+        "description": "Telefonní èíslo kurýra v mezinárodním formátu",
+        "example": "+420777123456"
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "title": "Email",
+        "description": "E-mailová adresa kurýra (musí být unikátní v systému)",
+        "example": "jan.novak@example.cz"
+      },
+      "tags": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array",
+        "title": "Tags",
+        "description": "Seznam tagù/specializací kurýra. Bìžné tagy:\n        - `bike` - jezdí na kole\n        - `car` - má auto\n        - `vip` - preferovaný pro VIP objednávky\n        - `fragile_ok` - mùže vozit køehké zboží\n        - `fast` - expresní doruèení\n        ",
+        "default": [],
+        "example": [
+          "bike",
+          "vip"
+        ]
+      }
+    },
+    "type": "object",
+    "required": [
+      "name",
+      "phone",
+      "email"
+    ],
+    "title": "CourierCreate",
+    "description": "Schéma pro vytvoøení nového kurýra.\n\nPo vytvoøení je kurýr ve stavu `offline` bez GPS polohy.\nPro aktivaci je potøeba nastavit lokaci a zmìnit stav na `available`.\n\n## Pøíklad použití\n\n```json\n{\n    \"name\": \"Jan Novák\",\n    \"phone\": \"+420777123456\",\n    \"email\": \"jan.novak@example.cz\",\n    \"tags\": [\"bike\", \"vip\"]\n}\n```",
+    "example": {
+      "email": "jan.novak@example.cz",
+      "name": "Jan Novák",
+      "phone": "+420777123456",
+      "tags": [
+        "bike",
+        "vip"
+      ]
+    }
+  },
+  "POST /api/v1/orders/": {
+    "properties": {
+      "customer_name": {
+        "type": "string",
+        "maxLength": 100,
+        "minLength": 2,
+        "title": "Customer Name",
+        "description": "Jméno zákazníka, který objednávku pøijímá",
+        "example": "Marie Svobodová"
+      },
+      "customer_phone": {
+        "type": "string",
+        "maxLength": 20,
+        "minLength": 9,
+        "title": "Customer Phone",
+        "description": "Telefonní èíslo zákazníka pro kontakt pøi doruèení",
+        "example": "+420606123456"
+      },
+      "pickup_address": {
+        "type": "string",
+        "maxLength": 200,
+        "minLength": 3,
+        "title": "Pickup Address",
+        "description": "Adresa místa vyzvednutí (restaurace, obchod)",
+        "example": "Národní 25, Praha 1"
+      },
+      "pickup_lat": {
+        "type": "number",
+        "maximum": 90.0,
+        "minimum": -90.0,
+        "title": "Pickup Lat",
+        "description": "GPS šíøka místa vyzvednutí",
+        "example": 50.0815
+      },
+      "pickup_lng": {
+        "type": "number",
+        "maximum": 180.0,
+        "minimum": -180.0,
+        "title": "Pickup Lng",
+        "description": "GPS délka místa vyzvednutí",
+        "example": 14.4195
+      },
+      "delivery_address": {
+        "type": "string",
+        "maxLength": 200,
+        "minLength": 3,
+        "title": "Delivery Address",
+        "description": "Adresa doruèení k zákazníkovi",
+        "example": "Vinohradská 50, Praha 2"
+      },
+      "delivery_lat": {
+        "type": "number",
+        "maximum": 90.0,
+        "minimum": -90.0,
+        "title": "Delivery Lat",
+        "description": "GPS šíøka místa doruèení",
+        "example": 50.0755
+      },
+      "delivery_lng": {
+        "type": "number",
+        "maximum": 180.0,
+        "minimum": -180.0,
+        "title": "Delivery Lng",
+        "description": "GPS délka místa doruèení",
+        "example": 14.4378
+      },
+      "is_vip": {
+        "type": "boolean",
+        "title": "Is Vip",
+        "description": "VIP pøíznak objednávky.\n\n        VIP objednávky mají prioritu pøi pøiøazování kurýra:\n        - Preferují se kurýøi s tagem `vip`\n        - Pokud žádný VIP kurýr není k dispozici, pøiøadí se bìžný kurýr\n        ",
+        "default": false,
+        "example": false
+      },
+      "required_tags": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array",
+        "title": "Required Tags",
+        "description": "Seznam tagù, které musí mít kurýr pro tuto objednávku.\n\n        Bìžné tagy:\n        - `fragile_ok` - objednávka obsahuje køehké zboží\n        - `fast` - expresní doruèení\n        - `bike` / `car` - specifický typ dopravy\n\n        Kurýr MUSÍ mít VŠECHNY požadované tagy, aby mohl objednávku pøevzít.\n        ",
+        "default": [],
+        "example": [
+          "fragile_ok"
+        ]
+      }
+    },
+    "type": "object",
+    "required": [
+      "customer_name",
+      "customer_phone",
+      "pickup_address",
+      "pickup_lat",
+      "pickup_lng",
+      "delivery_address",
+      "delivery_lat",
+      "delivery_lng"
+    ],
+    "title": "OrderCreate",
+    "description": "Schéma pro vytvoøení nové objednávky.\n\nPo vytvoøení je objednávka ve stavu `CREATED`.\nPro pøiøazení kurýra použijte endpoint `/dispatch/auto/{order_id}`.\n\n## Životní cyklus objednávky\n\n1. **CREATED** - Objednávka vytvoøena, èeká na dispatch\n2. **SEARCHING** - Hledá se vhodný kurýr\n3. **ASSIGNED** - Kurýr pøiøazen, míøí k vyzvednutí\n4. **PICKED** - Kurýr vyzvednul objednávku\n5. **DELIVERED** - Doruèeno zákazníkovi\n6. **CANCELLED** - Objednávka zrušena (mùže nastat kdykoli pøed DELIVERED)\n\n## Pøíklad vytvoøení\n\n```json\n{\n    \"customer_name\": \"Marie Svobodová\",\n    \"customer_phone\": \"+420606123456\",\n    \"pickup_address\": \"Národní 25, Praha 1\",\n    \"pickup_lat\": 50.0815,\n    \"pickup_lng\": 14.4195,\n    \"delivery_address\": \"Vinohradská 50, Praha 2\",\n    \"delivery_lat\": 50.0755,\n    \"delivery_lng\": 14.4378,\n    \"is_vip\": false,\n    \"required_tags\": []\n}\n```",
+    "example": {
+      "customer_name": "Marie Svobodová",
+      "customer_phone": "+420606123456",
+      "delivery_address": "Vinohradská 50, Praha 2",
+      "delivery_lat": 50.0755,
+      "delivery_lng": 14.4378,
+      "is_vip": false,
+      "pickup_address": "Národní 25, Praha 1",
+      "pickup_lat": 50.0815,
+      "pickup_lng": 14.4195,
+      "required_tags": []
+    }
+  },
+  "POST /api/v1/dispatch/manual": {
+    "properties": {
+      "order_id": {
+        "type": "integer",
+        "title": "Order Id",
+        "description": "ID objednávky k pøiøazení",
+        "example": 42
+      },
+      "courier_id": {
+        "type": "integer",
+        "title": "Courier Id",
+        "description": "ID kurýra, který má objednávku pøevzít",
+        "example": 5
+      }
+    },
+    "type": "object",
+    "required": [
+      "order_id",
+      "courier_id"
+    ],
+    "title": "DispatchAssign",
+    "description": "Schéma pro manuální pøiøazení kurýra k objednávce.\n\nPoužívá se, když operátor chce pøepsat automatický dispatch\na pøiøadit konkrétního kurýra k objednávce.\n\n## Kdy použít manuální dispatch\n\n- Zákazník si vyžádal konkrétního kurýra\n- Automatický dispatch selhal a operátor vybírá ruènì\n- Speciální situace vyžadující lidské rozhodnutí\n\n## Pøedpoklady\n\n- Objednávka musí být ve stavu `CREATED` nebo `SEARCHING`\n- Kurýr musí být ve stavu `available`\n- Kurýr musí mít všechny požadované tagy objednávky\n\n## Pøíklad\n\n```json\n{\n    \"order_id\": 42,\n    \"courier_id\": 5\n}\n```",
+    "example": {
+      "courier_id": 5,
+      "order_id": 42
+    }
+  },
+  "POST /api/v1/logs/frontend": {
+    "additionalProperties": true,
+    "type": "object",
+    "title": "Logs"
+  }
+}

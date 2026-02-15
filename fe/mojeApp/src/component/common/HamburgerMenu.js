@@ -7,6 +7,7 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 
 /**
@@ -21,6 +22,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 const NavigationMenu = ({ currentPage, onNavigate, children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const isMobile = width < 768;
 
@@ -137,7 +139,7 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
           data-component="sidebar"
           data-layout="desktop"
           data-class="sidebar desktop-nav navigation"
-          accessibilityRole="navigation"
+          accessibilityRole="none"
           aria-label="Hlavní navigace"
           className="sidebar desktop-nav navigation"
         >
@@ -202,7 +204,7 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
           id="main-content"
           data-component="page-content"
           data-class="desktop-content main-content"
-          accessibilityRole="main"
+          accessibilityRole="none"
           aria-label="Hlavní obsah"
           className="desktop-content main-content"
         >
@@ -227,7 +229,7 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
     >
       {/* Hamburger tlačítko */}
       <TouchableOpacity
-        style={styles.hamburgerButton}
+        style={[styles.hamburgerButton, { marginTop: insets.top + 10 }]}
         onPress={toggleMenu}
         // === HAMBURGER BUTTON LOKÁTORY ===
         testID="hamburger-button"
@@ -300,7 +302,7 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
 
           {/* Menu panel */}
           <View
-            style={styles.menuPanel}
+            style={[styles.menuPanel, { paddingTop: insets.top + 60 }]}
             // === MENU PANEL LOKÁTORY ===
             testID="hamburger-menu-panel"
             nativeID="hamburger-menu-panel"
@@ -316,7 +318,7 @@ const NavigationMenu = ({ currentPage, onNavigate, children }) => {
           >
             {/* Zavírací tlačítko */}
             <TouchableOpacity
-              style={styles.closeButton}
+              style={[styles.closeButton, { top: insets.top + 10 }]}
               onPress={toggleMenu}
               // === CLOSE BUTTON LOKÁTORY ===
               testID="menu-close-button"

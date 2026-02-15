@@ -23,9 +23,9 @@ class FormDataBase(BaseModel):
     phone: str = Field(
         ...,
         min_length=9,
-        max_length=15,
-        description="Telefonní číslo (9-15 znaků)",
-        json_schema_extra={"example": "123456789"}
+        max_length=25,
+        description="Telefonní číslo (9-25 znaků)",
+        json_schema_extra={"example": "+420 123 456 789"}
     )
     gender: str = Field(
         ...,
@@ -41,10 +41,14 @@ class FormDataBase(BaseModel):
     @field_validator("gender")
     @classmethod
     def validate_gender(cls, v: str) -> str:
-        allowed = ("male", "female", "other")
-        if v.lower() not in allowed:
-            raise ValueError(f"Pohlaví musí být jedno z: {', '.join(allowed)}")
-        return v.lower()
+        # Accept both full words and single letters
+        allowed = ("male", "female", "other", "m", "f", "o")
+        normalized = v.lower()
+        if normalized not in allowed:
+            raise ValueError(f"Pohlaví musí být jedno z: male, female, other")
+        # Normalize to full word
+        mapping = {"m": "male", "f": "female", "o": "other"}
+        return mapping.get(normalized, normalized)
 
 
 class FormDataCreate(FormDataBase):

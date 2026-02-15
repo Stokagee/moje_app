@@ -4,12 +4,12 @@ Auth Demo - Výuková ukázka 3 typů autentizace ve FastAPI.
 Spuštění:
     cd be/auth
     pip install -r requirements.txt
-    uvicorn main:app --reload --port 8001
+    uvicorn main:app --reload --port 5101
 
 Dostupné URL:
-    - Swagger UI: http://localhost:8001/docs
-    - ReDoc: http://localhost:8001/redoc
-    - OAuth2 login: http://localhost:8001/oauth2/login
+    - Swagger UI: http://localhost:5101/docs
+    - ReDoc: http://localhost:5101/redoc
+    - OAuth2 login: http://localhost:5101/oauth2/login
 
 Výchozí admin účet (nastavitelný v .env):
     - admin / admin123
@@ -19,6 +19,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
+# Logging setup
+from shared.logging.logger import setup_logging, get_logger
+
+logger = get_logger("auth-demo")
 
 from routes import router
 from database import engine, SessionLocal
@@ -37,15 +42,19 @@ async def lifespan(app: FastAPI):
     Startup/shutdown events pro FastAPI aplikaci.
 
     Při startu:
-    1. Vytvoří databázové tabulky (pokud neexistují)
-    2. Vytvoří výchozího admin uživatele (pokud neexistuje)
+    1. Nastaví logování do Loki
+    2. Vytvoří databázové tabulky (pokud neexistují)
+    3. Vytvoří výchozího admin uživatele (pokud neexistuje)
     """
+    # Nastavit logging jako první
+    setup_logging()
+
     # Startup
-    print("[START] Inicializace Auth Demo...")
+    logger.info("[START] Inicializace Auth Demo...")
 
     # Vytvoření tabulek
     Base.metadata.create_all(bind=engine)
-    print("[OK] Databazove tabulky vytvoreny/overeny")
+    logger.success("[OK] Databazove tabulky vytvoreny/overeny")
 
     # Vytvoření výchozího admin účtu
     db = SessionLocal()
@@ -57,18 +66,18 @@ async def lifespan(app: FastAPI):
                 password=DEFAULT_ADMIN_PASSWORD,
                 email=DEFAULT_ADMIN_EMAIL,
             )
-            print(f"[OK] Vytvoren vychozi admin ucet: {DEFAULT_ADMIN_USERNAME}")
+            logger.success(f"[OK] Vytvoren vychozi admin ucet: {DEFAULT_ADMIN_USERNAME}")
         else:
-            print(f"[INFO] Admin ucet '{DEFAULT_ADMIN_USERNAME}' jiz existuje")
+            logger.info(f"[INFO] Admin ucet '{DEFAULT_ADMIN_USERNAME}' jiz existuje")
     finally:
         db.close()
 
-    print("[READY] Auth Demo pripraveno na http://localhost:8001/docs")
+    logger.info("[READY] Auth Demo pripraveno na http://localhost:5101/docs")
 
     yield
 
     # Shutdown
-    print("[STOP] Auth Demo ukonceno")
+    logger.info("[STOP] Auth Demo ukonceno")
 
 
 # FastAPI instance

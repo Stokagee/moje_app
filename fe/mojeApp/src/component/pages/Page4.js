@@ -30,6 +30,7 @@ import {
   getUrgencyColor,
   getUrgencyLabel,
 } from '../../utils/constants';
+import logger from '../../utils/lokiLogger';
 
 /**
  * Hlavni komponenta Page4 - Dispatch Dashboard
@@ -54,7 +55,11 @@ export default function Page4({ navigation }) {
       setPendingOrders(ordersData || []);
       setAvailableCouriers(couriersData || []);
     } catch (err) {
-      console.error('Chyba pri nacitani dispatch dat:', err);
+      logger.error('Failed to load dispatch data', {
+        error: err.message,
+        stack: err.stack,
+        endpoints: [API_ENDPOINTS.ORDERS_PENDING, API_ENDPOINTS.COURIERS_AVAILABLE],
+      });
     }
   }, [get]);
 
@@ -104,7 +109,7 @@ export default function Page4({ navigation }) {
       data-section="pending-orders"
       data-count={pendingOrders.length}
       data-class="section pending-orders-section"
-      accessibilityRole="region"
+      accessibilityRole="none"
       accessibilityLabel="Čekající objednávky"
       aria-label="Čekající objednávky"
       className="section pending-orders-section"
@@ -142,7 +147,7 @@ export default function Page4({ navigation }) {
           data-component="orders-scroll"
           data-section="pending-orders"
           data-class="section-scroll orders-scroll"
-          accessibilityRole="list"
+          accessibilityRole="none"
           aria-label="Seznam čekajících objednávek"
           className="section-scroll orders-scroll"
         >
@@ -163,7 +168,7 @@ export default function Page4({ navigation }) {
                 data-urgency={urgency.label}
                 data-index={index}
                 data-class="card pending-order-card"
-                accessibilityRole="listitem"
+                accessibilityRole="none"
                 accessibilityLabel={`Čekající objednávka ${order.id}`}
                 aria-label={`Čekající objednávka ${order.id}`}
                 className="card pending-order-card"
@@ -300,7 +305,7 @@ export default function Page4({ navigation }) {
                     data-component="required-tags"
                     data-tags={order.required_tags.join(',')}
                     data-class="tags-row required-tags"
-                    accessibilityRole="group"
+                    accessibilityRole="none"
                     accessibilityLabel="Požadované tagy"
                     className="tags-row required-tags"
                   >
@@ -364,7 +369,7 @@ export default function Page4({ navigation }) {
       data-section="available-couriers"
       data-count={availableCouriers.length}
       data-class="section available-couriers-section"
-      accessibilityRole="region"
+      accessibilityRole="none"
       accessibilityLabel="Dostupní kurýři"
       aria-label="Dostupní kurýři"
       className="section available-couriers-section"
@@ -402,7 +407,7 @@ export default function Page4({ navigation }) {
           data-component="couriers-scroll"
           data-section="available-couriers"
           data-class="section-scroll couriers-scroll"
-          accessibilityRole="list"
+          accessibilityRole="none"
           aria-label="Seznam dostupných kurýrů"
           className="section-scroll couriers-scroll"
         >
@@ -420,7 +425,7 @@ export default function Page4({ navigation }) {
               data-courier-status={courier.status}
               data-index={index}
               data-class="card courier-card"
-              accessibilityRole="listitem"
+              accessibilityRole="none"
               accessibilityLabel={`Kurýr ${courier.name}`}
               aria-label={`Kurýr ${courier.name}`}
               className="card courier-card"
@@ -524,7 +529,7 @@ export default function Page4({ navigation }) {
                   data-component="courier-tags"
                   data-tags={courier.tags.join(',')}
                   data-class="tags-row courier-tags"
-                  accessibilityRole="group"
+                  accessibilityRole="none"
                   accessibilityLabel="Schopnosti kurýra"
                   className="tags-row courier-tags"
                 >
@@ -587,7 +592,7 @@ export default function Page4({ navigation }) {
         data-page="page4"
         data-section="header"
         data-class="page-header header-section"
-        accessibilityRole="banner"
+        accessibilityRole="none"
         aria-label="Hlavička Dispatch Dashboard"
         className="page-header header-section"
       >
@@ -653,7 +658,7 @@ export default function Page4({ navigation }) {
         data-pending={pendingOrders.length}
         data-available={availableCouriers.length}
         data-class="stats-panel dispatch-stats"
-        accessibilityRole="region"
+        accessibilityRole="none"
         accessibilityLabel="Statistiky dispatch"
         aria-label="Statistiky dispatch"
         className="stats-panel dispatch-stats"
@@ -760,7 +765,7 @@ export default function Page4({ navigation }) {
         data-page="page4"
         data-layout={isWideScreen ? 'wide' : 'narrow'}
         data-class="main-content dispatch-content"
-        accessibilityRole="main"
+        accessibilityRole="none"
         aria-label="Hlavní obsah dispatch"
         className="main-content dispatch-content"
       >

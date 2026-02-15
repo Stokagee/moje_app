@@ -41,8 +41,8 @@ Automaticky najde a přiřadí nejbližšího vhodného kurýra k objednávce.
 - Pokud žádný VIP kurýr není dostupný, použije se běžný kurýr
 
 ### Krok 4: Fázové hledání
-1. **Fáze 1 (2 km)**: Hledá kurýry do 2 km od místa vyzvednutí
-2. **Fáze 2 (5 km)**: Pokud nikdo není v 2 km, rozšíří na 5 km
+1. **Fáze 1 (750 km)**: Hledá kurýry do 750 km od místa vyzvednutí
+2. **Fáze 2 (1500 km)**: Pokud nikdo není v 750 km, rozšíří na 1500 km
 
 ### Krok 5: Výběr nejbližšího
 - Ze všech kandidátů v dosahu vybere **nejbližšího**
@@ -74,7 +74,7 @@ Automaticky najde a přiřadí nejbližšího vhodného kurýra k objednávce.
 ```json
 {
     "success": false,
-    "message": "No available courier found within 5km radius",
+    "message": "No available courier found within 1500km radius",
     "order_id": 42,
     "courier_id": null
 }

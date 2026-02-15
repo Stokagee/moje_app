@@ -1,16 +1,16 @@
 services:
   # ============================================
-  # DATABASE - PostgreSQL 15
+  # DATABASE - PostgreSQL 17
   # ============================================
   db:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     container_name: moje_app_db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-moje_app}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT:-20343}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -28,7 +28,7 @@ services:
       dockerfile: Dockerfile
     container_name: moje_app_backend
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-moje_app}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-moje_app}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       SECRET_TOKENS: ${SECRET_TOKENS:-dum,pes}
       # Loguru + Loki logging
@@ -36,7 +36,7 @@ services:
       APP_NAME: moje-app
       ENVIRONMENT: ${ENVIRONMENT:-development}
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "${BACKEND_PORT:-9000}:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -52,7 +52,7 @@ services:
       dockerfile: Dockerfile
     container_name: moje_app_frontend
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "${FRONTEND_PORT:-20301}:3000"
     depends_on:
       - backend
 
@@ -63,7 +63,7 @@ services:
     image: adminer:latest
     container_name: moje_app_adminer
     ports:
-      - "${ADMINER_PORT:-8080}:8080"
+      - "${ADMINER_PORT:-20380}:8080"
     depends_on:
       - db
 
@@ -76,7 +76,7 @@ services:
       dockerfile: Dockerfile
     container_name: moje_app_auth_demo
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-moje_app}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-moje_app}
       SECRET_KEY: ${AUTH_SECRET_KEY:-super-secret-key-change-in-production-123!}
       ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
@@ -86,21 +86,38 @@ services:
       DEFAULT_ADMIN_PASSWORD: ${AUTH_ADMIN_PASSWORD:-admin123}
       DEFAULT_ADMIN_EMAIL: ${AUTH_ADMIN_EMAIL:-admin@example.com}
     ports:
-      - "${AUTH_DEMO_PORT:-8001}:8001"
+      - "${AUTH_DEMO_PORT:-5101}:8001"
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - ./be/auth/static:/app/static
+      - ./be/shared:/app/shared:ro  # Mount shared logging module
+
+  # ============================================
+  # REDIS - Pro Authorization Code Demo
+  # ============================================
+  redis:
+    image: redis:8-alpine
+    container_name: moje_app_redis
+    ports:
+      - "${REDIS_PORT:-20400}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis_data:/data
 
   # ============================================
   # LOKI - Log aggregation
   # ============================================
   loki:
-    image: grafana/loki:2.9.0
+    image: grafana/loki:3.3.0
     container_name: moje_app_loki
     ports:
-      - "${LOKI_PORT:-3100}:3100"
+      - "${LOKI_PORT:-20351}:3100"
     volumes:
       - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml
       - loki_data:/loki
@@ -115,10 +132,10 @@ services:
   # GRAFANA - Visualization & Alerting
   # ============================================
   grafana:
-    image: grafana/grafana:10.2.0
+    image: grafana/grafana:11.4.0
     container_name: moje_app_grafana
     ports:
-      - "${GRAFANA_PORT:-3001}:3000"
+      - "${GRAFANA_PORT:-20350}:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
@@ -130,7 +147,123 @@ services:
       loki:
         condition: service_healthy
 
+  # ============================================
+  # AUTH REFRESH TOKEN DEMO - OAuth2 Refresh Token Flow
+  # ============================================
+  auth-refresh-demo:
+    build:
+      context: ./be/auth-refresh-demo
+      dockerfile: Dockerfile
+    container_name: moje_app_auth_refresh_demo
+    environment:
+      DATABASE_URL: sqlite:///./data/auth_refresh.db
+      SECRET_KEY: ${AUTH_REFRESH_SECRET_KEY:-refresh-secret-key-change-in-production}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 30
+      # Logging to Loki
+      LOKI_URL: http://loki:3100/loki/api/v1/push
+      APP_NAME: auth-refresh-demo
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "${AUTH_REFRESH_PORT:-5102}:8000"
+    volumes:
+      - auth_refresh_data:/app/data
+      - ./be/shared:/app/shared:ro  # Mount shared logging module
+
+  # ============================================
+  # AUTH CLIENT CREDENTIALS DEMO - OAuth2 M2M Flow
+  # ============================================
+  auth-client-credentials-demo:
+    build:
+      context: ./be/auth-client-credentials-demo
+      dockerfile: Dockerfile
+    container_name: moje_app_auth_client_credentials_demo
+    environment:
+      DATABASE_URL: sqlite:///./data/auth_client_credentials.db
+      SECRET_KEY: ${AUTH_CLIENT_SECRET_KEY:-client-credentials-secret-key}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      # Logging to Loki
+      LOKI_URL: http://loki:3100/loki/api/v1/push
+      APP_NAME: auth-client-credentials-demo
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "${AUTH_CLIENT_CREDENTIALS_PORT:-5103}:8000"
+    volumes:
+      - auth_client_credentials_data:/app/data
+      - ./be/shared:/app/shared:ro  # Mount shared logging module
+
+  # ============================================
+  # AUTH AUTHORIZATION CODE DEMO - OAuth2 Authorization Code Flow
+  # ============================================
+  auth-authorization-code-demo:
+    build:
+      context: ./be/auth-authorization-code-demo
+      dockerfile: Dockerfile
+    container_name: moje_app_auth_authorization_code_demo
+    environment:
+      DATABASE_URL: sqlite:///./data/auth_auth_code.db
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${AUTH_CODE_SECRET_KEY:-auth-code-secret-key}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      AUTH_CODE_EXPIRE_MINUTES: 10
+      # Logging to Loki
+      LOKI_URL: http://loki:3100/loki/api/v1/push
+      APP_NAME: auth-authorization-code-demo
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "${AUTH_CODE_PORT:-5104}:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    volumes:
+      - auth_auth_code_data:/app/data
+      - ./be/shared:/app/shared:ro  # Mount shared logging module
+
+  # ============================================
+  # AUTH PKCE DEMO - OAuth2 PKCE Flow (Public Clients)
+  # ============================================
+  auth-pkce-demo:
+    build:
+      context: ./be/auth-pkce-demo
+      dockerfile: Dockerfile
+    container_name: moje_app_auth_pkce_demo
+    environment:
+      DATABASE_URL: sqlite:///./data/auth_pkce.db
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${AUTH_PKCE_SECRET_KEY:-auth-pkce-secret-key}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      AUTH_CODE_EXPIRE_SECONDS: 600
+      # Logging to Loki
+      LOKI_URL: http://loki:3100/loki/api/v1/push
+      APP_NAME: auth-pkce-demo
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "${AUTH_PKCE_PORT:-5105}:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    volumes:
+      - auth_pkce_data:/app/data
+      - ./be/shared:/app/shared:ro  # Mount shared logging module
+
 volumes:
   postgres_data:
   loki_data:
   grafana_data:
+  redis_data:
+  auth_refresh_data:
+  auth_client_credentials_data:
+  auth_auth_code_data:
+  auth_pkce_data:

@@ -39,7 +39,7 @@ const AppModal = ({
           data-component="modal-box"
           data-modal={testID}
           data-class="modal-box modal-container"
-          accessibilityRole="dialog"
+          accessibilityRole="none"
           accessibilityLabel={title}
           aria-modal="true"
           aria-labelledby={`${testID}-title`}
@@ -85,7 +85,7 @@ const AppModal = ({
             id={`${testID}-buttons`}
             data-component="modal-actions"
             data-class="modal-actions button-group"
-            accessibilityRole="group"
+            accessibilityRole="none"
             className="modal-actions button-group"
           >
             {secondaryText && onSecondary ? (

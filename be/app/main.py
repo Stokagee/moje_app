@@ -5,6 +5,7 @@ from app.api.endpoints.form_data import router as form_data_router
 from app.api.endpoints.couriers import router as couriers_router
 from app.api.endpoints.orders import router as orders_router
 from app.api.endpoints.dispatch import router as dispatch_router
+from app.api.endpoints.logs import router as logs_router
 from app.database import engine, Base
 # DŮLEŽITÉ: naimportovat modely před create_all, aby se tabulky vytvořily
 from app.models import form_data as _model_form_data  # noqa: F401
@@ -147,7 +148,7 @@ busy (doručuje) ─────────────────────
 # In production, replace allow_origins with explicit trusted origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:20301", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -158,6 +159,7 @@ app.include_router(form_data_router, prefix="/api/v1")
 app.include_router(couriers_router, prefix="/api/v1", tags=["couriers"])
 app.include_router(orders_router, prefix="/api/v1", tags=["orders"])
 app.include_router(dispatch_router, prefix="/api/v1", tags=["dispatch"])
+app.include_router(logs_router, prefix="/api/v1", tags=["Logs"])
 
 @app.get("/")
 def root():

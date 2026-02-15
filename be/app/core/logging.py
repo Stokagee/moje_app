@@ -33,9 +33,9 @@ if LOKI_URL:
     loki_handler = LokiLoggerHandler(
         url=LOKI_URL,
         labels={
-            "application": os.getenv("APP_NAME", "moje-app"),
+            "service": os.getenv("APP_NAME", "moje-app"),
             "environment": os.getenv("ENVIRONMENT", "development"),
-            "service": "backend",
+            "application": os.getenv("APP_NAME", "moje-app"),
         },
         label_keys={},
         timeout=10,
@@ -53,8 +53,44 @@ else:
 
 
 def setup_logging():
-    """Dummy funkce pro zpětnou kompatibilitu s main.py."""
-    pass
+    """
+    Setup logging including interception of standard logging.
+
+    Redirects all standard logging (logging.getLogger) to Loguru
+    so that existing code works with Loki without modification.
+    """
+    import logging
+
+    class InterceptHandler(logging.Handler):
+        """Intercept standard logging and send to Loguru."""
+
+        def emit(self, record):
+            # Get corresponding Loguru level
+            try:
+                level = logger.level(record.levelname).name
+            except ValueError:
+                level = record.levelno
+
+            # Find caller from where originated
+            frame, depth = logging.currentframe(), 2
+            while frame.f_code.co_filename == logging.__file__:
+                frame = frame.f_back
+                depth += 1
+
+            logger.opt(depth=depth, exception=record.exc_info).log(
+                level, record.getMessage()
+            )
+
+    # Configure standard logging to use intercept handler
+    logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
+
+    # Intercept specific loggers
+    for name in ["uvicorn", "uvicorn.access", "uvicorn.error", "fastapi", "sqlalchemy"]:
+        logging_logger = logging.getLogger(name)
+        logging_logger.handlers = [InterceptHandler()]
+        logging_logger.propagate = False
+
+    logger.info("Standard logging intercepted and redirected to Loguru")
 
 
 def get_logger(name: str = None):

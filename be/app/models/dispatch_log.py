@@ -12,8 +12,8 @@ class DispatchLog(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     # References
-    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
-    courier_id = Column(Integer, ForeignKey("couriers.id"), nullable=False)
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
+    courier_id = Column(Integer, ForeignKey("couriers.id", ondelete="CASCADE"), nullable=False)
 
     # Action: offered, accepted, rejected, auto_assigned
     action = Column(String, nullable=False)

@@ -18,13 +18,15 @@ def get_db():
 
 
 # U PostgreSQL vynutíme klientské kódování UTF8 (řeší UnicodeEncodeError pro diakritiku)
-if settings.DATABASE_URL.startswith("postgresql"):
+if settings.DATABASE_URL.startswith("postgresql+psycopg") or settings.DATABASE_URL.startswith("postgresql"):
     logger = logging.getLogger(__name__)
 
     @event.listens_for(engine, "connect")
     def set_client_encoding(dbapi_connection, connection_record):
         try:
-            # psycopg2 API
-            dbapi_connection.set_client_encoding("UTF8")
+            # psycopg3 API - use cursor to execute SQL
+            cursor = dbapi_connection.cursor()
+            cursor.execute("SET client_encoding TO 'UTF8'")
+            cursor.close()
         except Exception as e:
             logger.warning("Nepodařilo se nastavit client_encoding UTF8: %s", e)

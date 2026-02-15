@@ -1,0 +1,80 @@
+{
+  "type": "object",
+  "properties": {
+    "customer_name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 100,
+      "description": "Customer full name"
+    },
+    "customer_phone": {
+      "type": "string",
+      "minLength": 9,
+      "maxLength": 20,
+      "format": "phone",
+      "description": "Customer phone number"
+    },
+    "pickup_address": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200,
+      "description": "Pickup location address"
+    },
+    "pickup_lat": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90,
+      "description": "Pickup GPS latitude"
+    },
+    "pickup_lng": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180,
+      "description": "Pickup GPS longitude"
+    },
+    "delivery_address": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200,
+      "description": "Delivery destination address"
+    },
+    "delivery_lat": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90,
+      "description": "Delivery GPS latitude"
+    },
+    "delivery_lng": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180,
+      "description": "Delivery GPS longitude"
+    },
+    "is_vip": {
+      "type": "boolean",
+      "default": false,
+      "description": "VIP flag for priority processing"
+    },
+    "required_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "examples": ["fragile_ok", "fast", "bike", "car", "vip"]
+      },
+      "minItems": 0,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "description": "Required courier specializations"
+    }
+  },
+  "required": [
+    "customer_name",
+    "customer_phone",
+    "pickup_address",
+    "pickup_lat",
+    "pickup_lng",
+    "delivery_address",
+    "delivery_lat",
+    "delivery_lng"
+  ]
+}

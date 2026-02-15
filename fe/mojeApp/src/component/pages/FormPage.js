@@ -8,20 +8,12 @@ import useAppModal from '../context/useAppModal';
 import InfoModal from '../common/InfoModal';
 import FileUploader from '../common/FileUploader';
 import TextArea from '../common/TextArea';
-
-// Dynamická konfigurace API URL podle platformy
-const getApiUrl = () => {
-  // Pro web
-  if (typeof window !== 'undefined' && window.location) {
-    return 'http://localhost:8000';
-  }
-  // Pro React Native (mobil)
-  return 'http://10.0.2.2:8000'; // Android emulator
-};
-
-const API_URL = getApiUrl();
+import logger from '../../utils/lokiLogger';
+import { getApiUrl } from '../../utils/apiConfig';
 
 const FormPage = ({ navigation }) => {
+  const { showModal } = useAppModal();
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -83,6 +75,10 @@ const FormPage = ({ navigation }) => {
       case 'phone':
         if (!value.trim()) {
           error = 'Vyplňtě telefonní číslo';
+        } else if (value.length < 9) {
+          error = 'Telefonní číslo musí mít alespoň 9 znaků';
+        } else if (value.length > 25) {
+          error = 'Telefonní číslo může mít maximálně 25 znaků';
         }
         break;
       case 'email':
@@ -102,7 +98,18 @@ const FormPage = ({ navigation }) => {
     return error;
   };
 
+  const handleBlur = (field) => {
+    setTouched({
+      ...touched,
+      [field]: true,
+    });
+  };
   const handleSubmit = async () => {
+    // DEBUG: Log pro zjisteni, zda se funkce vola
+    console.log('=== handleSubmit called ===');
+    console.log('API URL:', getApiUrl());
+    console.log('formData:', formData);
+
     // Validace všech polí
     const newErrors = {};
     let hasErrors = false;
@@ -115,7 +122,11 @@ const FormPage = ({ navigation }) => {
 
     setErrors(newErrors);
 
+    console.log('hasErrors:', hasErrors);
+
     if (hasErrors) {
+      console.log('Validation errors:', newErrors);
+      Alert.alert('Chyba', 'Musíš vyplnit všechna pole');
       showModal({
         title: 'Chyba',
         message: 'Musíš vyplnit všechna pole',
@@ -135,7 +146,11 @@ const FormPage = ({ navigation }) => {
         email: formData.email,
       };
 
-      const response = await fetch(`${API_URL}/api/v1/form/`, {
+      const apiUrl = `${getApiUrl()}/api/v1/form/`;
+      console.log('Fetching:', apiUrl);
+      console.log('Payload:', payload);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -143,13 +158,15 @@ const FormPage = ({ navigation }) => {
         body: JSON.stringify(payload),
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (response.ok) {
         // Případná příloha + instrukce (nezávisle na sobě)
         if (selectedFile) {
           try {
-            await fetch(`${API_URL}/api/v1/form/${data.id}/attachment`, {
+            await fetch(`${getApiUrl()}/api/v1/form/${data.id}/attachment`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -162,6 +179,11 @@ const FormPage = ({ navigation }) => {
             });
           } catch (e) {
             // nezastavuj flow – jen informuj do AppModalu
+            logger.warning('Attachment upload failed', {
+              error: e.message,
+              formId: data.id,
+              filename: selectedFile?.name,
+            });
             showModal({
               title: 'Poznámka',
               message: 'Data formuláře uložena, ale přílohu se nepodařilo nahrát.',
@@ -174,13 +196,18 @@ const FormPage = ({ navigation }) => {
         // Ulož instrukce, i když nebyl nahrán soubor
         if (!selectedFile && instructions && instructions.trim().length > 0) {
           try {
-            await fetch(`${API_URL}/api/v1/form/${data.id}/instructions`, {
+            await fetch(`${getApiUrl()}/api/v1/form/${data.id}/instructions`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ text: instructions }),
             });
           } catch (e) {
             // tichá chyba – nechceme blokovat flow
+            logger.warning('Instructions upload failed', {
+              error: e.message,
+              formId: data.id,
+              hasInstructions: !!instructions,
+            });
           }
         }
 
@@ -209,16 +236,29 @@ const FormPage = ({ navigation }) => {
         throw new Error(data.detail || 'Nepodařilo se odeslat data');
       }
     } catch (error) {
-      // Pro web použij window.alert, pro mobil Alert.alert
-      if (typeof window !== 'undefined' && window.alert) {
-        window.alert(error.message || 'Došlo k chybě při odesílání');
-      } else {
-        Alert.alert('Chyba', error.message || 'Došlo k chybě při odesílání');
-      }
+      // DEBUG: Log error
+      console.log('=== CATCH ERROR ===');
+      console.log('Error:', error.message);
+      console.log('Error stack:', error.stack);
+      Alert.alert('Chyba', error.message || 'Došlo k chybě při odesílání');
+
+      // Log to Loki with context
+      logger.error('Form submission failed', {
+        error: error.message,
+        stack: error.stack,
+        formData: { ...formData, email: undefined }, // Don't log PII
+        endpoint: '/api/v1/form/',
+      });
+
+      // Use consistent AppModal for all platforms
+      showModal({
+        title: 'Chyba',
+        message: error.message || 'Došlo k chybě při odesílání',
+        primaryText: 'OK',
+        testID: 'formSubmitErrorModal',
+      });
     }
   };
-
-  const { showModal } = useAppModal();
 
   const updateFormData = (key, value) => {
     // Pro telefonní číslo filtrujeme jen + a číslice
@@ -243,6 +283,7 @@ const FormPage = ({ navigation }) => {
     <Container>
       <ScrollView
         contentContainerStyle={styles.formWrapper}
+        keyboardShouldPersistTaps="handled"
         // === FORM CONTAINER LOKÁTORY ===
         testID="form-page-container"
         nativeID="form-container"
@@ -251,7 +292,7 @@ const FormPage = ({ navigation }) => {
         data-page="form"
         data-section="form-container"
         data-class="form-wrapper page-content"
-        accessibilityRole="form"
+        accessibilityRole="none"
         aria-label="Registrační formulář"
         className="form-wrapper page-content"
       >
@@ -392,7 +433,7 @@ const FormPage = ({ navigation }) => {
           data-component="file-upload-section"
           data-section="file-upload"
           data-class="file-section upload-container"
-          accessibilityRole="group"
+          accessibilityRole="none"
           accessibilityLabel="Sekce nahrání souboru"
           aria-label="Sekce nahrání souboru"
           className="file-section upload-container"

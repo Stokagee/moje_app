@@ -23,6 +23,7 @@ export const AppModalProvider = ({ children }) => {
         message={modalProps.message}
         primaryText={modalProps.primaryText || 'OK'}
         secondaryText={modalProps.secondaryText}
+        onClose={hideModal}
         onPrimary={() => {
           if (modalProps.onPrimary) modalProps.onPrimary();
           hideModal();

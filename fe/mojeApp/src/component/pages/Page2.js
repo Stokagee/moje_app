@@ -5,18 +5,8 @@ import NiceList from '../common/List';
 import Button from '../common/Button';
 import InfoModal from '../common/InfoModal';
 import useAppModal from '../context/useAppModal';
-
-// Dynamická konfigurace API URL podle platformy
-const getApiUrl = () => {
-  // Pro web
-  if (typeof window !== 'undefined' && window.location) {
-    return 'http://localhost:8000';
-  }
-  // Pro React Native (mobil)
-  return 'http://10.0.2.2:8000'; // Android emulator
-};
-
-const API_URL = getApiUrl();
+import logger from '../../utils/lokiLogger';
+import { getApiUrl } from '../../utils/apiConfig';
 
 export default function Page2({ navigation }) {
   const [data, setData] = useState([]);
@@ -29,7 +19,7 @@ export default function Page2({ navigation }) {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/v1/form/`);
+      const response = await fetch(`${getApiUrl()}/api/v1/form/`);
       const result = await response.json();
 
       if (response.ok) {
@@ -50,13 +40,17 @@ export default function Page2({ navigation }) {
         });
       }
     } catch (error) {
+      logger.error('Failed to load form data', {
+        error: error.message,
+        stack: error.stack,
+        endpoint: '/api/v1/form/',
+      });
       showModal({
         title: 'Chyba',
         message: 'Došlo k chybě při načítání dat',
         primaryText: 'OK',
         testID: 'loadDataExceptionModal',
       });
-      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -78,12 +72,12 @@ export default function Page2({ navigation }) {
     let hasFile = false;
     let instructions = '';
     try {
-      const resp = await fetch(`${API_URL}/api/v1/form/${user.id}/attachments`);
+      const resp = await fetch(`${getApiUrl()}/api/v1/form/${user.id}/attachments`);
       const atts = await resp.json();
       hasFile = Array.isArray(atts) && atts.length > 0;
       // nejprve zkus načíst samostatné instrukce
       try {
-        const instResp = await fetch(`${API_URL}/api/v1/form/${user.id}/instructions`);
+        const instResp = await fetch(`${getApiUrl()}/api/v1/form/${user.id}/instructions`);
         if (instResp.ok) {
           const inst = await instResp.json();
           if (inst && inst.text) {
@@ -98,6 +92,11 @@ export default function Page2({ navigation }) {
         instructions = atts[0]?.instructions || '';
       }
     } catch (e) {
+      logger.warning('Failed to fetch attachments for user detail', {
+        error: e.message,
+        userId: user.id,
+        endpoint: `/api/v1/form/${user.id}/attachments`,
+      });
       hasFile = false;
       instructions = '';
     }
@@ -114,7 +113,7 @@ export default function Page2({ navigation }) {
   // Smazání položky
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`${API_URL}/api/v1/form/${id}`, {
+      const response = await fetch(`${getApiUrl()}/api/v1/form/${id}`, {
         method: 'DELETE',
       });
 
@@ -132,6 +131,12 @@ export default function Page2({ navigation }) {
         throw new Error('Nepodařilo se smazat položku');
       }
     } catch (error) {
+      logger.error('Failed to delete form entry', {
+        error: error.message,
+        stack: error.stack,
+        id: id,
+        endpoint: `/api/v1/form/${id}`,
+      });
       showModal({
         title: 'Chyba',
         message: error.message || 'Došlo k chybě při mazání',
@@ -160,7 +165,7 @@ export default function Page2({ navigation }) {
           data-page="page2"
           data-state="loading"
           data-class="loading-container center-content"
-          accessibilityRole="progressbar"
+          accessibilityRole="none"
           accessibilityLabel="Načítání dat"
           aria-label="Načítání dat"
           aria-busy="true"
@@ -217,7 +222,7 @@ export default function Page2({ navigation }) {
         data-component="button-container"
         data-page="page2"
         data-class="button-container button-group actions"
-        accessibilityRole="group"
+        accessibilityRole="none"
         accessibilityLabel="Akční tlačítka"
         aria-label="Akční tlačítka"
         className="button-container button-group actions"

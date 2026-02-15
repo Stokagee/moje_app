@@ -63,7 +63,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
         <TouchableOpacity
           style={styles.modalContainer}
           activeOpacity={1}
-          onPress={(e) => e.stopPropagation()}
+          onPress={() => {}}
           // === MODAL CONTAINER LOKÁTORY ===
           testID="info-modal-container"
           nativeID="info-modal-content"
@@ -74,7 +74,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
           data-modal="info"
           data-variant={variant}
           data-class="modal-container info-modal"
-          accessibilityRole="dialog"
+          accessibilityRole="none"
           accessibilityLabel="Detail uživatele"
           aria-modal="true"
           aria-labelledby="modal-title"
@@ -91,7 +91,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
               data-component="modal-banner"
               data-variant={variant}
               data-class={`modal-banner banner-${variant}`}
-              accessibilityRole="status"
+              accessibilityRole="alert"
               accessibilityLabel={`Zpráva: ${message}`}
               aria-live="polite"
               className={`modal-banner banner-${variant}`}
@@ -141,7 +141,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
               id="modal-title"
               data-component="modal-title"
               data-class="modal-title"
-              accessibilityRole="header"
+              accessibilityRole="text"
               className="modal-title"
             >
               Detail uživatele
@@ -194,7 +194,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
             id="modal-content"
             data-component="modal-content"
             data-class="modal-body info-content"
-            accessibilityRole="main"
+            accessibilityRole="none"
             className="modal-body info-content"
           >
 
@@ -207,7 +207,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
               data-component="info-row"
               data-field="name"
               data-class="info-row row-name"
-              accessibilityRole="group"
+              accessibilityRole="none"
               accessibilityLabel="Jméno a příjmení"
               className="info-row row-name"
             >
@@ -229,7 +229,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
               data-component="info-row"
               data-field="phone"
               data-class="info-row row-phone"
-              accessibilityRole="group"
+              accessibilityRole="none"
               accessibilityLabel="Telefonní číslo"
               className="info-row row-phone"
             >
@@ -251,7 +251,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
               data-component="info-row"
               data-field="email"
               data-class="info-row row-email"
-              accessibilityRole="group"
+              accessibilityRole="none"
               accessibilityLabel="Email"
               className="info-row row-email"
             >
@@ -273,7 +273,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
               data-component="info-row"
               data-field="gender"
               data-class="info-row row-gender"
-              accessibilityRole="group"
+              accessibilityRole="none"
               accessibilityLabel="Pohlaví"
               className="info-row row-gender"
             >
@@ -295,7 +295,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
               data-component="info-row"
               data-field="file"
               data-class="info-row row-file"
-              accessibilityRole="group"
+              accessibilityRole="none"
               accessibilityLabel="Soubor"
               className="info-row row-file"
             >
@@ -319,7 +319,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
                 data-field="instructions"
                 data-has-content="true"
                 data-class="info-section instructions-section"
-                accessibilityRole="group"
+                accessibilityRole="none"
                 accessibilityLabel="Instrukce"
                 className="info-section instructions-section"
               >
@@ -337,7 +337,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
                 data-field="instructions"
                 data-has-content="false"
                 data-class="info-section instructions-section empty"
-                accessibilityRole="group"
+                accessibilityRole="none"
                 accessibilityLabel="Instrukce"
                 className="info-section instructions-section empty"
               >
@@ -369,7 +369,7 @@ const InfoModal = ({ visible, onClose, userData, message, variant = 'info' }) =>
             id="modal-footer"
             data-component="modal-footer"
             data-class="modal-footer"
-            accessibilityRole="contentinfo"
+            accessibilityRole="none"
             className="modal-footer"
           >
             <TouchableOpacity

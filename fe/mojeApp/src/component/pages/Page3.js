@@ -23,6 +23,7 @@ import EmptyState from '../common/EmptyState';
 import useApi from '../hooks/useApi';
 import { API_ENDPOINTS } from '../../utils/apiConfig';
 import { ORDER_STATUS_CONFIG, ORDER_STATUSES } from '../../utils/constants';
+import logger from '../../utils/lokiLogger';
 
 /**
  * Hlavni komponenta Page3 - Sprava objednavek
@@ -38,7 +39,11 @@ export default function Page3({ navigation }) {
       const data = await get(API_ENDPOINTS.ORDERS);
       setOrders(data || []);
     } catch (err) {
-      console.error('Chyba pri nacitani objednavek:', err);
+      logger.error('Failed to load orders data', {
+        error: err.message,
+        stack: err.stack,
+        endpoint: API_ENDPOINTS.ORDERS,
+      });
     }
   }, [get]);
 
@@ -98,7 +103,7 @@ export default function Page3({ navigation }) {
           data-page="page3"
           data-state="empty"
           data-class="page-header header-section"
-          accessibilityRole="banner"
+          accessibilityRole="none"
           aria-label="Hlavička stránky"
           className="page-header header-section"
         >
@@ -147,7 +152,7 @@ export default function Page3({ navigation }) {
         data-page="page3"
         data-section="header"
         data-class="page-header header-section"
-        accessibilityRole="banner"
+        accessibilityRole="none"
         aria-label="Hlavička stránky objednávek"
         className="page-header header-section"
       >
@@ -211,7 +216,7 @@ export default function Page3({ navigation }) {
         data-page="page3"
         data-section="statistics"
         data-class="stats-panel stats-row"
-        accessibilityRole="region"
+        accessibilityRole="none"
         accessibilityLabel="Statistiky objednávek"
         aria-label="Statistiky objednávek"
         className="stats-panel stats-row"
@@ -378,7 +383,7 @@ export default function Page3({ navigation }) {
         data-page="page3"
         data-count={orders.length}
         data-class="orders-list scroll-container"
-        accessibilityRole="list"
+        accessibilityRole="none"
         accessibilityLabel="Seznam objednávek"
         aria-label="Seznam objednávek"
         className="orders-list scroll-container"
@@ -398,7 +403,7 @@ export default function Page3({ navigation }) {
             data-order-vip={order.is_vip ? 'true' : 'false'}
             data-index={index}
             data-class="order-card card list-item"
-            accessibilityRole="listitem"
+            accessibilityRole="none"
             accessibilityLabel={`Objednávka ${order.id} - ${order.customer_name}`}
             aria-label={`Objednávka ${order.id}`}
             className="order-card card list-item"

@@ -50,4 +50,4 @@ class Order(Base):
 
     # Relationships
     courier = relationship("Courier", back_populates="orders")
-    dispatch_logs = relationship("DispatchLog", back_populates="order")
+    dispatch_logs = relationship("DispatchLog", back_populates="order", cascade="all, delete-orphan")

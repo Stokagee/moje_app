@@ -23,7 +23,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
         data-component="empty-state"
         data-type="list-empty"
         data-class="empty-container list-empty"
-        accessibilityRole="status"
+        accessibilityRole="alert"
         accessibilityLabel="Žádná data k zobrazení"
         aria-live="polite"
         className="empty-container list-empty"
@@ -55,7 +55,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
       data-component="data-table"
       data-rows={data.length}
       data-class="table-container list-container"
-      accessibilityRole="table"
+      accessibilityRole="none"
       aria-label="Seznam položek"
       aria-rowcount={data.length}
       className="table-container list-container"
@@ -69,7 +69,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
         id="table-header"
         data-component="table-header"
         data-class="table-header header-row"
-        accessibilityRole="row"
+        accessibilityRole="none"
         aria-rowindex={0}
         className="table-header header-row"
       >
@@ -82,7 +82,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
           data-component="header-cell"
           data-column="id"
           data-class="table-header-cell header-id"
-          accessibilityRole="columnheader"
+          accessibilityRole="none"
           aria-sort="none"
           className="table-header-cell header-id"
         >
@@ -97,7 +97,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
           data-component="header-cell"
           data-column="name"
           data-class="table-header-cell header-name"
-          accessibilityRole="columnheader"
+          accessibilityRole="none"
           className="table-header-cell header-name"
         >
           Celé jméno
@@ -111,7 +111,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
           data-component="header-cell"
           data-column="selected"
           data-class="table-header-cell header-selected"
-          accessibilityRole="columnheader"
+          accessibilityRole="none"
           className="table-header-cell header-selected"
         >
           Vybrané
@@ -125,7 +125,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
           data-component="header-cell"
           data-column="action"
           data-class="table-header-cell header-action"
-          accessibilityRole="columnheader"
+          accessibilityRole="none"
           className="table-header-cell header-action"
         >
           Akce
@@ -141,7 +141,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
         id="table-body"
         data-component="table-body"
         data-class="table-body scroll-container"
-        accessibilityRole="rowgroup"
+        accessibilityRole="none"
         className="table-body scroll-container"
       >
         {data.map((item, index) => (
@@ -159,7 +159,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
           data-row-index={index}
           data-selected={item.selected ? 'true' : 'false'}
           data-class="table-row data-row"
-          accessibilityRole="row"
+          accessibilityRole="none"
           accessibilityLabel={`Řádek ${index + 1}: ${item.fullName}`}
           aria-rowindex={index + 1}
           className={`table-row data-row row-${item.id} ${item.selected ? 'row-selected' : ''}`}
@@ -178,7 +178,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
             data-value={item.id}
             data-row-id={item.id}
             data-class="table-cell cell-id"
-            accessibilityRole="cell"
+            accessibilityRole="none"
             accessibilityLabel={`ID: ${item.id}`}
             aria-colindex={1}
             className="table-cell cell-id"
@@ -232,7 +232,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
             data-component="table-cell"
             data-column="selected"
             data-class="table-cell cell-checkbox"
-            accessibilityRole="cell"
+            accessibilityRole="none"
             aria-colindex={3}
             className="table-cell cell-checkbox"
           >
@@ -278,7 +278,7 @@ const NiceList = ({ data, onToggle, onDelete, onNamePress }) => {
             data-component="table-cell"
             data-column="action"
             data-class="table-cell cell-action"
-            accessibilityRole="cell"
+            accessibilityRole="none"
             aria-colindex={4}
             className="table-cell cell-action"
           >

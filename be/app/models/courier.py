@@ -36,4 +36,4 @@ class Courier(Base):
 
     # Relationships
     orders = relationship("Order", back_populates="courier")
-    dispatch_logs = relationship("DispatchLog", back_populates="courier")
+    dispatch_logs = relationship("DispatchLog", back_populates="courier", cascade="all, delete-orphan")

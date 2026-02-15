@@ -1,0 +1,25 @@
+# Refresh Token Demo Requirements
+
+# FastAPI
+fastapi==0.128.0
+uvicorn[standard]==0.40.0
+pydantic==2.12.5
+pydantic-settings==2.7.0
+
+# Database
+sqlalchemy==2.0.36
+
+# Security - bcrypt directly (replacing deprecated passlib)
+bcrypt==4.2.1
+python-jose[cryptography]==3.5.0
+python-multipart==0.0.22
+
+# Logging
+loguru>=0.7.3
+
+# Email validation
+email-validator==2.2.0
+
+# Testing
+pytest==8.3.4
+httpx==0.28.1
