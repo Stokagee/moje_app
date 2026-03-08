@@ -3,7 +3,8 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(sqlite3:*)",
-      "Bash(dir /b \"C:\\Users\\stoka\\Documents\\moje_app\\fe\\mojeApp\\src\")"
+      "Bash(dir /b \"C:\\Users\\stoka\\Documents\\moje_app\\fe\\mojeApp\\src\")",
+      "Bash(adb:*)"
     ],
     "deny": [],
     "ask": []

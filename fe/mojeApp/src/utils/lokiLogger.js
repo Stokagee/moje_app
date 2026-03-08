@@ -9,8 +9,8 @@ const getLokiUrl = () => {
   if (typeof window !== 'undefined' && window.location) {
     return 'http://localhost:20300/api/v1/logs/frontend';
   }
-  // For React Native (Android emulator)
-  return 'http://10.0.2.2:20300/api/v1/logs/frontend';
+  // For React Native (Android - fyzické zařízení na stejné WiFi)
+  return 'http://192.168.0.38:20300/api/v1/logs/frontend';
 };
 
 const LOKI_URL = getLokiUrl();

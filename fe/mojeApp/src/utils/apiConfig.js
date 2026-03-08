@@ -14,8 +14,8 @@ export const getApiUrl = () => {
   if (Platform.OS === 'web') {
     return 'http://localhost:20300';
   }
-  // Pro React Native (Android emulator - Docker backend on port 20300)
-  return 'http://10.0.2.2:20300';
+  // Pro React Native (Android - fyzické zařízení na stejné WiFi)
+  return 'http://192.168.0.38:20300';
 };
 
 /**
