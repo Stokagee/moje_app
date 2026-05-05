@@ -1,0 +1,36 @@
+meta {
+  name: 00f - Set Courier Available
+  type: http
+  seq: 6
+}
+
+docs {
+  Nastavi status kuryre na available, aby mohl prevzit objednavky.
+}
+
+patch {
+  url: {{base_url}}/couriers/{{test_courier_id}}/status
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "available"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    console.log('Courier is now available for dispatch');
+    console.log('Courier ID:', bru.getEnvVar('test_courier_id'));
+  }
+}

@@ -1,0 +1,28 @@
+meta {
+  name: 30 - Error No Auth
+  type: http
+  seq: 30
+}
+
+post {
+  url: {{base_url}}/orders/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "customer_name": "No Auth",
+    "customer_phone": "+420111222333",
+    "pickup_address": "Test",
+    "pickup_lat": 50.0,
+    "pickup_lng": 14.0,
+    "delivery_address": "Test",
+    "delivery_lat": 50.1,
+    "delivery_lng": 14.1
+  }
+}

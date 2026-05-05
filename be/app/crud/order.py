@@ -36,9 +36,14 @@ def get_orders(db: Session, skip: int = 0, limit: int = 100) -> List[Order]:
     return db.query(Order).offset(skip).limit(limit).all()
 
 
-def get_orders_by_status(db: Session, status: OrderStatus) -> List[Order]:
+def get_orders_by_status(
+    db: Session,
+    status: OrderStatus,
+    skip: int = 0,
+    limit: int = 100
+) -> List[Order]:
     """Get orders by status."""
-    return db.query(Order).filter(Order.status == status).all()
+    return db.query(Order).filter(Order.status == status).offset(skip).limit(limit).all()
 
 
 def get_pending_orders(db: Session) -> List[Order]:

@@ -19,7 +19,7 @@ Connect To Test Database
         ...    db_port=${DB_PORT}
         ...    alias=${DB_ALIAS}
     EXCEPT    AS    ${err}
-        ${msg}=    Set Variable    Selhání připojení k DB --> | ERROR: ${err}
+        VAR    ${msg}    Selhání připojení k DB --> | ERROR: ${err}
         Fail    ${msg}
     END
 
@@ -29,7 +29,7 @@ Disconnect From Test Database
     TRY
         Disconnect From Database    ${DB_ALIAS}
     EXCEPT    AS    ${err}
-        ${msg}=    Set Variable    Selhání odpojení od DB --> | ERROR: ${err}
+        VAR    ${msg}    Selhání odpojení od DB --> | ERROR: ${err}
         Fail    ${msg}
     END
 
@@ -40,7 +40,7 @@ Delete All Test Data
     TRY
         Execute Sql String    DELETE FROM users
     EXCEPT    AS    ${err}
-        ${msg}=    Set Variable    Selhání smazání testovacích dat z DB --> | ERROR: ${err}
+        VAR    ${msg}    Selhání smazání testovacích dat z DB --> | ERROR: ${err}
         Fail    ${msg}
     END
 
@@ -63,7 +63,7 @@ Verify Row Count In Database
             ...    retry_timeout=${retry_timeout}
             ...    assertion_message=${context_name}
         EXCEPT    AS    ${err}
-            ${default_msg}=    Set Variable    Ověření počtu řádků selhalo pro dotaz: "${select_statement}". Očekáváno ${assertion_operator} ${expected_value}.
+            VAR    ${default_msg}    Ověření počtu řádků selhalo pro dotaz: "${select_statement}". Očekáváno ${assertion_operator} ${expected_value}.
             Fail    ${default_msg} | ERROR: ${err}
         END
 

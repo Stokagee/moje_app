@@ -87,7 +87,7 @@
         }
       ],
       "title": "Log Level Distribution",
-      "type": "heatmap-overview"
+      "type": "table"
     },
     {
       "datasource": {
@@ -172,7 +172,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({service=\"moje-app-frontend\", level=\"error\"} [$__auto]))",
+          "expr": "sum(count_over_time({service=\"moje-app-frontend\", level=~\"(?i)error\"} [$__auto]))",
           "legendFormat": "Errors",
           "refId": "A"
         },
@@ -181,7 +181,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({service=\"moje-app-frontend\", level=\"warning\"} [$__auto]))",
+          "expr": "sum(count_over_time({service=\"moje-app-frontend\", level=~\"(?i)warning\"} [$__auto]))",
           "legendFormat": "Warnings",
           "refId": "B"
         }
@@ -311,7 +311,7 @@
           }
         }
       ],
-      "type": "heatmap-overview"
+      "type": "logs"
     }
   ],
   "refresh": "30s",

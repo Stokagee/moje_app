@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "name": "Orders Flow Tests",
+  "type": "collection",
+  "description": "Complete order lifecycle tests: create → dispatch → pickup → deliver"
+}

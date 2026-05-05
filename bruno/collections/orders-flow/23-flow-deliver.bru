@@ -1,0 +1,15 @@
+meta {
+  name: 23 - Flow Deliver Order
+  type: http
+  seq: 23
+}
+
+post {
+  url: {{base_url}}/orders/{{flow_order_id}}/deliver
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}

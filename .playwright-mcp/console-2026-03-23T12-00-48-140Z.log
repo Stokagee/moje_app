@@ -1,0 +1,17 @@
+[     245ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'ambient-light-sensor'. @ :0
+[     245ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'battery'. @ :0
+[     245ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'document-domain'. @ :0
+[     245ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'execution-while-not-rendered'. @ :0
+[     245ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'execution-while-out-of-viewport'. @ :0
+[     245ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'speaker-selection'. @ :0
+[     372ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://pypi.org/_fs-ch-1T1wmsGaOgGaSxcX/pat?token=AfjoYWorFj-92jRnYNsbwmr9xYbzXzPU11U_gPgZQPSiCnFNwzuo-OG1zFECUQPjnrMs7SdTrAHY1ij47h_-LgutR1r0nzDBgAQBnRqrxihFyDdYzaUcSu4Jph_TJBwJfxXezrl6p_LIp9hgqYQ7ADGrmyjOgClXI3Z0SFAUvHuSKHKdRzwYWy9Xrpbe6MUNemf1g99Y3KZYdSTfxvRoA2Bqbv4gdRgzdxLA9OYhwUiEMBj5JTRo920ydQyjIaae0aL6KHHAV75xcKJDNxAwAo48brPr0kuuvtdLkUmSI5OX1wVl4aFpf9DJqPvcwXQG4UhPHgEkN9vJK2paLZJTFFFpyUgFPlpX3bbDN9q0gb4mkHEDFDpYNWuhec03b6jpg-yJqXeoA2yAUjQ-xGJzr0wphhxesjQpJJgyjqIdZDxG_GSkqpoEZhoWDBCx8V6WLYPrOmsMXOZvIdZQKaRa2-bDQY_wAA==:0
+[     425ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://pypi.org/fastly/logo:0
+[    1012ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'ambient-light-sensor'. @ :0
+[    1012ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'battery'. @ :0
+[    1012ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'document-domain'. @ :0
+[    1012ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'execution-while-not-rendered'. @ :0
+[    1012ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'execution-while-out-of-viewport'. @ :0
+[    1012ms] [WARNING] Error with Permissions-Policy header: Unrecognized feature: 'speaker-selection'. @ :0
+[    1224ms] Error: No ad placements found.
+    at w (https://media.ethicalads.io/media/client/v1.4.0/ethicalads.min.js:1:11867)
+    at https://media.ethicalads.io/media/client/v1.4.0/ethicalads.min.js:1:12977

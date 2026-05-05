@@ -16,6 +16,18 @@ class Settings(BaseSettings):
     APP_NAME: str = os.getenv("APP_NAME", "moje-app-backend")
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
 
+    # OAuth2 JWT Configuration (PKCE)
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "super-secret-key-change-in-production-123!")
+    ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+
+    # CSRF Protection
+    CSRF_SECRET_KEY: str = os.getenv("CSRF_SECRET_KEY", "csrf-secret-key-change-in-production!")
+
+    # mTLS Configuration
+    FORCE_HTTPS: bool = os.getenv("FORCE_HTTPS", "false").lower() == "true"
+    TRUSTED_PROXIES: str = os.getenv("TRUSTED_PROXIES", "")
+
     # Keep env_file configured for cases where .env should be read directly
     model_config = {
         "env_file": ".env",

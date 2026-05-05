@@ -65,6 +65,10 @@ a `secret_message` s gratulací.
             "description": "Email již existuje v systému",
             "model": ErrorResponse,
         },
+        409: {
+            "description": "Konflikt - email již existuje",
+            "model": ErrorResponse,
+        },
         422: {
             "description": "Validační chyba (neplatná data)",
         },
@@ -102,8 +106,9 @@ def create_form_data_endpoint(
         logger.info(f"Záznam úspěšně vytvořen s ID {created_data.id}; easter_egg={egg}")
         return response
     except IntegrityError as e:
+        db.rollback()  # Reset session state after IntegrityError
         logger.warning(f"Duplicate email attempt: {form_data.email}")
-        raise HTTPException(status_code=400, detail="Email již existuje v systému")
+        raise HTTPException(status_code=409, detail="Email již existuje v systému")
     except Exception as e:
         logger.error(f"Chyba při vytváření záznamu: {str(e)}")
         raise HTTPException(status_code=500, detail="Nepodařilo se uložit data")

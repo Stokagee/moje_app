@@ -1,0 +1,98 @@
+meta {
+  name: Create New Order
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:20300/api/v1/orders/
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbjEiLCJ1c2VyX2lkIjoyLCJyb2xlIjoiYWRtaW4iLCJzY29wZXMiOiJvcmRlcnM6cmVhZCBvcmRlcnM6d3JpdGUgb3JkZXJzOmFkbWluIiwiZXhwIjoxNzc1MzA3NjIyLCJpYXQiOjE3NzUzMDQwMjJ9.RLA3-BurV6CLgAOd11Qhw2LeEmNyFh3f9OZzO2d58Ms
+  Content-Type: application/json
+  X-CSRF-Token: 484b32c6621469bfecfc9884733cba81d4b0a116
+}
+
+body:json {
+  {
+      "customer_name": "Test Customer",
+      "customer_phone": "+420606123456",
+      "pickup_address": "Test Pickup 1",
+      "pickup_lat": 50.0,
+      "pickup_lng": 14.0,
+      "delivery_address": "Test Delivery 1",
+      "delivery_lat": 50.1,
+      "delivery_lng": 14.1
+    }
+}
+
+script:pre-request {
+  function randomInRange(min, max) {
+    return min + Math.random() * (max - min);
+  }
+  
+  function randomItem(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+  
+  function randomPhone() {
+    return '+420' + Math.floor(100000000 + Math.random() * 900000000);
+  }
+  
+  function randomName() {
+    const first = ['Jan', 'Petr', 'Lucie', 'Eva', 'Tomáš', 'Marie', 'David'];
+    const last = ['Novák', 'Svoboda', 'Novotný', 'Dvořák', 'Černý'];
+    return `${randomItem(first)} ${randomItem(last)}`;
+  }
+  
+  const cities = [
+    { name: 'Praha', lat: 50.0755, lng: 14.4378 },
+    { name: 'Brno', lat: 49.1951, lng: 16.6068 },
+    { name: 'Ostrava', lat: 49.8209, lng: 18.2625 },
+    { name: 'Plzeň', lat: 49.7384, lng: 13.3736 },
+  ];
+  
+  function makeLocation() {
+    const base = randomItem(cities);
+  
+    return {
+      address: `${randomItem(['Národní','Vinohradská','Dlouhá','Masarykova'])} ${Math.floor(Math.random()*200)}, ${base.name}`,
+      lat: +(base.lat + randomInRange(-0.02, 0.02)).toFixed(6),
+      lng: +(base.lng + randomInRange(-0.03, 0.03)).toFixed(6),
+    };
+  }
+  
+  const pickup = makeLocation();
+  const delivery = makeLocation();
+  
+  const body = [
+    {
+      customer_name: randomName(),
+      customer_phone: randomPhone(),
+      pickup_address: pickup.address,
+      pickup_lat: pickup.lat,
+      pickup_lng: pickup.lng,
+      delivery_address: delivery.address,
+      delivery_lat: delivery.lat,
+      delivery_lng: delivery.lng,
+      is_vip: Math.random() < 0.1,
+      required_tags: [],
+      id: Math.floor(Math.random() * 100000),
+      status: 'CREATED',
+      courier_id: null,
+      created_at: new Date().toISOString(),
+      updated_at: null,
+    },
+  ];
+  
+  req.setBody(JSON.stringify(body));
+  req.setHeader('Content-Type', 'application/json');
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

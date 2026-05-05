@@ -1,0 +1,15 @@
+meta {
+  name: 22 - Flow Pickup Order
+  type: http
+  seq: 22
+}
+
+post {
+  url: {{base_url}}/orders/{{flow_order_id}}/pickup
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}

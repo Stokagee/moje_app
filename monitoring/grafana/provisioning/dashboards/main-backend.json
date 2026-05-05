@@ -87,7 +87,7 @@
         }
       ],
       "title": "Log Level Distribution",
-      "type": "heatmap-overview"
+      "type": "table"
     },
     {
       "datasource": {
@@ -244,7 +244,7 @@
         }
       ],
       "title": "Requests by Endpoint",
-      "type": "heatmap-overview"
+      "type": "table"
     },
     {
       "datasource": {
@@ -314,7 +314,7 @@
         }
       ],
       "title": "Recent Logs",
-      "type": "heatmap-overview"
+      "type": "logs"
     },
     {
       "datasource": {
@@ -395,7 +395,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({service=\"moje-app\", level=\"error\"} [$__auto]))",
+          "expr": "sum(count_over_time({service=\"moje-app\", level=~\"(?i)error\"} [$__auto]))",
           "refId": "A"
         },
         {
@@ -403,7 +403,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({service=\"moje-app\", level=\"warning\"} [$__auto]))",
+          "expr": "sum(count_over_time({service=\"moje-app\", level=~\"(?i)warning\"} [$__auto]))",
           "refId": "B"
         }
       ],

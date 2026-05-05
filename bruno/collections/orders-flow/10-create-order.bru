@@ -1,0 +1,82 @@
+meta {
+  name: 10 - Create Order
+  type: http
+  seq: 10
+}
+
+docs {
+  Vytvoreni nove objednavky s random daty.
+}
+
+post {
+  url: {{base_url}}/orders/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customer_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  function randomItem(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function randomPhone() {
+    return '+420' + Math.floor(100000000 + Math.random() * 900000000);
+  }
+
+  function randomName() {
+    const first = ['Jan', 'Petr', 'Lucie', 'Eva', 'Tomas', 'Marie', 'David'];
+    const last = ['Novak', 'Svoboda', 'Novotny', 'Dvorak', 'Cerny'];
+    return `${randomItem(first)} ${randomItem(last)}`;
+  }
+
+  function randomAddress() {
+    const streets = ['Narodni', 'Vinohradska', 'Dlouha', 'Masarykova', 'Vaclavske namesti'];
+    const cities = ['Praha 1', 'Praha 2', 'Praha 3', 'Praha 4'];
+    return `${randomItem(streets)} ${Math.floor(Math.random() * 200) + 1}, ${randomItem(cities)}`;
+  }
+
+  function randomCoords(baseLat, baseLng, delta) {
+    return {
+      lat: +(baseLat + (Math.random() * 2 - 1) * delta).toFixed(6),
+      lng: +(baseLng + (Math.random() * 2 - 1) * delta).toFixed(6),
+    };
+  }
+
+  const pickup = randomCoords(50.0755, 14.4378, 0.02);
+  const delivery = randomCoords(50.0755, 14.4378, 0.02);
+
+  const body = {
+    customer_name: randomName(),
+    customer_phone: randomPhone(),
+    pickup_address: randomAddress(),
+    pickup_lat: pickup.lat,
+    pickup_lng: pickup.lng,
+    delivery_address: randomAddress(),
+    delivery_lat: delivery.lat,
+    delivery_lng: delivery.lng,
+    is_vip: Math.random() < 0.1,
+    required_tags: []
+  };
+
+  req.setBody(JSON.stringify(body));
+  console.log('Creating order for:', body.customer_name);
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setEnvVar('order_id', res.body.id.toString());
+    console.log('Order created with ID:', res.body.id);
+  }
+}

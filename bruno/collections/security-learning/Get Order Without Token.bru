@@ -1,0 +1,48 @@
+meta {
+  name: Get Order Without Token
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://localhost/api/v1/orders
+  body: none
+  auth: oauth2
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbjEiLCJ1c2VyX2lkIjoyLCJyb2xlIjoiYWRtaW4iLCJzY29wZXMiOiJvcmRlcnM6cmVhZCBvcmRlcnM6d3JpdGUgb3JkZXJzOmFkbWluIiwiZXhwIjoxNzc1MzExNjAxLCJpYXQiOjE3NzUzMDgwMDF9.h2N-E7GPo5FxHPppCHyVLAXoA6_01cwPU6smTQAz8xc
+}
+
+auth:oauth2 {
+  grant_type: authorization_code
+  callback_url: 
+  authorization_url: 
+  access_token_url: 
+  refresh_token_url: 
+  client_id: 
+  client_secret: 
+  scope: 
+  state: 
+  pkce: false
+  credentials_placement: body
+  credentials_id: credentials
+  token_source: access_token
+  token_placement: header
+  token_header_prefix: Bearer
+  auto_fetch_token: true
+  auto_refresh_token: false
+}
+
+vars:pre-request {
+  base_url: https://localhost/api/v1/orders/
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Tady se píše o testu co se děla a jak má fungovat
+}

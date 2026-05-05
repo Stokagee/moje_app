@@ -1,0 +1,20 @@
+meta {
+  name: Get CSRF Token
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:20300/api/v1/auth/csrf-token
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbjEiLCJ1c2VyX2lkIjoyLCJyb2xlIjoiYWRtaW4iLCJzY29wZXMiOiJvcmRlcnM6cmVhZCBvcmRlcnM6d3JpdGUgb3JkZXJzOmFkbWluIiwiZXhwIjoxNzc1MzA3NjIyLCJpYXQiOjE3NzUzMDQwMjJ9.RLA3-BurV6CLgAOd11Qhw2LeEmNyFh3f9OZzO2d58Ms
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

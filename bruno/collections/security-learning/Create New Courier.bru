@@ -1,0 +1,58 @@
+meta {
+  name: Create New Courier
+  type: http
+  seq: 8
+}
+
+post {
+  url: http://localhost:20300/api/v1/couriers/
+  body: none
+  auth: inherit
+}
+
+script:pre-request {
+  function randomItem(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+  
+  function randomPhone() {
+    return '+420' + Math.floor(100000000 + Math.random() * 900000000);
+  }
+  
+  function randomName() {
+    const first = ['Jan', 'Petr', 'Lucie', 'Eva', 'Tomáš', 'Marie', 'David'];
+    const last = ['Novák', 'Svoboda', 'Novotný', 'Dvořák', 'Černý'];
+    return {
+      full: `${randomItem(first)} ${randomItem(last)}`,
+      first: randomItem(first),
+      last: randomItem(last),
+    };
+  }
+  
+  function randomEmail(first, last) {
+    const domains = ['example.cz', 'mail.cz', 'seznam.cz'];
+    return `${first.toLowerCase()}.${last.toLowerCase()}@${randomItem(domains)}`;
+  }
+  
+  function randomTags() {
+    const allTags = ['bike', 'car', 'vip', 'express', 'fragile'];
+    return allTags.filter(() => Math.random() < 0.4);
+  }
+  
+  const name = randomName();
+  
+  const body = {
+    email: randomEmail(name.first, name.last),
+    name: name.full,
+    phone: randomPhone(),
+    tags: randomTags(),
+  };
+  
+  req.setBody(JSON.stringify(body));
+  req.setHeader('Content-Type', 'application/json');
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

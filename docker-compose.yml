@@ -35,8 +35,20 @@ services:
       LOKI_URL: http://loki:3100/loki/api/v1/push
       APP_NAME: moje-app
       ENVIRONMENT: ${ENVIRONMENT:-development}
+      BRANCH_NAME: ${BRANCH_NAME:-local}
+      # OAuth2 JWT Configuration
+      SECRET_KEY: ${SECRET_KEY:-super-secret-key-change-in-production-123!}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      # CSRF Protection
+      CSRF_SECRET_KEY: ${CSRF_SECRET_KEY:-csrf-secret-key-change-in-production!}
+      # mTLS Configuration
+      FORCE_HTTPS: ${FORCE_HTTPS:-false}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-nginx}
     ports:
-      - "${BACKEND_PORT:-9000}:8000"
+      - "${BACKEND_PORT:-20300}:8000"
+    volumes:
+      - ./be/shared:/app/shared:ro  # Shared logging module
     depends_on:
       db:
         condition: service_healthy
@@ -257,6 +269,33 @@ services:
     volumes:
       - auth_pkce_data:/app/data
       - ./be/shared:/app/shared:ro  # Mount shared logging module
+
+  # ============================================
+  # NGINX - Reverse Proxy s mTLS
+  # ============================================
+  # Pro produkci: HTTPS termination + mTLS klient certifikáty
+  #
+  # Jak to funguje:
+  # 1. Klient poslal HTTPS request na nginx
+  # 2. Nginx vyžaduje klientský certifikát (mTLS)
+  # 3. Pokud je certifikát validní, request pokračuje na backend
+  # 4. Backend dostane info o certifikátu v hlavičkách (X-Client-CN)
+  #
+  # Pro development: nginx není potřeba (přímý přístup k backend:8000)
+  nginx:
+    image: nginx:alpine
+    container_name: moje_app_nginx
+    ports:
+      - "${NGINX_HTTPS_PORT:-443}:443"
+      - "${NGINX_HTTP_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
+    profiles:
+      - production  # Spustit jen s: docker compose --profile production up
+    restart: unless-stopped
 
 volumes:
   postgres_data:

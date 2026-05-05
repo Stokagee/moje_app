@@ -1,0 +1,26 @@
+meta {
+  name: 31 - Error Invalid Data
+  type: http
+  seq: 31
+}
+
+post {
+  url: {{base_url}}/orders/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customer_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "customer_name": "",
+    "customer_phone": "invalid"
+  }
+}

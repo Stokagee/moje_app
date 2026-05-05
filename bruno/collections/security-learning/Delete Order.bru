@@ -1,0 +1,24 @@
+meta {
+  name: Delete Order
+  type: http
+  seq: 5
+}
+
+delete {
+  url: http://localhost:20300/api/v1/orders/1
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbjEiLCJ1c2VyX2lkIjoyLCJyb2xlIjoiYWRtaW4iLCJzY29wZXMiOiJvcmRlcnM6cmVhZCBvcmRlcnM6d3JpdGUgb3JkZXJzOmFkbWluIiwiZXhwIjoxNzc1MzA3NjIyLCJpYXQiOjE3NzUzMDQwMjJ9.RLA3-BurV6CLgAOd11Qhw2LeEmNyFh3f9OZzO2d58Ms
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Delte jasně říká, že se to maže a nedá se s tím nic už potom dělat
+}

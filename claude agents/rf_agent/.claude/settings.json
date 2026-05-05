@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__filesystem__directory_tree",
+      "mcp__filesystem__read_multiple_files",
+      "mcp__filesystem__read_text_file",
+      "mcp__filesystem__read_file",
+      "mcp__filesystem__write_file",
+      "mcp__filesystem__create_directory",
+      "mcp__filesystem__move_file",
+      "mcp__filesystem__list_directory",
+      "mcp__filesystem__search_files",
+      "mcp__filesystem__get_file_info",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(robot:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Read(**)",
+      "Write(**)",
+      "Edit(**)"
+    ]
+  },
+  "hooks": {}
+}

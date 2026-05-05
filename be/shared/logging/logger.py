@@ -22,6 +22,7 @@ from .formatters import LokiFormatter
 LOKI_URL = os.getenv("LOKI_URL", "http://loki:3100/loki/api/v1/push")
 APP_NAME = os.getenv("APP_NAME", "unknown-service")
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+BRANCH_NAME = os.getenv("BRANCH_NAME", "main")  # For multi-branch deployments
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
 
@@ -53,6 +54,7 @@ def setup_logging() -> None:
     common_labels = {
         "service": APP_NAME,
         "environment": ENVIRONMENT,
+        "branch": BRANCH_NAME,
     }
 
     # Console handler - colored, human-readable for development
@@ -94,12 +96,31 @@ def setup_logging() -> None:
         # Loki expects nanosecond timestamps
         timestamp_ns = int(record["time"].timestamp() * 1_000_000_000)
 
+        # Build JSON log entry with all important fields
+        log_entry = {
+            "message": record["message"],
+            "level": record["level"].name,
+            "timestamp": record["time"].isoformat(),
+            "logger": record["extra"].get("logger_name", "root"),
+            "request_id": record["extra"].get("request_id", "N/A"),
+        }
+
+        # Add ALL extra fields from the record
+        for key, value in record["extra"].items():
+            if key not in ["stream_labels", "service", "environment", "branch", "logger_name", "request_id"]:
+                # Convert non-serializable values to strings
+                try:
+                    json.dumps({key: value})
+                    log_entry[key] = value
+                except (TypeError, ValueError):
+                    log_entry[key] = str(value)
+
         payload = {
             "streams": [
                 {
                     "stream": stream,
                     "values": [
-                        [str(timestamp_ns), str(message).strip()]
+                        [str(timestamp_ns), json.dumps(log_entry)]
                     ]
                 }
             ]
@@ -162,6 +183,7 @@ def _update_record_loki(record: Dict[str, Any], labels: Dict[str, str]) -> bool:
     stream_labels = {
         "service": labels["service"],
         "environment": labels["environment"],
+        "branch": labels.get("branch", "local"),
         "level": record["level"].name,
     }
 
@@ -243,5 +265,12 @@ def intercept_standard_logging() -> None:
         logging_logger = logging.getLogger(name)
         logging_logger.handlers = [InterceptHandler()]
         logging_logger.propagate = False
+
+    # IMPORTANT: Disable logging for httpx to prevent log loop
+    # httpx is used to send logs to Loki, so we must NOT log its activity
+    httpx_logger = logging.getLogger("httpx")
+    httpx_logger.handlers = []
+    httpx_logger.propagate = False
+    httpx_logger.setLevel(logging.WARNING)  # Only log warnings/errors
 
     logger.info("Standard logging intercepted and redirected to Loguru")

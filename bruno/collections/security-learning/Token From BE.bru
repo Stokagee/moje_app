@@ -1,0 +1,20 @@
+meta {
+  name: Token From BE
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:20300/api/v1/orders/
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjb3VyaWVyMSIsInVzZXJfaWQiOjEsInJvbGUiOiJjb3VyaWVyIiwic2NvcGVzIjoib3JkZXJzOnJlYWQgb3JkZXJzOndyaXRlIiwiZXhwIjoxNzc1MzA3MzY4LCJpYXQiOjE3NzUzMDM3Njh9.Pe2iTq7yies86MFwJ0R47PqnkNaHneKQ1P5Q534GENM
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,17 @@
+meta {
+  name: 21 - Flow Dispatch Order
+  type: http
+  seq: 21
+}
+
+post {
+  url: {{base_url}}/dispatch/auto/{{flow_order_id}}
+  body: none
+  auth: none
+}
+
+script:post-response {
+  if (res.body.success) {
+    bru.setEnvVar('flow_courier_id', res.body.courier_id.toString());
+  }
+}

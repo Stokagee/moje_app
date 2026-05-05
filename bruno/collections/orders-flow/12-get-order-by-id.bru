@@ -1,0 +1,15 @@
+meta {
+  name: 12 - Get Order By ID
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{base_url}}/orders/{{order_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customer_token}}
+}

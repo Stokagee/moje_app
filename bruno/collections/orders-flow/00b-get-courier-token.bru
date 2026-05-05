@@ -1,0 +1,31 @@
+meta {
+  name: 00b - Get Courier Token
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/auth/test-token
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "username": "test_courier",
+    "role": "courier",
+    "user_id": 10,
+    "scopes": "orders:read orders:write"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    bru.setEnvVar('courier_token', res.body.access_token);
+    bru.setEnvVar('courier_id', '10');
+  }
+}

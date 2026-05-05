@@ -1,0 +1,36 @@
+meta {
+  name: Token Exhange
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:5105/oauth2/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/x-www-form-urlencoded
+}
+
+body:json {
+  grant_type: authorization_code
+  code: kbUe5MyA3E1k2ksvEByNDGxbwfX6t8_D9_2gtXF7Vzw
+  client_id: pkce-spa-client
+  code_verifier: PycKf4VSHgSUNJ9taSRNFgnnykJq4xJixOLJHzyHPr_oQihunMzm2UkLZqs-nes7PvRT0_uj1oj8g2Y00JwEpA
+    redirect_uri: http://localhost:3000/callback
+}
+
+body:form-urlencoded {
+  grant_type: authorization_code
+  code: ZD6ln9gItn_a2iFnPS3Ts2kFL1J9oLFYDj8NnyvOWVA
+  client_id: pkce-spa-client
+  code_verifier: db2WbeRSMZM6_FvjLWbGFjppivG8rXLD7OXS-e3iwa8fLczPFTgOi-DPMm1dviRz_MsovNF5eA6RtDVP8Lk2eA
+  redirect_uri: http://localhost:3000/callback
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

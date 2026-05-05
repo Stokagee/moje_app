@@ -1,0 +1,15 @@
+meta {
+  name: 60 - Admin Delete Order
+  type: http
+  seq: 60
+}
+
+delete {
+  url: {{base_url}}/orders/{{order_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}

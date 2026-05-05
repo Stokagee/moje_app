@@ -1,0 +1,81 @@
+meta {
+  name: 00d - Create Test Courier
+  type: http
+  seq: 4
+}
+
+docs {
+  Vytvori testovaciho kuryra pro flow testy.
+  Pouziva random data generator v pre-request scriptu.
+}
+
+post {
+  url: {{base_url}}/couriers/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  function randomItem(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function randomPhone() {
+    return '+420' + Math.floor(100000000 + Math.random() * 900000000);
+  }
+
+  function randomName() {
+    const first = ['Jan', 'Petr', 'Lucie', 'Eva', 'Tomas', 'Marie', 'David'];
+    const last = ['Novak', 'Svoboda', 'Novotny', 'Dvorak', 'Cerny'];
+    return {
+      full: `${randomItem(first)} ${randomItem(last)}`,
+      first: randomItem(first),
+      last: randomItem(last),
+    };
+  }
+
+  function randomEmail(first, last) {
+    const domains = ['example.cz', 'mail.cz', 'seznam.cz'];
+    return `${first.toLowerCase()}.${last.toLowerCase()}@${randomItem(domains)}`;
+  }
+
+  function randomTags() {
+    const allTags = ['bike', 'car', 'vip', 'express', 'fragile_ok'];
+    return allTags.filter(() => Math.random() < 0.4);
+  }
+
+  const name = randomName();
+  const timestamp = Date.now();
+
+  const body = {
+    email: `courier${timestamp}@test.cz`,
+    name: name.full,
+    phone: randomPhone(),
+    tags: randomTags()
+  };
+
+  req.setBody(JSON.stringify(body));
+  console.log('Creating courier:', body.name, body.email);
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setEnvVar('test_courier_id', res.body.id.toString());
+    bru.setEnvVar('test_courier_name', res.body.name);
+    console.log('Test courier created:', res.body.id, res.body.name);
+  } else {
+    console.log('Courier creation status:', res.status);
+  }
+}

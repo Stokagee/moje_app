@@ -1,0 +1,36 @@
+meta {
+  name: 00e - Set Courier Location
+  type: http
+  seq: 5
+}
+
+docs {
+  Nastavi GPS polohu kuryre (Praha centrum).
+}
+
+patch {
+  url: {{base_url}}/couriers/{{test_courier_id}}/location
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{admin_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "lat": 50.0810,
+    "lng": 14.4240
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    console.log('Courier location set to Prague center');
+  }
+}

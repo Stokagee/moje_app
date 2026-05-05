@@ -45,9 +45,14 @@ class OrderAPI:
         response.raise_for_status()
         return response.json()
 
-    def get_orders_by_status(self, status: str) -> List[Dict]:
+    def get_orders_by_status(
+        self, status: str, skip: int = 0, limit: int = 100
+    ) -> List[Dict]:
         """Získat objednávky podle statusu."""
-        response = self.api_client.get(f"{self.base_endpoint}/by-status/{status}")
+        response = self.api_client.get(
+            f"{self.base_endpoint}/by-status/{status}",
+            params={"skip": skip, "limit": limit}
+        )
         response.raise_for_status()
         return response.json()
 

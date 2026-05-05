@@ -1,0 +1,37 @@
+meta {
+  name: 30 - Error: Create Order No Auth
+  type: http
+  seq: 30
+}
+
+docs {
+  Test: Vytvoreni objednavky bez autentizace.
+  Ocekava: 401 Unauthorized
+}
+
+post {
+  url: {{base_url}}/orders/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "customer_name": "No Auth Test",
+    "customer_phone": "+420111222333",
+    "pickup_address": "Test Address",
+    "pickup_lat": 50.0,
+    "pickup_lng": 14.0,
+    "delivery_address": "Delivery Address",
+    "delivery_lat": 50.1,
+    "delivery_lng": 14.1
+  }
+}
+
+assert {
+  res.status: eq 401
+}

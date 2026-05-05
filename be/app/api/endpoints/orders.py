@@ -2,6 +2,11 @@
 
 Tento modul poskytuje kompletní životní cyklus objednávky:
 vytvoření, dispatch, pickup, deliver, cancel.
+
+SECURITY:
+- Všechny endpointy vyžadují OAuth2 Bearer token (PKCE flow)
+- pickup/deliver vyžadují roli "courier" nebo "admin"
+- delete vyžaduje roli "admin"
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from sqlalchemy.orm import Session
@@ -17,6 +22,17 @@ from app.schemas.order import (
 from app.models.order import OrderStatus
 from app.crud import order as order_crud
 from app.crud import courier as courier_crud
+from app.core.auth import (
+    get_current_user,
+    get_current_courier,
+    get_current_admin,
+    CurrentUser
+)
+from app.core.csrf import validate_csrf_or_raise
+from app.core.config import settings
+
+
+from app.database import get_db
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -108,8 +124,12 @@ Např. `["fragile_ok"]` znamená, že kurýr musí mít tag `fragile_ok`.
         }
     }
 )
-def create_order(order: OrderCreate, db: Session = Depends(get_db)):
-    """Vytvoří novou objednávku."""
+def create_order(
+    order: OrderCreate,
+    db: Session = Depends(get_db),
+    user: CurrentUser = Depends(get_current_user)
+):
+    """Vytvoří novou objednávku. Vyžaduje autentizaci."""
     return order_crud.create_order(db, order)
 
 
@@ -139,9 +159,10 @@ Pro filtrování podle stavu použijte `/orders/by-status/{status}`.
 def get_orders(
     skip: int = Query(default=0, ge=0, description="Offset pro stránkování"),
     limit: int = Query(default=100, ge=1, le=1000, description="Max počet záznamů"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: CurrentUser = Depends(get_current_user)
 ):
-    """Vrátí seznam všech objednávek."""
+    """Vrátí seznam všech objednávek. Vyžaduje autentizaci."""
     return order_crud.get_orders(db, skip=skip, limit=limit)
 
 
@@ -167,8 +188,11 @@ Vrátí seznam objednávek ve stavu `SEARCHING` - čekají na přiřazení kurý
         }
     }
 )
-def get_pending_orders(db: Session = Depends(get_db)):
-    """Vrátí objednávky čekající na přiřazení kurýra."""
+def get_pending_orders(
+    db: Session = Depends(get_db),
+    user: CurrentUser = Depends(get_current_user)
+):
+    """Vrátí objednávky čekající na přiřazení kurýra. Vyžaduje autentizaci."""
     return order_crud.get_pending_orders(db)
 
 
@@ -203,10 +227,13 @@ Vrátí seznam všech objednávek v daném stavu.
 )
 def get_orders_by_status(
     status: OrderStatus = Path(..., description="Stav objednávky pro filtrování"),
-    db: Session = Depends(get_db)
+    skip: int = Query(default=0, ge=0, description="Offset pro stránkování"),
+    limit: int = Query(default=100, ge=1, le=1000, description="Max počet záznamů"),
+    db: Session = Depends(get_db),
+    user: CurrentUser = Depends(get_current_user)
 ):
-    """Vrátí objednávky filtrované podle stavu."""
-    return order_crud.get_orders_by_status(db, status)
+    """Vrátí objednávky filtrované podle stavu. Vyžaduje autentizaci."""
+    return order_crud.get_orders_by_status(db, status, skip=skip, limit=limit)
 
 
 @router.get(
@@ -246,9 +273,10 @@ Vrátí kompletní informace o objednávce včetně detailů přiřazeného kur�
 )
 def get_order(
     order_id: int = Path(..., ge=1, description="ID objednávky"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: CurrentUser = Depends(get_current_user)
 ):
-    """Vrátí detail objednávky včetně kurýra."""
+    """Vrátí detail objednávky včetně kurýra. Vyžaduje autentizaci."""
     order = order_crud.get_order(db, order_id)
     if not order:
         raise HTTPException(
@@ -301,9 +329,10 @@ Tento endpoint je určen pro **výjimečné situace** a opravy.
 def update_order_status(
     order_id: int = Path(..., ge=1, description="ID objednávky"),
     status_update: OrderStatusUpdate = ...,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: CurrentUser = Depends(get_current_admin)  # Pouze admin
 ):
-    """Změní stav objednávky (administrativní operace)."""
+    """Změní stav objednávky (administrativní operace). Vyžaduje admin roli."""
     updated = order_crud.update_order_status(db, order_id, status_update)
     if not updated:
         raise HTTPException(
@@ -366,16 +395,24 @@ Po doručení zavolejte `POST /orders/{id}/deliver`.
         }
     }
 )
-def mark_order_picked(
+async def mark_order_picked(
     order_id: int = Path(..., ge=1, description="ID objednávky"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    courier: CurrentUser = Depends(get_current_courier)  # Pouze courier
 ):
-    """Označí objednávku jako vyzvednutou kurýrem."""
+    """Označí objednávku jako vyzvednutou kurýrem. Vyžaduje roli courier a vlastnictví."""
     order = order_crud.get_order(db, order_id)
     if not order:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Order not found"
+        )
+
+    # Kontrola vlastnictví - kurýr může vyzvednout jen své objednávky
+    if courier.role != "admin" and order.courier_id != courier.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only pickup orders assigned to you"
         )
 
     if order.status != OrderStatus.ASSIGNED:
@@ -443,16 +480,24 @@ Toto je **konečný stav** objednávky. Po doručení nelze stav změnit.
         }
     }
 )
-def mark_order_delivered(
+async def mark_order_delivered(
     order_id: int = Path(..., ge=1, description="ID objednávky"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    courier: CurrentUser = Depends(get_current_courier)  # Pouze courier
 ):
-    """Označí objednávku jako doručenou."""
+    """Označí objednávku jako doručenou. Vyžaduje roli courier a vlastnictví."""
     order = order_crud.get_order(db, order_id)
     if not order:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Order not found"
+        )
+
+    # Kontrola vlastnictví - kurýr může doručit jen své objednávky
+    if courier.role != "admin" and order.courier_id != courier.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only deliver orders assigned to you"
         )
 
     if order.status != OrderStatus.PICKED:
@@ -538,11 +583,12 @@ Zruší objednávku a uvolní kurýra (pokud byl přiřazen).
         }
     }
 )
-def cancel_order(
+async def cancel_order(
     order_id: int = Path(..., ge=1, description="ID objednávky"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: CurrentUser = Depends(get_current_user)  # Auth uživatel může zrušit
 ):
-    """Zruší objednávku."""
+    """Zruší objednávku. Vyžaduje autentizaci."""
     order = order_crud.get_order(db, order_id)
     if not order:
         raise HTTPException(
@@ -603,11 +649,12 @@ V produkci objednávky nemazat - slouží pro historii a reporting.
         }
     }
 )
-def delete_order(
+async def delete_order(
     order_id: int = Path(..., ge=1, description="ID objednávky"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: CurrentUser = Depends(get_current_admin)  # Pouze admin
 ):
-    """Smaže objednávku (pouze pro admin/testování)."""
+    """Smaže objednávku (pouze pro admin). Vyžaduje admin roli."""
     deleted = order_crud.delete_order(db, order_id)
     if not deleted:
         raise HTTPException(

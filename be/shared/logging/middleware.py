@@ -48,17 +48,14 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         client_host = request.client.host if request.client else "unknown"
 
         # Log incoming request
-        logger_context.debug(
-            f"Incoming request: {request.method} {request.url.path}",
-            extra={
-                "event_type": "http_request",
-                "method": request.method,
-                "path": request.url.path,
-                "query_params": str(request.query_params),
-                "client_host": client_host,
-                "user_agent": request.headers.get("user-agent", "unknown"),
-            },
-        )
+        logger_context.bind(
+            event_type="http_request",
+            method=request.method,
+            endpoint=request.url.path,
+            query_params=str(request.query_params),
+            client_host=client_host,
+            user_agent=request.headers.get("user-agent", "unknown"),
+        ).debug(f"Incoming request: {request.method} {request.url.path}")
 
         try:
             # Process request
@@ -71,17 +68,15 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             log_level = "warning" if response.status_code >= 400 else "info"
             log_level = "error" if response.status_code >= 500 else log_level
 
-            getattr(logger_context, log_level)(
-                f"Request completed: {request.method} {request.url.path} - {response.status_code}",
-                extra={
-                    "event_type": "http_response",
-                    "method": request.method,
-                    "path": request.url.path,
-                    "status_code": response.status_code,
-                    "duration_ms": round(duration_ms, 2),
-                    "success": response.status_code < 400,
-                },
-            )
+            # Log response with structured fields
+            logger_context.bind(
+                event_type="http_response",
+                method=request.method,
+                endpoint=request.url.path,
+                status_code=response.status_code,
+                duration_ms=round(duration_ms, 2),
+                success=response.status_code < 400,
+            ).log(log_level.upper(), f"Request completed: {request.method} {request.url.path} - {response.status_code}")
 
             # Add request_id to response header for debugging
             response.headers["X-Request-ID"] = request_id
@@ -92,18 +87,14 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # Calculate duration even for errors
             duration_ms = (time.time() - start_time) * 1000
 
-            logger_context.error(
-                f"Request failed: {request.method} {request.url.path}",
-                extra={
-                    "event_type": "http_error",
-                    "method": request.method,
-                    "path": request.url.path,
-                    "duration_ms": round(duration_ms, 2),
-                    "error_type": type(e).__name__,
-                    "error_message": str(e),
-                },
-                exc_info=True,
-            )
+            logger_context.bind(
+                event_type="http_error",
+                method=request.method,
+                endpoint=request.url.path,
+                duration_ms=round(duration_ms, 2),
+                error_type=type(e).__name__,
+                error_message=str(e),
+            ).exception(f"Request failed: {request.method} {request.url.path}")
             raise
 
 
