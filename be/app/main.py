@@ -83,114 +83,114 @@ app = FastAPI(
     title="Food Delivery API",
     version="2.0.0",
     description="""
-# Food Delivery API - Systém pro správu rozvozové služby
+# Food Delivery API - System for managing a food delivery service
 
-Toto API poskytuje kompletní řešení pro správu **kurýrů**, **objednávek** a **dispečinku**
-rozvozové služby jídla.
+This API provides a complete solution for managing **couriers**, **orders**, and **dispatch**
+for a food delivery service.
 
-## Hlavní funkce
+## Key features
 
-### Kurýři (`/couriers`)
-- Vytváření, úprava a mazání kurýrů
-- Správa GPS polohy v reálném čase
-- Stavy kurýrů: **available** (volný), **busy** (zaneprázdněný), **offline** (nedostupný)
-- Systém tagů pro specializace (např. `bike`, `car`, `vip`, `fragile_ok`, `fast`)
+### Couriers (`/couriers`)
+- Create, update, and delete couriers
+- Real-time GPS location management
+- Courier statuses: **available** (free), **busy** (delivering), **offline** (unavailable)
+- Tag system for specializations (e.g. `bike`, `car`, `vip`, `fragile_ok`, `fast`)
 
-### Objednávky (`/orders`)
-- Kompletní životní cyklus objednávky
-- Stavy: **CREATED** → **SEARCHING** → **ASSIGNED** → **PICKED** → **DELIVERED**
-- Podpora VIP objednávek s prioritním zpracováním
-- Požadavky na tagy kurýra (např. objednávka vyžadující `fragile_ok`)
+### Orders (`/orders`)
+- Complete order lifecycle
+- Statuses: **CREATED** → **SEARCHING** → **ASSIGNED** → **PICKED** → **DELIVERED**
+- VIP order support with priority processing
+- Courier tag requirements (e.g. orders requiring `fragile_ok`)
 
-### Dispečink (`/dispatch`)
-- **Automatický dispatch**: Algoritmus vybírá nejbližšího vhodného kurýra
-- **Manuální dispatch**: Operátor může přiřadit konkrétního kurýra
-- Fázový algoritmus: 2km → 5km radius
-- VIP objednávky preferují kurýry s tagem `vip`
-- Historie všech přiřazení v logu
+### Dispatch (`/dispatch`)
+- **Auto dispatch**: Algorithm selects the nearest suitable courier
+- **Manual dispatch**: Operator can assign a specific courier
+- Phased algorithm: 750 km → 1500 km radius
+- VIP orders prefer couriers with the `vip` tag
+- Full assignment history log
 
-## Stavový diagram objednávky
+## Order state diagram
 
 ```
 CREATED ──────────────────────────────────────┐
     │                                          │
     ▼                                          │
-SEARCHING (hledá se kurýr)                     │
+SEARCHING (looking for courier)                │
     │                                          │
     ▼                                          ▼
-ASSIGNED (kurýr přijal) ──────────────────► CANCELLED
+ASSIGNED (courier accepted) ───────────────► CANCELLED
     │                                          ▲
     ▼                                          │
-PICKED (vyzvednuto) ───────────────────────────┤
+PICKED (picked up) ────────────────────────────┤
     │                                          │
     ▼                                          │
-DELIVERED (doručeno)                           │
+DELIVERED                                      │
 ```
 
-## Stavový diagram kurýra
+## Courier state diagram
 
 ```
 offline ◄───────────────────────────────────────┐
     │                                            │
     ▼                                            │
-available (čeká na objednávku) ◄────────────────┤
+available (waiting for order) ◄─────────────────┤
     │                                            │
     ▼ (dispatch)                                 │ (deliver/cancel)
-busy (doručuje) ─────────────────────────────────┘
+busy (delivering) ───────────────────────────────┘
 ```
 
-## Algoritmus automatického dispatchnutí
+## Auto-dispatch algorithm
 
-1. Najde všechny **available** kurýry s platnou GPS polohou
-2. Odfiltruje kurýry, kteří nemají požadované tagy
-3. Pro VIP objednávky preferuje kurýry s tagem `vip`
-4. **Fáze 1**: Hledá kurýry do 2 km od místa vyzvednutí
-5. **Fáze 2**: Pokud nikdo není, rozšíří na 5 km
-6. Vybere nejbližšího kurýra podle GPS vzdálenosti
-7. Přiřadí kurýra a změní jeho stav na `busy`
+1. Finds all **available** couriers with a valid GPS location
+2. Filters out couriers who do not have the required tags
+3. For VIP orders, prefers couriers with the `vip` tag
+4. **Phase 1**: Looks for couriers within 750 km of the pickup point
+5. **Phase 2**: If none found, expands to 1500 km
+6. Selects the nearest courier by GPS distance
+7. Assigns the courier and changes their status to `busy`
 
-## Příklady použití
+## Usage examples
 
-### Kompletní workflow doručení
-1. `POST /couriers` - Vytvoř kurýra
-2. `PATCH /couriers/{id}/status` - Nastav `available`
-3. `PATCH /couriers/{id}/location` - Aktualizuj GPS
-4. `POST /orders` - Vytvoř objednávku
-5. `POST /dispatch/auto/{order_id}` - Přiřaď kurýra
-6. `POST /orders/{id}/pickup` - Kurýr vyzvednul
-7. `POST /orders/{id}/deliver` - Kurýr doručil
+### Complete delivery workflow
+1. `POST /couriers` - Create a courier
+2. `PATCH /couriers/{id}/status` - Set to `available`
+3. `PATCH /couriers/{id}/location` - Update GPS
+4. `POST /orders` - Create an order
+5. `POST /dispatch/auto/{order_id}` - Assign a courier
+6. `POST /orders/{id}/pickup` - Courier picked up
+7. `POST /orders/{id}/deliver` - Courier delivered
 
 ---
-**Kontakt**: support@fooddelivery.cz | **Verze**: 2.0.0
+**Contact**: support@fooddelivery.cz | **Version**: 2.0.0
 """,
     openapi_tags=[
         {
             "name": "couriers",
-            "description": "Správa kurýrů - vytváření, editace, lokace a stavy. Kurýr je osoba, která doručuje objednávky zákazníkům.",
+            "description": "Courier management - create, edit, location and status updates. A courier is a person who delivers orders to customers.",
         },
         {
             "name": "orders",
-            "description": "Správa objednávek - vytváření, lifecycle a doručení. Objednávka představuje požadavek na doručení od místa vyzvednutí k zákazníkovi.",
+            "description": "Order management - creation, lifecycle and delivery. An order represents a delivery request from a pickup location to a customer.",
         },
         {
             "name": "dispatch",
-            "description": "Dispečink - přiřazování kurýrů k objednávkám. Automatické i manuální přiřazení s logováním historie.",
+            "description": "Dispatch - assigning couriers to orders. Automatic and manual assignment with history logging.",
         },
         {
-            "name": "Formuláře",
-            "description": "CRUD operace nad formuláři - vytváření, čtení, mazání záznamů. Obsahuje easter egg mini hru.",
+            "name": "Forms",
+            "description": "Form CRUD operations - create, read, delete records. Includes easter egg mini game.",
         },
         {
-            "name": "Přílohy",
-            "description": "Nahrávání a správa souborových příloh k formulářům. Podporuje PDF a TXT, max 1 MB.",
+            "name": "Attachments",
+            "description": "File attachment upload and management for forms. Supports PDF and TXT, max 1 MB.",
         },
         {
-            "name": "Instrukce",
-            "description": "Textové instrukce k formulářům - vytvoření, aktualizace, čtení.",
+            "name": "Instructions",
+            "description": "Text instructions for forms - create, update, read.",
         },
         {
-            "name": "Mini hra",
-            "description": "Easter egg funkce - vyhodnocení tajných jmen (neo, trinity, morpheus, jan, pavla, matrix).",
+            "name": "Mini game",
+            "description": "Easter egg feature - evaluates secret names (neo, trinity, morpheus, jan, pavla, matrix).",
         },
     ],
     contact={

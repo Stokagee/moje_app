@@ -18,7 +18,9 @@ RF/nul
 fe/mojeApp/nul
 be/nul
 nul
+.claude
 .env
+
 AGENTS.md
 claude_kuryri_orders_dispatch_docker.md
 DOCS_DBEAVEROVY_SQL_KURZ.md

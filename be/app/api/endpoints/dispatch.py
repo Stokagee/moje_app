@@ -1,7 +1,7 @@
-"""API endpointy pro dispečink.
+"""API endpoints for dispatch.
 
-Tento modul zajišťuje přiřazování kurýrů k objednávkám.
-Podporuje automatický dispatch (algoritmus) i manuální (operátor).
+This module handles assigning couriers to orders.
+Supports automatic dispatch (algorithm) and manual dispatch (operator).
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Path, Query
 from sqlalchemy.orm import Session
@@ -22,55 +22,55 @@ router = APIRouter(prefix="/dispatch", tags=["dispatch"])
 @router.post(
     "/auto/{order_id}",
     response_model=DispatchResult,
-    summary="Automaticky přiřadit kurýra k objednávce",
+    summary="Auto-assign a courier to an order",
     description="""
-Automaticky najde a přiřadí nejbližšího vhodného kurýra k objednávce.
+Automatically finds and assigns the nearest suitable courier to an order.
 
-## Jak algoritmus funguje
+## How the algorithm works
 
-### Krok 1: Najdi kandidáty
-- Vybere všechny kurýry ve stavu `available`
-- Musí mít platnou GPS polohu
+### Step 1: Find candidates
+- Selects all couriers in `available` status
+- Must have a valid GPS location
 
-### Krok 2: Filtruj podle tagů
-- Pokud objednávka má `required_tags`, kurýr musí mít **všechny** tyto tagy
-- Např. objednávka vyžaduje `["fragile_ok", "bike"]` → kurýr musí mít oba
+### Step 2: Filter by tags
+- If the order has `required_tags`, the courier must have **all** of those tags
+- E.g. order requires `["fragile_ok", "bike"]` → courier must have both
 
-### Krok 3: VIP priorita
-- Pro VIP objednávky (`is_vip: true`) se nejdřív zkusí najít kurýr s tagem `vip`
-- Pokud žádný VIP kurýr není dostupný, použije se běžný kurýr
+### Step 3: VIP priority
+- For VIP orders (`is_vip: true`), the algorithm first tries to find a courier with the `vip` tag
+- If no VIP courier is available, a regular courier is used
 
-### Krok 4: Fázové hledání
-1. **Fáze 1 (750 km)**: Hledá kurýry do 750 km od místa vyzvednutí
-2. **Fáze 2 (1500 km)**: Pokud nikdo není v 750 km, rozšíří na 1500 km
+### Step 4: Phased search
+1. **Phase 1 (750 km)**: Looks for couriers within 750 km of the pickup point
+2. **Phase 2 (1500 km)**: If none found within 750 km, expands to 1500 km
 
-### Krok 5: Výběr nejbližšího
-- Ze všech kandidátů v dosahu vybere **nejbližšího**
-- Vzdálenost se počítá pomocí Haversine vzorce (GPS)
+### Step 5: Select nearest
+- From all candidates in range, selects the **nearest** one
+- Distance is calculated using the Haversine formula (GPS)
 
-## Co se stane po úspěchu
-1. Objednávka přejde do stavu `ASSIGNED`
-2. Kurýr přejde do stavu `busy`
-3. Vytvoří se záznam v dispatch logu
+## On success
+1. Order moves to `ASSIGNED` status
+2. Courier moves to `busy` status
+3. A record is created in the dispatch log
 
-## Co se stane po neúspěchu
-1. Objednávka přejde do stavu `SEARCHING`
-2. Vrátí se `success: false` s důvodem
-3. Můžete zkusit znovu později nebo použít manuální dispatch
+## On failure
+1. Order moves to `SEARCHING` status
+2. Returns `success: false` with a reason
+3. You can retry later or use manual dispatch
 
-## Příklady odpovědí
+## Example responses
 
-### Úspěch
+### Success
 ```json
 {
     "success": true,
-    "message": "Kurýr Jan Novák přiřazen (vzdálenost: 1.2 km)",
+    "message": "Courier Jan Novák assigned (distance: 1.2 km)",
     "order_id": 42,
     "courier_id": 5
 }
 ```
 
-### Neúspěch - žádný kurýr v dosahu
+### Failure - no courier in range
 ```json
 {
     "success": false,
@@ -80,7 +80,7 @@ Automaticky najde a přiřadí nejbližšího vhodného kurýra k objednávce.
 }
 ```
 
-### Neúspěch - chybí tagy
+### Failure - missing tags
 ```json
 {
     "success": false,
@@ -90,27 +90,27 @@ Automaticky najde a přiřadí nejbližšího vhodného kurýra k objednávce.
 }
 ```
 
-## Chyby
-- **Objednávka neexistuje** - `success: false`, message obsahuje "not found"
-- **Objednávka již přiřazena** - `success: false`, message obsahuje "cannot be dispatched"
+## Errors
+- **Order not found** - `success: false`, message contains "not found"
+- **Order already assigned** - `success: false`, message contains "cannot be dispatched"
     """,
     responses={
         200: {
-            "description": "Výsledek dispatch operace",
+            "description": "Dispatch operation result",
             "content": {
                 "application/json": {
                     "examples": {
                         "success": {
-                            "summary": "Úspěšný dispatch",
+                            "summary": "Successful dispatch",
                             "value": {
                                 "success": True,
-                                "message": "Kurýr Jan Novák přiřazen (vzdálenost: 1.2 km)",
+                                "message": "Courier Jan Novák assigned (distance: 1.2 km)",
                                 "order_id": 42,
                                 "courier_id": 5
                             }
                         },
                         "no_courier": {
-                            "summary": "Žádný kurýr v dosahu",
+                            "summary": "No courier in range",
                             "value": {
                                 "success": False,
                                 "message": "No available courier found within 5km radius",
@@ -119,7 +119,7 @@ Automaticky najde a přiřadí nejbližšího vhodného kurýra k objednávce.
                             }
                         },
                         "wrong_state": {
-                            "summary": "Objednávka v neplatném stavu",
+                            "summary": "Order in invalid status",
                             "value": {
                                 "success": False,
                                 "message": "Order 42 cannot be dispatched (status: DELIVERED)",
@@ -134,10 +134,10 @@ Automaticky najde a přiřadí nejbližšího vhodného kurýra k objednávce.
     }
 )
 def dispatch_order_auto(
-    order_id: int = Path(..., ge=1, description="ID objednávky k dispatchnutí"),
+    order_id: int = Path(..., ge=1, description="Order ID to dispatch"),
     db: Session = Depends(get_db)
 ):
-    """Automaticky přiřadí nejbližšího vhodného kurýra."""
+    """Automatically assigns the nearest suitable courier."""
     success, message, courier_id = auto_dispatch_order(db, order_id)
     return DispatchResult(
         success=success,
@@ -150,32 +150,32 @@ def dispatch_order_auto(
 @router.post(
     "/manual",
     response_model=DispatchResult,
-    summary="Manuálně přiřadit kurýra k objednávce",
+    summary="Manually assign a courier to an order",
     description="""
-Manuálně přiřadí konkrétního kurýra k objednávce.
+Manually assigns a specific courier to an order.
 
-## Kdy použít
-- Zákazník si vyžádal konkrétního kurýra
-- Automatický dispatch selhal a operátor vybírá ručně
-- Speciální situace vyžadující lidské rozhodnutí
-- Kurýr je mimo standardní dosah ale může objednávku obsloužit
+## When to use
+- Customer requested a specific courier
+- Auto dispatch failed and the operator is selecting manually
+- Special situation requiring a human decision
+- Courier is outside the standard range but can handle the order
 
-## Předpoklady
-- Objednávka musí být ve stavu `CREATED` nebo `SEARCHING`
-- Kurýr musí být ve stavu `available`
-- Kurýr musí mít všechny požadované tagy objednávky
+## Prerequisites
+- Order must be in `CREATED` or `SEARCHING` status
+- Courier must be in `available` status
+- Courier must have all required tags for the order
 
-## Co se ověřuje
-1. Objednávka existuje a je v dispatchovatelném stavu
-2. Kurýr existuje a je dostupný
-3. Kurýr má všechny požadované tagy
+## What is validated
+1. Order exists and is in a dispatchable status
+2. Courier exists and is available
+3. Courier has all required tags
 
-## Co se stane po úspěchu
-1. Objednávka přejde do stavu `ASSIGNED`
-2. Kurýr přejde do stavu `busy`
-3. Vytvoří se záznam v dispatch logu s akcí `manual_assigned`
+## On success
+1. Order moves to `ASSIGNED` status
+2. Courier moves to `busy` status
+3. A record is created in the dispatch log with action `manual_assigned`
 
-## Příklad požadavku
+## Example request
 ```json
 {
     "order_id": 42,
@@ -183,19 +183,19 @@ Manuálně přiřadí konkrétního kurýra k objednávce.
 }
 ```
 
-## Chyby
-- **Kurýr není dostupný** - `success: false`
-- **Kurýr nemá požadované tagy** - `success: false`
-- **Objednávka v neplatném stavu** - `success: false`
+## Errors
+- **Courier not available** - `success: false`
+- **Courier missing required tags** - `success: false`
+- **Order in invalid status** - `success: false`
     """,
     responses={
         200: {
-            "description": "Výsledek manuálního dispatch",
+            "description": "Manual dispatch result",
             "content": {
                 "application/json": {
                     "examples": {
                         "success": {
-                            "summary": "Úspěšné přiřazení",
+                            "summary": "Successful assignment",
                             "value": {
                                 "success": True,
                                 "message": "Courier successfully assigned to order",
@@ -204,7 +204,7 @@ Manuálně přiřadí konkrétního kurýra k objednávce.
                             }
                         },
                         "courier_busy": {
-                            "summary": "Kurýr není dostupný",
+                            "summary": "Courier not available",
                             "value": {
                                 "success": False,
                                 "message": "Courier 5 is not available (status: busy)",
@@ -213,7 +213,7 @@ Manuálně přiřadí konkrétního kurýra k objednávce.
                             }
                         },
                         "missing_tags": {
-                            "summary": "Kurýr nemá požadované tagy",
+                            "summary": "Courier missing required tags",
                             "value": {
                                 "success": False,
                                 "message": "Courier 5 missing required tags: fragile_ok",
@@ -231,7 +231,7 @@ def dispatch_order_manual(
     assign: DispatchAssign,
     db: Session = Depends(get_db)
 ):
-    """Manuálně přiřadí konkrétního kurýra k objednávce."""
+    """Manually assigns a specific courier to an order."""
     success, message = manual_dispatch_order(db, assign.order_id, assign.courier_id)
     return DispatchResult(
         success=success,
@@ -243,37 +243,37 @@ def dispatch_order_manual(
 
 @router.get(
     "/available-couriers/{order_id}",
-    summary="Získat seznam vhodných kurýrů pro objednávku",
+    summary="Get suitable couriers for an order",
     description="""
-Vrátí seznam všech kurýrů, kteří mohou převzít danou objednávku.
+Returns a list of all couriers who can take the given order.
 
-## Co se kontroluje
-- Kurýr je ve stavu `available`
-- Kurýr má platnou GPS polohu
-- Kurýr má všechny `required_tags` objednávky
-- Kurýr je v zadaném radiusu od místa vyzvednutí
+## What is checked
+- Courier is in `available` status
+- Courier has a valid GPS location
+- Courier has all `required_tags` from the order
+- Courier is within the specified radius of the pickup point
 
-## Využití
-- UI pro manuální dispatch - operátor vidí kandidáty
-- Zobrazení kurýrů na mapě
-- Rozhodování před manuálním přiřazením
+## Use cases
+- Manual dispatch UI - operator sees candidates
+- Displaying couriers on a map
+- Decision support before manual assignment
 
-## Parametry
-- `order_id` - ID objednávky
-- `radius_km` - Maximální vzdálenost v km (default 10)
+## Parameters
+- `order_id` - Order ID
+- `radius_km` - Maximum distance in km (default 10)
 
-## Vrácená data
-Pro každého kurýra:
-- Základní info (ID, jméno, telefon)
-- Vzdálenost od místa vyzvednutí
-- Je-li VIP kurýr
-- Seznam tagů
+## Returned data
+For each courier:
+- Basic info (ID, name, phone)
+- Distance from the pickup point
+- Whether the courier is VIP
+- List of tags
 
-## Řazení
-Kurýři jsou seřazeni podle vzdálenosti (nejbližší první).
-Pro VIP objednávky jsou VIP kurýři na začátku.
+## Ordering
+Couriers are sorted by distance (nearest first).
+For VIP orders, VIP couriers appear at the top.
 
-## Příklad odpovědi
+## Example response
 ```json
 {
     "order_id": 42,
@@ -302,12 +302,12 @@ Pro VIP objednávky jsou VIP kurýři na začátku.
     """,
     responses={
         200: {
-            "description": "Seznam dostupných kurýrů",
+            "description": "List of available couriers",
             "content": {
                 "application/json": {
                     "examples": {
                         "found": {
-                            "summary": "Nalezeni kurýři",
+                            "summary": "Couriers found",
                             "value": {
                                 "order_id": 42,
                                 "radius_km": 10.0,
@@ -325,7 +325,7 @@ Pro VIP objednávky jsou VIP kurýři na začátku.
                             }
                         },
                         "empty": {
-                            "summary": "Žádný kurýr nenalezen",
+                            "summary": "No courier found",
                             "value": {
                                 "order_id": 42,
                                 "radius_km": 10.0,
@@ -340,16 +340,16 @@ Pro VIP objednávky jsou VIP kurýři na začátku.
     }
 )
 def get_couriers_for_order(
-    order_id: int = Path(..., ge=1, description="ID objednávky"),
+    order_id: int = Path(..., ge=1, description="Order ID"),
     radius_km: float = Query(
         default=10.0,
         ge=0.1,
         le=100.0,
-        description="Maximální vzdálenost od místa vyzvednutí v km"
+        description="Maximum distance from the pickup point in km"
     ),
     db: Session = Depends(get_db)
 ):
-    """Vrátí seznam kurýrů vhodných pro danou objednávku."""
+    """Returns a list of couriers suitable for the given order."""
     couriers = get_available_couriers_for_order(db, order_id, radius_km)
     if not couriers:
         return {
@@ -369,28 +369,28 @@ def get_couriers_for_order(
 @router.get(
     "/logs/order/{order_id}",
     response_model=List[DispatchLogResponse],
-    summary="Získat historii dispatchů pro objednávku",
+    summary="Get dispatch history for an order",
     description="""
-Vrátí kompletní historii přiřazení kurýrů k dané objednávce.
+Returns the complete courier assignment history for a given order.
 
-## Využití
-- Audit a debugging
-- Zobrazení historie v detailu objednávky
-- Analýza problémů s dispatchem
+## Use cases
+- Audit and debugging
+- Displaying history in order detail
+- Analysing dispatch problems
 
-## Typy záznamů (action)
+## Record types (action)
 
-| Akce | Popis |
-|------|-------|
-| `auto_assigned` | Kurýr přiřazen automatickým algoritmem |
-| `manual_assigned` | Kurýr přiřazen operátorem ručně |
-| `auto_failed` | Automatický dispatch selhal |
-| `rejected` | Kurýr odmítl objednávku |
+| Action | Description |
+|--------|-------------|
+| `auto_assigned` | Courier assigned by the automatic algorithm |
+| `manual_assigned` | Courier assigned manually by an operator |
+| `auto_failed` | Automatic dispatch failed |
+| `rejected` | Courier rejected the order |
 
-## Řazení
-Záznamy jsou seřazeny od nejnovějšího.
+## Ordering
+Records are sorted from newest to oldest.
 
-## Příklad odpovědi
+## Example response
 ```json
 [
     {
@@ -412,39 +412,39 @@ Záznamy jsou seřazeny od nejnovějšího.
     """,
     responses={
         200: {
-            "description": "Historie dispatchů pro objednávku"
+            "description": "Dispatch history for the order"
         }
     }
 )
 def get_dispatch_logs_for_order(
-    order_id: int = Path(..., ge=1, description="ID objednávky"),
+    order_id: int = Path(..., ge=1, description="Order ID"),
     db: Session = Depends(get_db)
 ):
-    """Vrátí historii dispatchů pro objednávku."""
+    """Returns dispatch history for an order."""
     return dispatch_log_crud.get_dispatch_logs_for_order(db, order_id)
 
 
 @router.get(
     "/logs/courier/{courier_id}",
     response_model=List[DispatchLogResponse],
-    summary="Získat historii dispatchů pro kurýra",
+    summary="Get dispatch history for a courier",
     description="""
-Vrátí kompletní historii přiřazení objednávek danému kurýrovi.
+Returns the complete order assignment history for a given courier.
 
-## Využití
-- Analýza výkonu kurýra
-- Přehled dokončených objednávek
-- Debugging problémů s konkrétním kurýrem
+## Use cases
+- Courier performance analysis
+- Overview of completed orders
+- Debugging issues with a specific courier
 
-## Informace v záznamu
-- Které objednávky kurýr dostal
-- Zda byly automaticky nebo manuálně přiřazeny
-- Časové údaje
+## Record information
+- Which orders the courier received
+- Whether they were assigned automatically or manually
+- Timestamps
 
-## Řazení
-Záznamy jsou seřazeny od nejnovějšího.
+## Ordering
+Records are sorted from newest to oldest.
 
-## Příklad odpovědi
+## Example response
 ```json
 [
     {
@@ -466,13 +466,13 @@ Záznamy jsou seřazeny od nejnovějšího.
     """,
     responses={
         200: {
-            "description": "Historie dispatchů pro kurýra"
+            "description": "Dispatch history for the courier"
         }
     }
 )
 def get_dispatch_logs_for_courier(
-    courier_id: int = Path(..., ge=1, description="ID kurýra"),
+    courier_id: int = Path(..., ge=1, description="Courier ID"),
     db: Session = Depends(get_db)
 ):
-    """Vrátí historii dispatchů pro kurýra."""
+    """Returns dispatch history for a courier."""
     return dispatch_log_crud.get_dispatch_logs_for_courier(db, courier_id)

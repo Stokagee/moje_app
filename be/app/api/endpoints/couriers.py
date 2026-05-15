@@ -1,7 +1,7 @@
-"""API endpointy pro správu kurýrů.
+"""API endpoints for courier management.
 
-Tento modul poskytuje CRUD operace a správu stavu kurýrů.
-Kurýr je osoba, která doručuje objednávky zákazníkům.
+This module provides CRUD operations and courier status management.
+A courier is a person who delivers orders to customers.
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from sqlalchemy.orm import Session
@@ -24,26 +24,26 @@ router = APIRouter(prefix="/couriers", tags=["couriers"])
     "/",
     response_model=CourierResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Vytvořit nového kurýra",
+    summary="Create a new courier",
     description="""
-Vytvoří nového kurýra v systému.
+Creates a new courier in the system.
 
-## Co se stane
-1. Ověří se, že e-mail ještě není v systému použit
-2. Vytvoří se nový záznam kurýra
-3. Kurýr je automaticky ve stavu `offline` bez GPS polohy
+## What happens
+1. Verifies the e-mail is not already in the system
+2. Creates a new courier record
+3. Courier starts in `offline` status with no GPS location
 
-## Další kroky po vytvoření
-- Nastavte GPS polohu: `PATCH /couriers/{id}/location`
-- Aktivujte kurýra: `PATCH /couriers/{id}/status` s hodnotou `available`
+## Next steps after creation
+- Set GPS location: `PATCH /couriers/{id}/location`
+- Activate the courier: `PATCH /couriers/{id}/status` with value `available`
 
-## Chyby
-- **400 Bad Request** - E-mail již existuje v systému
-- **422 Unprocessable Entity** - Neplatný formát dat (chybí povinná pole, špatný e-mail)
+## Errors
+- **400 Bad Request** - E-mail already exists in the system
+- **422 Unprocessable Entity** - Invalid data format (missing required fields, bad e-mail)
     """,
     responses={
         201: {
-            "description": "Kurýr úspěšně vytvořen",
+            "description": "Courier created successfully",
             "content": {
                 "application/json": {
                     "example": {
@@ -62,7 +62,7 @@ Vytvoří nového kurýra v systému.
             }
         },
         400: {
-            "description": "E-mail již existuje",
+            "description": "E-mail already exists",
             "content": {
                 "application/json": {
                     "example": {"detail": "Courier with this email already exists"}
@@ -70,7 +70,7 @@ Vytvoří nového kurýra v systému.
             }
         },
         422: {
-            "description": "Neplatný formát dat",
+            "description": "Invalid data format",
             "content": {
                 "application/json": {
                     "example": {
@@ -88,7 +88,7 @@ Vytvoří nového kurýra v systému.
     }
 )
 def create_courier(courier: CourierCreate, db: Session = Depends(get_db)):
-    """Vytvoří nového kurýra v systému."""
+    """Creates a new courier in the system."""
     existing = courier_crud.get_courier_by_email(db, courier.email)
     if existing:
         raise HTTPException(
@@ -101,25 +101,25 @@ def create_courier(courier: CourierCreate, db: Session = Depends(get_db)):
 @router.get(
     "/",
     response_model=List[CourierResponse],
-    summary="Získat seznam všech kurýrů",
+    summary="Get list of all couriers",
     description="""
-Vrátí stránkovaný seznam všech kurýrů v systému.
+Returns a paginated list of all couriers in the system.
 
-## Parametry
-- `skip` - Počet záznamů k přeskočení (pro stránkování)
-- `limit` - Maximální počet vrácených záznamů (max 1000)
+## Parameters
+- `skip` - Number of records to skip (for pagination)
+- `limit` - Maximum number of records to return (max 1000)
 
-## Příklad stránkování
-- První stránka (10 záznamů): `?skip=0&limit=10`
-- Druhá stránka: `?skip=10&limit=10`
-- Třetí stránka: `?skip=20&limit=10`
+## Pagination example
+- First page (10 records): `?skip=0&limit=10`
+- Second page: `?skip=10&limit=10`
+- Third page: `?skip=20&limit=10`
 
-## Řazení
-Kurýři jsou řazeni podle data vytvoření (nejnovější první).
+## Ordering
+Couriers are sorted by creation date (newest first).
     """,
     responses={
         200: {
-            "description": "Seznam kurýrů",
+            "description": "List of couriers",
             "content": {
                 "application/json": {
                     "example": [
@@ -145,39 +145,39 @@ def get_couriers(
     skip: int = Query(
         default=0,
         ge=0,
-        description="Počet záznamů k přeskočení (offset pro stránkování)"
+        description="Number of records to skip (pagination offset)"
     ),
     limit: int = Query(
         default=100,
         ge=1,
         le=1000,
-        description="Maximální počet vrácených záznamů"
+        description="Maximum number of records to return"
     ),
     db: Session = Depends(get_db)
 ):
-    """Vrátí stránkovaný seznam všech kurýrů."""
+    """Returns a paginated list of all couriers."""
     return courier_crud.get_couriers(db, skip=skip, limit=limit)
 
 
 @router.get(
     "/available",
     response_model=List[CourierResponse],
-    summary="Získat seznam dostupných kurýrů",
+    summary="Get list of available couriers",
     description="""
-Vrátí seznam všech kurýrů, kteří jsou právě **dostupní** pro přijetí objednávky.
+Returns a list of all couriers who are currently **available** to accept an order.
 
-## Kritéria "dostupného" kurýra
-- Stav: `available`
-- Má nastavenou GPS polohu (lat a lng nejsou null)
+## Criteria for an "available" courier
+- Status: `available`
+- Has a GPS location set (lat and lng are not null)
 
-## Využití
-- Operátor vidí, koho může přiřadit k objednávce
-- Dashboard zobrazující aktivní kurýry
-- Mobilní aplikace pro sledování flotily
+## Use cases
+- Operator sees who can be assigned to an order
+- Dashboard showing active couriers
+- Fleet tracking mobile application
     """,
     responses={
         200: {
-            "description": "Seznam dostupných kurýrů",
+            "description": "List of available couriers",
             "content": {
                 "application/json": {
                     "example": [
@@ -200,33 +200,33 @@ Vrátí seznam všech kurýrů, kteří jsou právě **dostupní** pro přijetí
     }
 )
 def get_available_couriers(db: Session = Depends(get_db)):
-    """Vrátí seznam všech dostupných kurýrů."""
+    """Returns a list of all available couriers."""
     return courier_crud.get_available_couriers(db)
 
 
 @router.get(
     "/{courier_id}",
     response_model=CourierResponse,
-    summary="Získat detail kurýra",
+    summary="Get courier detail",
     description="""
-Vrátí kompletní informace o jednom kurýrovi podle jeho ID.
+Returns complete information about one courier by their ID.
 
-## Vrácené informace
-- Základní údaje (jméno, telefon, e-mail)
-- Aktuální GPS poloha
-- Aktuální stav (offline/available/busy)
-- Seznam tagů/specializací
-- Časové údaje (vytvořeno, aktualizováno)
+## Returned information
+- Basic data (name, phone, e-mail)
+- Current GPS location
+- Current status (offline/available/busy)
+- List of tags/specializations
+- Timestamps (created, updated)
 
-## Chyby
-- **404 Not Found** - Kurýr s daným ID neexistuje
+## Errors
+- **404 Not Found** - Courier with the given ID does not exist
     """,
     responses={
         200: {
-            "description": "Detail kurýra"
+            "description": "Courier detail"
         },
         404: {
-            "description": "Kurýr nenalezen",
+            "description": "Courier not found",
             "content": {
                 "application/json": {
                     "example": {"detail": "Courier not found"}
@@ -239,11 +239,11 @@ def get_courier(
     courier_id: int = Path(
         ...,
         ge=1,
-        description="Unikátní identifikátor kurýra"
+        description="Unique courier identifier"
     ),
     db: Session = Depends(get_db)
 ):
-    """Vrátí detail kurýra podle ID."""
+    """Returns courier detail by ID."""
     courier = courier_crud.get_courier(db, courier_id)
     if not courier:
         raise HTTPException(
@@ -256,31 +256,31 @@ def get_courier(
 @router.put(
     "/{courier_id}",
     response_model=CourierResponse,
-    summary="Aktualizovat údaje kurýra",
+    summary="Update courier data",
     description="""
-Aktualizuje základní údaje kurýra (jméno, telefon, tagy).
+Updates basic courier data (name, phone, tags).
 
-## Co lze změnit
-- `name` - Jméno kurýra
-- `phone` - Telefonní číslo
-- `tags` - Seznam tagů (nahradí stávající seznam)
+## What can be changed
+- `name` - Courier name
+- `phone` - Phone number
+- `tags` - List of tags (replaces the existing list)
 
-## Co NELZE změnit
-- `email` - E-mail je unikátní identifikátor a nelze ho měnit
+## What CANNOT be changed
+- `email` - E-mail is a unique identifier and cannot be changed
 
-## Poznámka
-Pro změnu lokace použijte `PATCH /couriers/{id}/location`.
-Pro změnu stavu použijte `PATCH /couriers/{id}/status`.
+## Note
+To change location use `PATCH /couriers/{id}/location`.
+To change status use `PATCH /couriers/{id}/status`.
 
-## Chyby
-- **404 Not Found** - Kurýr neexistuje
+## Errors
+- **404 Not Found** - Courier does not exist
     """,
     responses={
         200: {
-            "description": "Kurýr úspěšně aktualizován"
+            "description": "Courier updated successfully"
         },
         404: {
-            "description": "Kurýr nenalezen",
+            "description": "Courier not found",
             "content": {
                 "application/json": {
                     "example": {"detail": "Courier not found"}
@@ -290,11 +290,11 @@ Pro změnu stavu použijte `PATCH /couriers/{id}/status`.
     }
 )
 def update_courier(
-    courier_id: int = Path(..., ge=1, description="ID kurýra"),
+    courier_id: int = Path(..., ge=1, description="Courier ID"),
     courier: CourierUpdate = ...,
     db: Session = Depends(get_db)
 ):
-    """Aktualizuje základní údaje kurýra."""
+    """Updates basic courier data."""
     updated = courier_crud.update_courier(db, courier_id, courier)
     if not updated:
         raise HTTPException(
@@ -307,32 +307,32 @@ def update_courier(
 @router.patch(
     "/{courier_id}/location",
     response_model=CourierResponse,
-    summary="Aktualizovat GPS polohu kurýra",
+    summary="Update courier GPS location",
     description="""
-Aktualizuje aktuální GPS polohu kurýra.
+Updates the courier's current GPS location.
 
-## Kdy volat
-- Pravidelně z mobilní aplikace kurýra (např. každých 30 sekund)
-- Po změně polohy o více než X metrů
+## When to call
+- Regularly from the courier's mobile app (e.g. every 30 seconds)
+- After moving more than X metres
 
-## Důležité
-- Kurýr musí mít platnou GPS polohu, aby mohl být přiřazen k objednávce
-- Vzdálenost se počítá od místa vyzvednutí objednávky
+## Important
+- The courier must have a valid GPS location to be assigned to an order
+- Distance is calculated from the order's pickup point
 
-## Formát souřadnic
-- Latitude (šířka): -90 až 90 (Praha je cca 50.08)
-- Longitude (délka): -180 až 180 (Praha je cca 14.42)
+## Coordinate format
+- Latitude: -90 to 90 (Prague is approx. 50.08)
+- Longitude: -180 to 180 (Prague is approx. 14.42)
 
-## Chyby
-- **404 Not Found** - Kurýr neexistuje
-- **422 Unprocessable Entity** - Neplatné souřadnice
+## Errors
+- **404 Not Found** - Courier does not exist
+- **422 Unprocessable Entity** - Invalid coordinates
     """,
     responses={
         200: {
-            "description": "Lokace aktualizována"
+            "description": "Location updated"
         },
         404: {
-            "description": "Kurýr nenalezen",
+            "description": "Courier not found",
             "content": {
                 "application/json": {
                     "example": {"detail": "Courier not found"}
@@ -342,11 +342,11 @@ Aktualizuje aktuální GPS polohu kurýra.
     }
 )
 def update_courier_location(
-    courier_id: int = Path(..., ge=1, description="ID kurýra"),
+    courier_id: int = Path(..., ge=1, description="Courier ID"),
     location: CourierLocationUpdate = ...,
     db: Session = Depends(get_db)
 ):
-    """Aktualizuje GPS polohu kurýra."""
+    """Updates the courier's GPS location."""
     updated = courier_crud.update_courier_location(db, courier_id, location)
     if not updated:
         raise HTTPException(
@@ -359,37 +359,37 @@ def update_courier_location(
 @router.patch(
     "/{courier_id}/status",
     response_model=CourierResponse,
-    summary="Změnit stav kurýra",
+    summary="Change courier status",
     description="""
-Změní provozní stav kurýra.
+Changes the courier's operational status.
 
-## Možné stavy
+## Possible statuses
 
-| Stav | Popis | Může přijmout objednávku |
-|------|-------|--------------------------|
-| `offline` | Kurýr není v práci | Ne |
-| `available` | Kurýr je volný | Ano |
-| `busy` | Kurýr doručuje | Ne |
+| Status | Description | Can accept orders |
+|--------|-------------|-------------------|
+| `offline` | Courier is not working | No |
+| `available` | Courier is free | Yes |
+| `busy` | Courier is delivering | No |
 
-## Typické přechody
-- **Začátek směny**: `offline` → `available`
-- **Konec směny**: `available` → `offline`
-- **Přiřazení objednávky**: `available` → `busy` (automaticky)
-- **Dokončení doručení**: `busy` → `available` (automaticky)
+## Typical transitions
+- **Start of shift**: `offline` → `available`
+- **End of shift**: `available` → `offline`
+- **Order assignment**: `available` → `busy` (automatic)
+- **Delivery completed**: `busy` → `available` (automatic)
 
-## Upozornění
-- Stav `busy` je většinou nastaven automaticky při dispatch
-- Stav se automaticky změní na `available` po dokončení doručení
+## Note
+- `busy` status is usually set automatically during dispatch
+- Status changes to `available` automatically after delivery is completed
 
-## Chyby
-- **404 Not Found** - Kurýr neexistuje
+## Errors
+- **404 Not Found** - Courier does not exist
     """,
     responses={
         200: {
-            "description": "Stav změněn"
+            "description": "Status updated"
         },
         404: {
-            "description": "Kurýr nenalezen",
+            "description": "Courier not found",
             "content": {
                 "application/json": {
                     "example": {"detail": "Courier not found"}
@@ -399,11 +399,11 @@ Změní provozní stav kurýra.
     }
 )
 def update_courier_status(
-    courier_id: int = Path(..., ge=1, description="ID kurýra"),
+    courier_id: int = Path(..., ge=1, description="Courier ID"),
     status_update: CourierStatusUpdate = ...,
     db: Session = Depends(get_db)
 ):
-    """Změní provozní stav kurýra."""
+    """Changes the courier's operational status."""
     updated = courier_crud.update_courier_status(db, courier_id, status_update)
     if not updated:
         raise HTTPException(
@@ -416,27 +416,27 @@ def update_courier_status(
 @router.delete(
     "/{courier_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Smazat kurýra",
+    summary="Delete a courier",
     description="""
-Trvale smaže kurýra ze systému.
+Permanently deletes a courier from the system.
 
-## Upozornění
-- Akce je **nevratná**!
-- Kurýr by neměl mít aktivní objednávky (stav `busy`)
-- Historie objednávek zůstane zachována
+## Warning
+- This action is **irreversible**!
+- The courier should not have active orders (`busy` status)
+- Order history will be preserved
 
-## Doporučení
-Místo mazání zvažte nastavení stavu na `offline` pro deaktivaci.
+## Recommendation
+Instead of deleting, consider setting the status to `offline` to deactivate.
 
-## Chyby
-- **404 Not Found** - Kurýr neexistuje
+## Errors
+- **404 Not Found** - Courier does not exist
     """,
     responses={
         204: {
-            "description": "Kurýr smazán"
+            "description": "Courier deleted"
         },
         404: {
-            "description": "Kurýr nenalezen",
+            "description": "Courier not found",
             "content": {
                 "application/json": {
                     "example": {"detail": "Courier not found"}
@@ -446,10 +446,10 @@ Místo mazání zvažte nastavení stavu na `offline` pro deaktivaci.
     }
 )
 def delete_courier(
-    courier_id: int = Path(..., ge=1, description="ID kurýra"),
+    courier_id: int = Path(..., ge=1, description="Courier ID"),
     db: Session = Depends(get_db)
 ):
-    """Smaže kurýra ze systému."""
+    """Deletes a courier from the system."""
     deleted = courier_crud.delete_courier(db, courier_id)
     if not deleted:
         raise HTTPException(

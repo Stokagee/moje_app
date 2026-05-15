@@ -1,7 +1,7 @@
-"""Pydantic schémata pro objednávky.
+"""Pydantic schemas for orders.
 
-Tento modul definuje datové struktury pro práci s objednávkami v API.
-Objednávka představuje požadavek na doručení od místa vyzvednutí k zákazníkovi.
+This module defines data structures for working with orders in the API.
+An order represents a delivery request from a pickup location to a customer.
 """
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
@@ -10,105 +10,105 @@ from app.models.order import OrderStatus
 
 
 class OrderBase(BaseModel):
-    """Základní atributy objednávky společné pro vytváření i odpovědi."""
+    """Base order attributes shared by create and response schemas."""
 
     customer_name: str = Field(
         ...,
         min_length=2,
         max_length=100,
-        description="Jméno zákazníka, který objednávku přijímá",
+        description="Name of the customer receiving the order",
         json_schema_extra={"example": "Marie Svobodová"}
     )
     customer_phone: str = Field(
         ...,
         min_length=9,
         max_length=20,
-        description="Telefonní číslo zákazníka pro kontakt při doručení",
+        description="Customer phone number for contact during delivery",
         json_schema_extra={"example": "+420606123456"}
     )
     pickup_address: str = Field(
         ...,
         min_length=3,
         max_length=200,
-        description="Adresa místa vyzvednutí (restaurace, obchod)",
+        description="Pickup address (restaurant, shop)",
         json_schema_extra={"example": "Národní 25, Praha 1"}
     )
     pickup_lat: float = Field(
         ...,
         ge=-90,
         le=90,
-        description="GPS šířka místa vyzvednutí",
+        description="GPS latitude of the pickup point",
         json_schema_extra={"example": 50.0815}
     )
     pickup_lng: float = Field(
         ...,
         ge=-180,
         le=180,
-        description="GPS délka místa vyzvednutí",
+        description="GPS longitude of the pickup point",
         json_schema_extra={"example": 14.4195}
     )
     delivery_address: str = Field(
         ...,
         min_length=3,
         max_length=200,
-        description="Adresa doručení k zákazníkovi",
+        description="Delivery address to the customer",
         json_schema_extra={"example": "Vinohradská 50, Praha 2"}
     )
     delivery_lat: float = Field(
         ...,
         ge=-90,
         le=90,
-        description="GPS šířka místa doručení",
+        description="GPS latitude of the delivery point",
         json_schema_extra={"example": 50.0755}
     )
     delivery_lng: float = Field(
         ...,
         ge=-180,
         le=180,
-        description="GPS délka místa doručení",
+        description="GPS longitude of the delivery point",
         json_schema_extra={"example": 14.4378}
     )
     is_vip: bool = Field(
         default=False,
-        description="""VIP příznak objednávky.
+        description="""VIP flag for the order.
 
-        VIP objednávky mají prioritu při přiřazování kurýra:
-        - Preferují se kurýři s tagem `vip`
-        - Pokud žádný VIP kurýr není k dispozici, přiřadí se běžný kurýr
+        VIP orders have priority during courier assignment:
+        - Couriers with the `vip` tag are preferred
+        - If no VIP courier is available, a regular courier is assigned
         """,
         json_schema_extra={"example": False}
     )
     required_tags: List[str] = Field(
         default=[],
-        description="""Seznam tagů, které musí mít kurýr pro tuto objednávku.
+        description="""List of tags the courier must have for this order.
 
-        Běžné tagy:
-        - `fragile_ok` - objednávka obsahuje křehké zboží
-        - `fast` - expresní doručení
-        - `bike` / `car` - specifický typ dopravy
+        Common tags:
+        - `fragile_ok` - order contains fragile items
+        - `fast` - express delivery
+        - `bike` / `car` - specific transport type
 
-        Kurýr MUSÍ mít VŠECHNY požadované tagy, aby mohl objednávku převzít.
+        The courier MUST have ALL required tags to be able to take the order.
         """,
         json_schema_extra={"example": ["fragile_ok"]}
     )
 
 
 class OrderCreate(OrderBase):
-    """Schéma pro vytvoření nové objednávky.
+    """Schema for creating a new order.
 
-    Po vytvoření je objednávka ve stavu `CREATED`.
-    Pro přiřazení kurýra použijte endpoint `/dispatch/auto/{order_id}`.
+    After creation the order is in `CREATED` status.
+    To assign a courier use the `/dispatch/auto/{order_id}` endpoint.
 
-    ## Životní cyklus objednávky
+    ## Order lifecycle
 
-    1. **CREATED** - Objednávka vytvořena, čeká na dispatch
-    2. **SEARCHING** - Hledá se vhodný kurýr
-    3. **ASSIGNED** - Kurýr přiřazen, míří k vyzvednutí
-    4. **PICKED** - Kurýr vyzvednul objednávku
-    5. **DELIVERED** - Doručeno zákazníkovi
-    6. **CANCELLED** - Objednávka zrušena (může nastat kdykoli před DELIVERED)
+    1. **CREATED** - Order created, waiting for dispatch
+    2. **SEARCHING** - Looking for a suitable courier
+    3. **ASSIGNED** - Courier assigned, heading to pickup
+    4. **PICKED** - Courier picked up the order
+    5. **DELIVERED** - Delivered to the customer
+    6. **CANCELLED** - Order cancelled (can happen any time before DELIVERED)
 
-    ## Příklad vytvoření
+    ## Creation example
 
     ```json
     {
@@ -145,32 +145,32 @@ class OrderCreate(OrderBase):
 
 
 class OrderStatusUpdate(BaseModel):
-    """Schéma pro manuální změnu stavu objednávky.
+    """Schema for manually changing an order's status.
 
-    ## Možné stavy
+    ## Possible statuses
 
-    | Stav | Popis | Následující stav |
-    |------|-------|------------------|
-    | `CREATED` | Nově vytvořená | SEARCHING |
-    | `SEARCHING` | Hledá se kurýr | ASSIGNED |
-    | `ASSIGNED` | Kurýr přiřazen | PICKED |
-    | `PICKED` | Vyzvednuto | DELIVERED |
-    | `DELIVERED` | Doručeno | - (konec) |
-    | `CANCELLED` | Zrušeno | - (konec) |
+    | Status | Description | Next status |
+    |--------|-------------|-------------|
+    | `CREATED` | Newly created | SEARCHING |
+    | `SEARCHING` | Looking for courier | ASSIGNED |
+    | `ASSIGNED` | Courier assigned | PICKED |
+    | `PICKED` | Picked up | DELIVERED |
+    | `DELIVERED` | Delivered | - (final) |
+    | `CANCELLED` | Cancelled | - (final) |
 
-    ## Upozornění
+    ## Note
 
-    Pro běžné operace používejte specifické endpointy:
-    - `/orders/{id}/pickup` - pro označení vyzvednutí
-    - `/orders/{id}/deliver` - pro označení doručení
-    - `/orders/{id}/cancel` - pro zrušení
+    For normal operations use the dedicated endpoints:
+    - `/orders/{id}/pickup` - to mark pickup
+    - `/orders/{id}/deliver` - to mark delivery
+    - `/orders/{id}/cancel` - to cancel
 
-    Tento endpoint je určen pro administrativní účely.
+    This endpoint is intended for administrative purposes.
     """
 
     status: OrderStatus = Field(
         ...,
-        description="Nový stav objednávky",
+        description="New order status",
         json_schema_extra={"example": "ASSIGNED"}
     )
 
@@ -184,11 +184,11 @@ class OrderStatusUpdate(BaseModel):
 
 
 class OrderResponse(OrderBase):
-    """Kompletní odpověď s daty objednávky.
+    """Complete response with order data.
 
-    Vrací se při GET operacích a po vytvoření/aktualizaci objednávky.
+    Returned on GET operations and after creating/updating an order.
 
-    ## Příklad odpovědi
+    ## Example response
 
     ```json
     {
@@ -213,27 +213,27 @@ class OrderResponse(OrderBase):
 
     id: int = Field(
         ...,
-        description="Unikátní identifikátor objednávky",
+        description="Unique order identifier",
         json_schema_extra={"example": 42}
     )
     status: OrderStatus = Field(
         ...,
-        description="Aktuální stav objednávky",
+        description="Current order status",
         json_schema_extra={"example": "ASSIGNED"}
     )
     courier_id: Optional[int] = Field(
         default=None,
-        description="ID přiřazeného kurýra (null pokud ještě není přiřazen)",
+        description="ID of the assigned courier (null if not yet assigned)",
         json_schema_extra={"example": 5}
     )
     created_at: datetime = Field(
         ...,
-        description="Datum a čas vytvoření objednávky",
+        description="Date and time the order was created",
         json_schema_extra={"example": "2024-01-15T12:00:00"}
     )
     updated_at: Optional[datetime] = Field(
         default=None,
-        description="Datum a čas poslední změny stavu",
+        description="Date and time of the last status change",
         json_schema_extra={"example": "2024-01-15T12:05:00"}
     )
 
@@ -262,12 +262,12 @@ class OrderResponse(OrderBase):
 
 
 class OrderWithCourier(OrderResponse):
-    """Rozšířená odpověď s detaily přiřazeného kurýra.
+    """Extended response with assigned courier details.
 
-    Vrací se při GET jednotlivé objednávky (`/orders/{id}`).
-    Obsahuje navíc jméno a telefon kurýra pro snadnější zobrazení v UI.
+    Returned on GET for a single order (`/orders/{id}`).
+    Includes the courier's name and phone for easier display in the UI.
 
-    ## Příklad odpovědi
+    ## Example response
 
     ```json
     {
@@ -294,12 +294,12 @@ class OrderWithCourier(OrderResponse):
 
     courier_name: Optional[str] = Field(
         default=None,
-        description="Jméno přiřazeného kurýra (null pokud není přiřazen)",
+        description="Name of the assigned courier (null if not assigned)",
         json_schema_extra={"example": "Jan Novák"}
     )
     courier_phone: Optional[str] = Field(
         default=None,
-        description="Telefon přiřazeného kurýra (null pokud není přiřazen)",
+        description="Phone of the assigned courier (null if not assigned)",
         json_schema_extra={"example": "+420777123456"}
     )
 

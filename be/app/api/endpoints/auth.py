@@ -1,6 +1,6 @@
-"""Autentizační endpointy.
+"""Authentication endpoints.
 
-Tento modul poskytuje:
+This module provides:
 - OAuth2 PKCE token endpoint
 - CSRF token endpoint
 - User info endpoint
@@ -27,13 +27,13 @@ oauth2_scheme = HTTPBearer()
 
 
 class CsrfTokenResponse(BaseModel):
-    """Response s CSRF tokenem."""
+    """Response with CSRF token."""
     csrf_token: str
     message: str = "Include this token in X-CSRF-Token header for POST/PUT/DELETE requests"
 
 
 class UserInfoResponse(BaseModel):
-    """Response s informacemi o uživateli."""
+    """Response with user information."""
     username: str
     user_id: Optional[int]
     role: str
@@ -50,22 +50,22 @@ class TokenResponse(BaseModel):
 @router.get(
     "/csrf-token",
     response_model=CsrfTokenResponse,
-    summary="Získat CSRF token",
+    summary="Get CSRF token",
     description="""
-Vrátí CSRF token pro ochranu proti Cross-Site Request Forgery.
+Returns a CSRF token for protection against Cross-Site Request Forgery.
 
-## Jak to funguje:
-1. Frontend zavolá tento endpoint před state-changing operací
-2. Server vrátí token a nastaví ho do cookie
-3. Frontend musí poslat token v hlavičce `X-CSRF-Token`
+## How it works:
+1. Frontend calls this endpoint before a state-changing operation
+2. Server returns the token and sets it in a cookie
+3. Frontend must send the token in the `X-CSRF-Token` header
 
-## Příklad použití:
+## Usage example:
 ```javascript
-// 1. Získat CSRF token
+// 1. Get CSRF token
 const response = await fetch('/api/v1/auth/csrf-token');
 const { csrf_token } = await response.json();
 
-// 2. Použít v POST requestu
+// 2. Use in POST request
 await fetch('/api/v1/orders/', {
     method: 'POST',
     headers: {
@@ -77,13 +77,13 @@ await fetch('/api/v1/orders/', {
 });
 ```
 
-## Poznámka:
-- Token je validní 1 hodinu
-- Token je vázán na cookie (SameSite=strict)
+## Note:
+- Token is valid for 1 hour
+- Token is bound to a cookie (SameSite=strict)
 """
 )
 async def get_csrf_token(response: Response):
-    """Vrátí CSRF token pro state-changing operace."""
+    """Returns a CSRF token for state-changing operations."""
     token = generate_csrf_token(response)
     return CsrfTokenResponse(csrf_token=token)
 
@@ -91,17 +91,17 @@ async def get_csrf_token(response: Response):
 @router.get(
     "/me",
     response_model=UserInfoResponse,
-    summary="Získat info o přihlášeném uživateli",
+    summary="Get current user info",
     description="""
-Vrátí informace o aktuálně přihlášeném uživateli z JWT tokenu.
+Returns information about the currently authenticated user from the JWT token.
 
-Vyžaduje Bearer token v hlavičce Authorization.
+Requires a Bearer token in the Authorization header.
 """
 )
 async def get_user_info(
     user: CurrentUser = Depends(get_current_user)
 ):
-    """Vrátí info o přihlášeném uživateli."""
+    """Returns info about the authenticated user."""
     return UserInfoResponse(
         username=user.username,
         user_id=user.user_id,
@@ -112,12 +112,12 @@ async def get_user_info(
 
 @router.post(
     "/logout",
-    summary="Odhlásit uživatele",
+    summary="Log out user",
     description="""
-Odhlásí uživatele invalidací tokenu.
+Logs the user out by invalidating the token.
 
-Poznámka: V aktuální implementaci s JWT bez token blacklistu
-je toto pouze "soft logout" - klient by měl smazat token lokálně.
+Note: In the current JWT implementation without a token blacklist,
+this is a "soft logout" — the client should delete the token locally.
 """
 )
 async def logout(
@@ -125,7 +125,7 @@ async def logout(
     response: Response,
     user: CurrentUser = Depends(get_current_user)
 ):
-    """Odhlásí uživatele."""
+    """Logs the user out."""
     # CSRF validace pro logout
     await validate_csrf_or_raise(request)
 
@@ -139,17 +139,17 @@ async def logout(
 @router.post(
     "/refresh",
     response_model=TokenResponse,
-    summary="Obnovit access token",
+    summary="Refresh access token",
     description="""
-Obnoví access token pomocí refresh tokenu.
+Refreshes the access token using a refresh token.
 
-TODO: Implementovat refresh token flow s Redis storage.
+TODO: Implement refresh token flow with Redis storage.
 """
 )
 async def refresh_token(
     credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)
 ):
-    """Obnoví access token."""
+    """Refreshes the access token."""
     # TODO: Implementovat refresh token flow
     raise HTTPException(
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
@@ -158,11 +158,11 @@ async def refresh_token(
 
 
 # ============================================
-# Test Token Endpoint - POUZE PRO TESTOVÁNÍ!
+# Test Token Endpoint - FOR TESTING ONLY!
 # ============================================
 
 class TestTokenRequest(BaseModel):
-    """Request pro vytvoření testovacího tokenu."""
+    """Request for creating a test token."""
     username: str = "test_user"
     role: str = "user"  # user, courier, admin
     user_id: int = 1
@@ -172,19 +172,19 @@ class TestTokenRequest(BaseModel):
 @router.post(
     "/test-token",
     response_model=TokenResponse,
-    summary="[TEST ONLY] Vytvořit testovací token",
+    summary="[TEST ONLY] Create a test token",
     description="""
-**POUZE PRO TESTOVACÍ ÚČELY!**
+**FOR TESTING PURPOSES ONLY!**
 
-Vytvoří JWT token s danou rolí bez nutnosti PKCE flow.
-V produkci by tento endpoint měl být zakázán!
+Creates a JWT token with the given role without requiring the PKCE flow.
+This endpoint should be disabled in production!
 
-## Dostupné role:
-- `user` / `customer` - Základní uživatel
-- `courier` - Kurýr (může pickup/deliver)
-- `admin` - Administrátor (plný přístup)
+## Available roles:
+- `user` / `customer` - Basic user
+- `courier` - Courier (can pickup/deliver)
+- `admin` - Administrator (full access)
 
-## Příklad:
+## Example:
 ```json
 {
     "username": "test_courier",
@@ -196,7 +196,7 @@ V produkci by tento endpoint měl být zakázán!
 """
 )
 async def create_test_token(request: TestTokenRequest):
-    """Vytvoří testovací JWT token (pouze pro development/testing)."""
+    """Creates a test JWT token (development/testing only)."""
     from app.core.auth import create_access_token
 
     # Normalizace role
