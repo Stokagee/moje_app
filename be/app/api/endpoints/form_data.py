@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 # ============================================
-# FORMULÁŘE - CRUD operace
+# FORMS - CRUD operations
 # ============================================
 
 @router.post(
@@ -41,39 +41,39 @@ logger = logging.getLogger(__name__)
     response_model=FormDataResponse,
     response_model_exclude_none=True,
     status_code=201,
-    summary="Vytvoření nového formuláře",
+    summary="Create a new form",
     description="""
-Vytvoří nový záznam formuláře v databázi.
+Creates a new form record in the database.
 
-**Mini hra (Easter Egg):**
-Pokud křestní jméno nebo příjmení odpovídá tajnému tokenu
-(neo, trinity, morpheus, jan, pavla, matrix), vrátí se `easter_egg=true`
-a `secret_message` s gratulací.
+**Mini game (Easter Egg):**
+If the first name or last name matches a secret token
+(neo, trinity, morpheus, jan, pavla, matrix), the response includes `easter_egg=true`
+and a `secret_message` with a congratulation.
 
-**Validace:**
-- Email musí být unikátní v systému
-- Pohlaví: male, female, other
-- Telefon: 9-15 znaků
+**Validation:**
+- Email must be unique in the system
+- Gender: male, female, other
+- Phone: 9-15 characters
     """,
-    tags=["Formuláře"],
+    tags=["Forms"],
     responses={
         201: {
-            "description": "Formulář úspěšně vytvořen",
+            "description": "Form created successfully",
             "model": FormDataResponse,
         },
         400: {
-            "description": "Email již existuje v systému",
+            "description": "Email already exists in the system",
             "model": ErrorResponse,
         },
         409: {
-            "description": "Konflikt - email již existuje",
+            "description": "Conflict - email already exists",
             "model": ErrorResponse,
         },
         422: {
-            "description": "Validační chyba (neplatná data)",
+            "description": "Validation error (invalid data)",
         },
         500: {
-            "description": "Interní chyba serveru",
+            "description": "Internal server error",
             "model": ErrorResponse,
         },
     },
@@ -81,11 +81,11 @@ a `secret_message` s gratulací.
 def create_form_data_endpoint(
     form_data: FormDataCreate = Body(
         ...,
-        description="Data nového formuláře",
+        description="New form data",
     ),
     db: Session = Depends(get_db),
 ):
-    """Vytvoří nový záznam z dat formuláře."""
+    """Creates a new record from form data."""
     try:
         logger.info(f"Pokus o vytvoření záznamu pro {form_data.email}")
         created_data = create_form_data(db=db, form_data=form_data)
@@ -117,20 +117,20 @@ def create_form_data_endpoint(
 @router.get(
     "/form/",
     response_model=list[FormDataSchema],
-    summary="Seznam všech formulářů",
+    summary="List all forms",
     description="""
-Vrátí stránkovaný seznam všech formulářů v databázi.
+Returns a paginated list of all forms in the database.
 
-**Stránkování:**
-- `skip`: Počet záznamů k přeskočení (výchozí: 0)
-- `limit`: Maximální počet vrácených záznamů (výchozí: 100, max: 1000)
+**Pagination:**
+- `skip`: Number of records to skip (default: 0)
+- `limit`: Maximum number of records to return (default: 100, max: 1000)
 
-**Příklad:** `GET /form/?skip=10&limit=20` vrátí záznamy 11-30.
+**Example:** `GET /form/?skip=10&limit=20` returns records 11-30.
     """,
-    tags=["Formuláře"],
+    tags=["Forms"],
     responses={
         200: {
-            "description": "Seznam formulářů",
+            "description": "List of forms",
             "model": list[FormDataSchema],
         },
     },
@@ -139,19 +139,19 @@ def read_form_data(
     skip: int = Query(
         0,
         ge=0,
-        description="Počet záznamů k přeskočení (pro stránkování)",
+        description="Number of records to skip (for pagination)",
         example=0,
     ),
     limit: int = Query(
         100,
         ge=1,
         le=1000,
-        description="Maximální počet vrácených záznamů",
+        description="Maximum number of records to return",
         example=100,
     ),
     db: Session = Depends(get_db),
 ):
-    """Získá všechny záznamy formuláře."""
+    """Gets all form records."""
     logger.debug(f"Získávání záznamů, skip: {skip}, limit: {limit}")
     form_data = get_all_form_data(db, skip=skip, limit=limit)
     return form_data
@@ -160,20 +160,20 @@ def read_form_data(
 @router.get(
     "/form/{form_data_id}",
     response_model=FormDataSchema,
-    summary="Detail formuláře",
+    summary="Form detail",
     description="""
-Vrátí detail jednoho konkrétního formuláře podle jeho ID.
+Returns the detail of a single form by its ID.
 
-Pokud formulář s daným ID neexistuje, vrátí se chyba 404.
+If no form with the given ID exists, a 404 error is returned.
     """,
-    tags=["Formuláře"],
+    tags=["Forms"],
     responses={
         200: {
-            "description": "Detail formuláře",
+            "description": "Form detail",
             "model": FormDataSchema,
         },
         404: {
-            "description": "Formulář s daným ID nenalezen",
+            "description": "Form with the given ID not found",
             "model": ErrorResponse,
         },
     },
@@ -182,12 +182,12 @@ def read_single_form_data(
     form_data_id: int = Path(
         ...,
         gt=0,
-        description="Unikátní ID formuláře",
+        description="Unique form ID",
         example=1,
     ),
     db: Session = Depends(get_db),
 ):
-    """Získá jeden konkrétní záznam formuláře podle ID."""
+    """Gets a single form record by ID."""
     logger.debug(f"Získávání záznamu s ID {form_data_id}")
     db_form_data = get_form_data(db, form_data_id=form_data_id)
     if db_form_data is None:
@@ -199,27 +199,27 @@ def read_single_form_data(
 @router.delete(
     "/form/{form_data_id}",
     response_model=DeleteResponse,
-    summary="Smazání formuláře",
+    summary="Delete a form",
     description="""
-Smaže formulář podle ID včetně všech souvisejících dat (přílohy, instrukce).
+Deletes a form by ID including all related data (attachments, instructions).
 
-**Kaskádové mazání:** Automaticky se smažou i všechny přílohy a instrukce
-přiřazené k tomuto formuláři.
+**Cascade delete:** All attachments and instructions linked to this form
+are automatically deleted as well.
 
-Pokud formulář s daným ID neexistuje, vrátí se chyba 404.
+If no form with the given ID exists, a 404 error is returned.
     """,
-    tags=["Formuláře"],
+    tags=["Forms"],
     responses={
         200: {
-            "description": "Formulář úspěšně smazán",
+            "description": "Form deleted successfully",
             "model": DeleteResponse,
         },
         404: {
-            "description": "Formulář s daným ID nenalezen",
+            "description": "Form with the given ID not found",
             "model": ErrorResponse,
         },
         500: {
-            "description": "Chyba při mazání",
+            "description": "Error during deletion",
             "model": ErrorResponse,
         },
     },
@@ -228,12 +228,12 @@ def delete_form_data_endpoint(
     form_data_id: int = Path(
         ...,
         gt=0,
-        description="ID formuláře ke smazání",
+        description="Form ID to delete",
         example=1,
     ),
     db: Session = Depends(get_db),
 ):
-    """Smaže záznam formuláře podle ID."""
+    """Deletes a form record by ID."""
     try:
         logger.info(f"Pokus o smazání záznamu s ID {form_data_id}")
         deleted = delete_form_data(db=db, form_data_id=form_data_id)
@@ -250,44 +250,44 @@ def delete_form_data_endpoint(
 
 
 # ============================================
-# MINI HRA - Easter Egg vyhodnocení
+# MINI GAME - Easter Egg evaluation
 # ============================================
 
 @router.post(
     "/form/evaluate-name",
     response_model=GameResponse,
     response_model_exclude_none=True,
-    summary="Vyhodnocení tajného jména (Mini hra)",
+    summary="Evaluate a secret name (Mini game)",
     description="""
-Zkontroluje, zda zadaný text odpovídá některému z tajných tokenů.
+Checks whether the given text matches one of the secret tokens.
 
-**Tajné tokeny:** neo, trinity, morpheus, jan, pavla, matrix
+**Secret tokens:** neo, trinity, morpheus, jan, pavla, matrix
 
-**Pravidla:**
-- Vyhodnocení je case-insensitive (Neo = neo = NEO)
-- Ignoruje bílé znaky na začátku a konci
-- Neprovádí žádnou práci s databází
+**Rules:**
+- Evaluation is case-insensitive (Neo = neo = NEO)
+- Leading and trailing whitespace is ignored
+- No database operations are performed
 
-**Odpověď:**
-- `matched=true` + `message` při shodě
-- `matched=false` + `message=null` bez shody
+**Response:**
+- `matched=true` + `message` on a match
+- `matched=false` + `message=null` on no match
     """,
-    tags=["Mini hra"],
+    tags=["Mini game"],
     responses={
         200: {
-            "description": "Výsledek vyhodnocení",
+            "description": "Evaluation result",
             "content": {
                 "application/json": {
                     "examples": {
-                        "shoda": {
-                            "summary": "Tajné jméno nalezeno",
+                        "match": {
+                            "summary": "Secret name found",
                             "value": {
                                 "matched": True,
-                                "message": "Tajemství odhaleno: 'neo'! Máš oko sokola."
+                                "message": "Secret revealed: 'neo'! You have the eyes of a hawk."
                             }
                         },
-                        "bez_shody": {
-                            "summary": "Tajné jméno nenalezeno",
+                        "no_match": {
+                            "summary": "Secret name not found",
                             "value": {
                                 "matched": False,
                                 "message": None
@@ -298,7 +298,7 @@ Zkontroluje, zda zadaný text odpovídá některému z tajných tokenů.
             }
         },
         500: {
-            "description": "Chyba při vyhodnocení",
+            "description": "Evaluation error",
             "model": ErrorResponse,
         },
     },
@@ -306,12 +306,12 @@ Zkontroluje, zda zadaný text odpovídá některému z tajných tokenů.
 def evaluate_name_endpoint(
     payload: NameInput = Body(
         ...,
-        description="Text k ověření proti tajným tokenům",
+        description="Text to check against secret tokens",
     ),
 ):
-    """Vyhodnotí zadaný text proti tajným jménům a vrátí zprávu pro FE.
+    """Evaluates the given text against secret names and returns a message for the FE.
 
-    Neprovádí žádnou práci s DB; čistě logika mini hry.
+    Does not perform any DB operations; purely mini game logic.
     """
     try:
         matched, message = evaluate_text_for_game(payload.text)
@@ -323,43 +323,43 @@ def evaluate_name_endpoint(
 
 
 # ============================================
-# PŘÍLOHY - Nahrávání a správa souborů
+# ATTACHMENTS - File upload and management
 # ============================================
 
 @router.post(
     "/form/{form_id}/attachment",
     response_model=AttachmentOut,
     status_code=201,
-    summary="Nahrání přílohy k formuláři",
+    summary="Upload an attachment to a form",
     description="""
-Nahraje soubor (přílohu) k existujícímu formuláři.
+Uploads a file (attachment) to an existing form.
 
-**Omezení:**
-- Maximální velikost souboru: **1 MB** (po dekódování z base64)
-- Povolené MIME typy: `application/pdf`, `text/plain`
+**Limits:**
+- Maximum file size: **1 MB** (after base64 decoding)
+- Allowed MIME types: `application/pdf`, `text/plain`
 
-**Formát dat:**
-Data souboru se odesílají jako base64 string v JSON těle požadavku.
+**Data format:**
+File data is sent as a base64 string in the JSON request body.
 
-**Instrukce:**
-Volitelně lze přidat textové instrukce k příloze.
+**Instructions:**
+Optionally, text instructions can be attached to the file.
     """,
-    tags=["Přílohy"],
+    tags=["Attachments"],
     responses={
         201: {
-            "description": "Příloha úspěšně nahrána",
+            "description": "Attachment uploaded successfully",
             "model": AttachmentOut,
         },
         400: {
-            "description": "Neplatný soubor (špatný formát, velikost, MIME typ)",
+            "description": "Invalid file (wrong format, size, or MIME type)",
             "model": ErrorResponse,
         },
         404: {
-            "description": "Formulář s daným ID nenalezen",
+            "description": "Form with the given ID not found",
             "model": ErrorResponse,
         },
         500: {
-            "description": "Chyba při ukládání přílohy",
+            "description": "Error saving attachment",
             "model": ErrorResponse,
         },
     },
@@ -368,18 +368,18 @@ def create_attachment_endpoint(
     form_id: int = Path(
         ...,
         gt=0,
-        description="ID formuláře, ke kterému se přiloha přidává",
+        description="Form ID to attach the file to",
         example=1,
     ),
     payload: AttachmentCreate = Body(
         ...,
-        description="Data přílohy (soubor v base64)",
+        description="Attachment data (file in base64)",
     ),
     db: Session = Depends(get_db),
 ):
-    """Vytvoří přílohu vázanou na existující form záznam.
+    """Creates an attachment linked to an existing form record.
 
-    Příjem dat jako base64 (pro jednoduchost). Alternativně by šel multipart/form-data s UploadFile.
+    Receives data as base64 (for simplicity). Alternatively multipart/form-data with UploadFile could be used.
     """
     # Ověřit, že form existuje
     exists = get_form_data(db, form_id)
@@ -398,16 +398,16 @@ def create_attachment_endpoint(
 @router.get(
     "/form/{form_id}/attachments",
     response_model=list[AttachmentOut],
-    summary="Seznam příloh formuláře",
+    summary="List form attachments",
     description="""
-Vrátí seznam všech příloh přiřazených k danému formuláři.
+Returns a list of all attachments linked to the given form.
 
-**Poznámka:** Vrací pouze metadata příloh (ID, název, typ), ne samotný obsah souborů.
+**Note:** Returns only attachment metadata (ID, filename, type), not the file content itself.
     """,
-    tags=["Přílohy"],
+    tags=["Attachments"],
     responses={
         200: {
-            "description": "Seznam příloh",
+            "description": "List of attachments",
             "model": list[AttachmentOut],
         },
     },
@@ -416,44 +416,44 @@ def list_attachments_endpoint(
     form_id: int = Path(
         ...,
         gt=0,
-        description="ID formuláře",
+        description="Form ID",
         example=1,
     ),
     db: Session = Depends(get_db),
 ):
-    """Vrátí všechny přílohy pro daný formulář."""
+    """Returns all attachments for the given form."""
     return get_attachments_for_form(db, form_id)
 
 
 # ============================================
-# INSTRUKCE - Textové pokyny k formulářům
+# INSTRUCTIONS - Text instructions for forms
 # ============================================
 
 @router.put(
     "/form/{form_id}/instructions",
     response_model=InstructionOut,
-    summary="Vytvoření nebo aktualizace instrukcí",
+    summary="Create or update instructions",
     description="""
-Vytvoří nebo aktualizuje instrukce k formuláři (upsert operace).
+Creates or updates instructions for a form (upsert operation).
 
-**Chování:**
-- Pokud instrukce pro daný formulář **neexistují**, vytvoří se nové
-- Pokud instrukce **existují**, přepíší se novým textem
+**Behaviour:**
+- If instructions for the given form **do not exist**, new ones are created
+- If instructions **already exist**, they are overwritten with the new text
 
-Každý formulář může mít maximálně jedny instrukce (vztah 1:1).
+Each form can have at most one set of instructions (1:1 relationship).
     """,
-    tags=["Instrukce"],
+    tags=["Instructions"],
     responses={
         200: {
-            "description": "Instrukce vytvořeny/aktualizovány",
+            "description": "Instructions created/updated",
             "model": InstructionOut,
         },
         404: {
-            "description": "Formulář s daným ID nenalezen",
+            "description": "Form with the given ID not found",
             "model": ErrorResponse,
         },
         500: {
-            "description": "Chyba při ukládání instrukcí",
+            "description": "Error saving instructions",
             "model": ErrorResponse,
         },
     },
@@ -462,16 +462,16 @@ def upsert_instructions_endpoint(
     form_id: int = Path(
         ...,
         gt=0,
-        description="ID formuláře",
+        description="Form ID",
         example=1,
     ),
     payload: InstructionCreate = Body(
         ...,
-        description="Text instrukcí",
+        description="Instructions text",
     ),
     db: Session = Depends(get_db),
 ):
-    """Vytvoří nebo aktualizuje instrukce pro formulář."""
+    """Creates or updates instructions for a form."""
     exists = get_form_data(db, form_id)
     if not exists:
         raise HTTPException(status_code=404, detail="Záznam formuláře nenalezen")
@@ -486,18 +486,18 @@ def upsert_instructions_endpoint(
 @router.get(
     "/form/{form_id}/instructions",
     response_model=InstructionOut | None,
-    summary="Získání instrukcí formuláře",
+    summary="Get form instructions",
     description="""
-Vrátí instrukce přiřazené k formuláři.
+Returns the instructions linked to a form.
 
-**Návratové hodnoty:**
-- Objekt instrukcí, pokud existují
-- `null`, pokud formulář nemá žádné instrukce
+**Return values:**
+- Instructions object if they exist
+- `null` if the form has no instructions
     """,
-    tags=["Instrukce"],
+    tags=["Instructions"],
     responses={
         200: {
-            "description": "Instrukce formuláře (nebo null)",
+            "description": "Form instructions (or null)",
             "model": InstructionOut,
         },
     },
@@ -506,10 +506,10 @@ def get_instructions_endpoint(
     form_id: int = Path(
         ...,
         gt=0,
-        description="ID formuláře",
+        description="Form ID",
         example=1,
     ),
     db: Session = Depends(get_db),
 ):
-    """Vrátí instrukce pro daný formulář."""
+    """Returns instructions for the given form."""
     return get_instruction_for_form(db, form_id)

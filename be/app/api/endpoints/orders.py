@@ -1,12 +1,12 @@
-"""API endpointy pro správu objednávek.
+"""API endpoints for order management.
 
-Tento modul poskytuje kompletní životní cyklus objednávky:
-vytvoření, dispatch, pickup, deliver, cancel.
+This module provides the complete order lifecycle:
+create, dispatch, pickup, deliver, cancel.
 
 SECURITY:
-- Všechny endpointy vyžadují OAuth2 Bearer token (PKCE flow)
-- pickup/deliver vyžadují roli "courier" nebo "admin"
-- delete vyžaduje roli "admin"
+- All endpoints require an OAuth2 Bearer token (PKCE flow)
+- pickup/deliver require the "courier" or "admin" role
+- delete requires the "admin" role
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from sqlalchemy.orm import Session
@@ -41,31 +41,31 @@ router = APIRouter(prefix="/orders", tags=["orders"])
     "/",
     response_model=OrderResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Vytvořit novou objednávku",
+    summary="Create a new order",
     description="""
-Vytvoří novou objednávku v systému.
+Creates a new order in the system.
 
-## Co se stane
-1. Vytvoří se nový záznam objednávky
-2. Objednávka je ve stavu `CREATED`
-3. Čeká na přiřazení kurýra (dispatch)
+## What happens
+1. A new order record is created
+2. The order starts in `CREATED` status
+3. It waits for a courier assignment (dispatch)
 
-## Další kroky
-Pro přiřazení kurýra zavolejte `POST /dispatch/auto/{order_id}`.
+## Next steps
+To assign a courier, call `POST /dispatch/auto/{order_id}`.
 
-## GPS souřadnice
-- **pickup_lat/pickup_lng** - Místo vyzvednutí (restaurace)
-- **delivery_lat/delivery_lng** - Místo doručení (zákazník)
+## GPS coordinates
+- **pickup_lat/pickup_lng** - Pickup location (restaurant)
+- **delivery_lat/delivery_lng** - Delivery location (customer)
 
-## VIP objednávky
-Nastavte `is_vip: true` pro prioritní zpracování.
-VIP objednávky preferují kurýry s tagem `vip`.
+## VIP orders
+Set `is_vip: true` for priority processing.
+VIP orders prefer couriers with the `vip` tag.
 
-## Požadavky na kurýra (tagy)
-Pole `required_tags` určuje, jaké specializace musí mít kurýr.
-Např. `["fragile_ok"]` znamená, že kurýr musí mít tag `fragile_ok`.
+## Courier requirements (tags)
+The `required_tags` field specifies what specializations the courier must have.
+E.g. `["fragile_ok"]` means the courier must have the `fragile_ok` tag.
 
-## Příklad
+## Example
 ```json
 {
     "customer_name": "Marie Svobodová",
@@ -83,7 +83,7 @@ Např. `["fragile_ok"]` znamená, že kurýr musí mít tag `fragile_ok`.
     """,
     responses={
         201: {
-            "description": "Objednávka vytvořena",
+            "description": "Order created",
             "content": {
                 "application/json": {
                     "example": {
@@ -107,7 +107,7 @@ Např. `["fragile_ok"]` znamená, že kurýr musí mít tag `fragile_ok`.
             }
         },
         422: {
-            "description": "Neplatný formát dat",
+            "description": "Invalid data format",
             "content": {
                 "application/json": {
                     "example": {
@@ -129,62 +129,62 @@ def create_order(
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(get_current_user)
 ):
-    """Vytvoří novou objednávku. Vyžaduje autentizaci."""
+    """Creates a new order. Requires authentication."""
     return order_crud.create_order(db, order)
 
 
 @router.get(
     "/",
     response_model=List[OrderResponse],
-    summary="Získat seznam všech objednávek",
+    summary="Get list of all orders",
     description="""
-Vrátí stránkovaný seznam všech objednávek v systému.
+Returns a paginated list of all orders in the system.
 
-## Parametry
-- `skip` - Počet záznamů k přeskočení
-- `limit` - Maximální počet vrácených záznamů
+## Parameters
+- `skip` - Number of records to skip
+- `limit` - Maximum number of records to return
 
-## Řazení
-Objednávky jsou řazeny podle data vytvoření (nejnovější první).
+## Ordering
+Orders are sorted by creation date (newest first).
 
 ## Tip
-Pro filtrování podle stavu použijte `/orders/by-status/{status}`.
+To filter by status, use `/orders/by-status/{status}`.
     """,
     responses={
         200: {
-            "description": "Seznam objednávek"
+            "description": "List of orders"
         }
     }
 )
 def get_orders(
-    skip: int = Query(default=0, ge=0, description="Offset pro stránkování"),
-    limit: int = Query(default=100, ge=1, le=1000, description="Max počet záznamů"),
+    skip: int = Query(default=0, ge=0, description="Pagination offset"),
+    limit: int = Query(default=100, ge=1, le=1000, description="Max number of records"),
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(get_current_user)
 ):
-    """Vrátí seznam všech objednávek. Vyžaduje autentizaci."""
+    """Returns a list of all orders. Requires authentication."""
     return order_crud.get_orders(db, skip=skip, limit=limit)
 
 
 @router.get(
     "/pending",
     response_model=List[OrderResponse],
-    summary="Získat objednávky čekající na kurýra",
+    summary="Get orders waiting for a courier",
     description="""
-Vrátí seznam objednávek ve stavu `SEARCHING` - čekají na přiřazení kurýra.
+Returns a list of orders in `SEARCHING` status — waiting for a courier assignment.
 
-## Kdy je objednávka ve stavu SEARCHING?
-- Po neúspěšném automatickém dispatch (žádný kurýr v dosahu)
-- Objednávka čeká na opakovaný pokus o dispatch
+## When is an order in SEARCHING status?
+- After a failed auto dispatch (no courier in range)
+- The order is waiting for a retry
 
-## Využití
-- Dashboard dispečera pro manuální přiřazení
-- Monitoring nepřiřazených objednávek
-- Alert systém pro dlouho čekající objednávky
+## Use cases
+- Dispatcher dashboard for manual assignment
+- Monitoring unassigned orders
+- Alert system for long-waiting orders
     """,
     responses={
         200: {
-            "description": "Seznam čekajících objednávek"
+            "description": "List of pending orders"
         }
     }
 )
@@ -192,77 +192,77 @@ def get_pending_orders(
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(get_current_user)
 ):
-    """Vrátí objednávky čekající na přiřazení kurýra. Vyžaduje autentizaci."""
+    """Returns orders waiting for courier assignment. Requires authentication."""
     return order_crud.get_pending_orders(db)
 
 
 @router.get(
     "/by-status/{status}",
     response_model=List[OrderResponse],
-    summary="Získat objednávky podle stavu",
+    summary="Get orders by status",
     description="""
-Vrátí seznam všech objednávek v daném stavu.
+Returns a list of all orders in the given status.
 
-## Možné stavy
+## Possible statuses
 
-| Stav | Popis |
-|------|-------|
-| `CREATED` | Nově vytvořená, čeká na dispatch |
-| `SEARCHING` | Hledá se kurýr |
-| `ASSIGNED` | Kurýr přiřazen, míří k vyzvednutí |
-| `PICKED` | Kurýr vyzvednul zásilku |
-| `DELIVERED` | Doručeno zákazníkovi |
-| `CANCELLED` | Zrušeno |
+| Status | Description |
+|--------|-------------|
+| `CREATED` | Newly created, waiting for dispatch |
+| `SEARCHING` | Looking for a courier |
+| `ASSIGNED` | Courier assigned, heading to pickup |
+| `PICKED` | Courier picked up the parcel |
+| `DELIVERED` | Delivered to customer |
+| `CANCELLED` | Cancelled |
 
-## Příklady
-- `/orders/by-status/ASSIGNED` - Aktivní objednávky s kurýrem
-- `/orders/by-status/DELIVERED` - Dokončené objednávky
-- `/orders/by-status/CANCELLED` - Zrušené objednávky
+## Examples
+- `/orders/by-status/ASSIGNED` - Active orders with a courier
+- `/orders/by-status/DELIVERED` - Completed orders
+- `/orders/by-status/CANCELLED` - Cancelled orders
     """,
     responses={
         200: {
-            "description": "Seznam objednávek v daném stavu"
+            "description": "List of orders in the given status"
         }
     }
 )
 def get_orders_by_status(
-    status: OrderStatus = Path(..., description="Stav objednávky pro filtrování"),
-    skip: int = Query(default=0, ge=0, description="Offset pro stránkování"),
-    limit: int = Query(default=100, ge=1, le=1000, description="Max počet záznamů"),
+    status: OrderStatus = Path(..., description="Order status to filter by"),
+    skip: int = Query(default=0, ge=0, description="Pagination offset"),
+    limit: int = Query(default=100, ge=1, le=1000, description="Max number of records"),
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(get_current_user)
 ):
-    """Vrátí objednávky filtrované podle stavu. Vyžaduje autentizaci."""
+    """Returns orders filtered by status. Requires authentication."""
     return order_crud.get_orders_by_status(db, status, skip=skip, limit=limit)
 
 
 @router.get(
     "/{order_id}",
     response_model=OrderWithCourier,
-    summary="Získat detail objednávky",
+    summary="Get order detail",
     description="""
-Vrátí kompletní informace o objednávce včetně detailů přiřazeného kurýra.
+Returns complete information about an order including the assigned courier details.
 
-## Vrácené informace
-- Všechny údaje objednávky (zákazník, adresy, GPS)
-- Aktuální stav
-- ID kurýra + jeho jméno a telefon (pokud je přiřazen)
-- Časové údaje
+## Returned information
+- All order data (customer, addresses, GPS)
+- Current status
+- Courier ID + name and phone (if assigned)
+- Timestamps
 
-## Využití
-- Sledování stavu objednávky
-- Zobrazení kontaktu na kurýra
-- Detail pro zákazníka
+## Use cases
+- Tracking order status
+- Displaying courier contact
+- Customer detail view
 
-## Chyby
-- **404 Not Found** - Objednávka neexistuje
+## Errors
+- **404 Not Found** - Order does not exist
     """,
     responses={
         200: {
-            "description": "Detail objednávky s kurýrem"
+            "description": "Order detail with courier"
         },
         404: {
-            "description": "Objednávka nenalezena",
+            "description": "Order not found",
             "content": {
                 "application/json": {
                     "example": {"detail": "Order not found"}
@@ -272,11 +272,11 @@ Vrátí kompletní informace o objednávce včetně detailů přiřazeného kur�
     }
 )
 def get_order(
-    order_id: int = Path(..., ge=1, description="ID objednávky"),
+    order_id: int = Path(..., ge=1, description="Order ID"),
     db: Session = Depends(get_db),
     user: CurrentUser = Depends(get_current_user)
 ):
-    """Vrátí detail objednávky včetně kurýra. Vyžaduje autentizaci."""
+    """Returns order detail including courier. Requires authentication."""
     order = order_crud.get_order(db, order_id)
     if not order:
         raise HTTPException(
@@ -297,27 +297,27 @@ def get_order(
 @router.patch(
     "/{order_id}/status",
     response_model=OrderResponse,
-    summary="Změnit stav objednávky (admin)",
+    summary="Update order status (admin)",
     description="""
-Administrativní endpoint pro přímou změnu stavu objednávky.
+Administrative endpoint for directly changing an order's status.
 
-## Upozornění
-Pro běžné operace používejte specifické endpointy:
-- `/orders/{id}/pickup` - Kurýr vyzvednul
-- `/orders/{id}/deliver` - Kurýr doručil
-- `/orders/{id}/cancel` - Zrušení
+## Note
+For normal operations use the dedicated endpoints:
+- `/orders/{id}/pickup` - Courier picked up
+- `/orders/{id}/deliver` - Courier delivered
+- `/orders/{id}/cancel` - Cancellation
 
-Tento endpoint je určen pro **výjimečné situace** a opravy.
+This endpoint is intended for **exceptional situations** and corrections.
 
-## Chyby
-- **404 Not Found** - Objednávka neexistuje
+## Errors
+- **404 Not Found** - Order does not exist
     """,
     responses={
         200: {
-            "description": "Stav změněn"
+            "description": "Status updated"
         },
         404: {
-            "description": "Objednávka nenalezena",
+            "description": "Order not found",
             "content": {
                 "application/json": {
                     "example": {"detail": "Order not found"}
@@ -327,12 +327,12 @@ Tento endpoint je určen pro **výjimečné situace** a opravy.
     }
 )
 def update_order_status(
-    order_id: int = Path(..., ge=1, description="ID objednávky"),
+    order_id: int = Path(..., ge=1, description="Order ID"),
     status_update: OrderStatusUpdate = ...,
     db: Session = Depends(get_db),
-    admin: CurrentUser = Depends(get_current_admin)  # Pouze admin
+    admin: CurrentUser = Depends(get_current_admin)
 ):
-    """Změní stav objednávky (administrativní operace). Vyžaduje admin roli."""
+    """Updates order status (administrative operation). Requires admin role."""
     updated = order_crud.update_order_status(db, order_id, status_update)
     if not updated:
         raise HTTPException(
@@ -345,28 +345,28 @@ def update_order_status(
 @router.post(
     "/{order_id}/pickup",
     response_model=OrderResponse,
-    summary="Označit objednávku jako vyzvednutou",
+    summary="Mark order as picked up",
     description="""
-Kurýr označí, že vyzvednul objednávku v restauraci/obchodě.
+The courier marks that they have picked up the order from the restaurant/shop.
 
-## Co se stane
-1. Stav se změní z `ASSIGNED` na `PICKED`
-2. Kurýr nyní vozí zásilku k zákazníkovi
+## What happens
+1. Status changes from `ASSIGNED` to `PICKED`
+2. The courier is now transporting the parcel to the customer
 
-## Předpoklady
-- Objednávka musí být ve stavu `ASSIGNED`
-- Kurýr musí být přiřazen
+## Prerequisites
+- Order must be in `ASSIGNED` status
+- A courier must be assigned
 
-## Další krok
-Po doručení zavolejte `POST /orders/{id}/deliver`.
+## Next step
+After delivery, call `POST /orders/{id}/deliver`.
 
-## Chyby
-- **404 Not Found** - Objednávka neexistuje
-- **400 Bad Request** - Objednávka není ve stavu ASSIGNED
+## Errors
+- **404 Not Found** - Order does not exist
+- **400 Bad Request** - Order is not in ASSIGNED status
     """,
     responses={
         200: {
-            "description": "Objednávka označena jako vyzvednutá",
+            "description": "Order marked as picked up",
             "content": {
                 "application/json": {
                     "example": {
@@ -378,7 +378,7 @@ Po doručení zavolejte `POST /orders/{id}/deliver`.
             }
         },
         400: {
-            "description": "Neplatný stav pro vyzvednutí",
+            "description": "Invalid status for pickup",
             "content": {
                 "application/json": {
                     "example": {"detail": "Order cannot be picked up (status: CREATED)"}
@@ -386,7 +386,7 @@ Po doručení zavolejte `POST /orders/{id}/deliver`.
             }
         },
         404: {
-            "description": "Objednávka nenalezena",
+            "description": "Order not found",
             "content": {
                 "application/json": {
                     "example": {"detail": "Order not found"}
@@ -396,11 +396,11 @@ Po doručení zavolejte `POST /orders/{id}/deliver`.
     }
 )
 async def mark_order_picked(
-    order_id: int = Path(..., ge=1, description="ID objednávky"),
+    order_id: int = Path(..., ge=1, description="Order ID"),
     db: Session = Depends(get_db),
-    courier: CurrentUser = Depends(get_current_courier)  # Pouze courier
+    courier: CurrentUser = Depends(get_current_courier)
 ):
-    """Označí objednávku jako vyzvednutou kurýrem. Vyžaduje roli courier a vlastnictví."""
+    """Marks the order as picked up by the courier. Requires courier role and ownership."""
     order = order_crud.get_order(db, order_id)
     if not order:
         raise HTTPException(
@@ -430,28 +430,28 @@ async def mark_order_picked(
 @router.post(
     "/{order_id}/deliver",
     response_model=OrderResponse,
-    summary="Označit objednávku jako doručenou",
+    summary="Mark order as delivered",
     description="""
-Kurýr označí, že doručil objednávku zákazníkovi.
+The courier marks that they have delivered the order to the customer.
 
-## Co se stane
-1. Stav se změní z `PICKED` na `DELIVERED`
-2. Kurýr se automaticky vrátí do stavu `available`
-3. Kurýr může přijmout další objednávku
+## What happens
+1. Status changes from `PICKED` to `DELIVERED`
+2. The courier automatically returns to `available` status
+3. The courier can accept another order
 
-## Předpoklady
-- Objednávka musí být ve stavu `PICKED`
+## Prerequisites
+- Order must be in `PICKED` status
 
-## Poznámka
-Toto je **konečný stav** objednávky. Po doručení nelze stav změnit.
+## Note
+This is the **final status** of an order. After delivery the status cannot be changed.
 
-## Chyby
-- **404 Not Found** - Objednávka neexistuje
-- **400 Bad Request** - Objednávka není ve stavu PICKED
+## Errors
+- **404 Not Found** - Order does not exist
+- **400 Bad Request** - Order is not in PICKED status
     """,
     responses={
         200: {
-            "description": "Objednávka doručena",
+            "description": "Order delivered",
             "content": {
                 "application/json": {
                     "example": {
@@ -463,7 +463,7 @@ Toto je **konečný stav** objednávky. Po doručení nelze stav změnit.
             }
         },
         400: {
-            "description": "Neplatný stav pro doručení",
+            "description": "Invalid status for delivery",
             "content": {
                 "application/json": {
                     "example": {"detail": "Order cannot be delivered (status: ASSIGNED)"}
@@ -471,7 +471,7 @@ Toto je **konečný stav** objednávky. Po doručení nelze stav změnit.
             }
         },
         404: {
-            "description": "Objednávka nenalezena",
+            "description": "Order not found",
             "content": {
                 "application/json": {
                     "example": {"detail": "Order not found"}
@@ -481,11 +481,11 @@ Toto je **konečný stav** objednávky. Po doručení nelze stav změnit.
     }
 )
 async def mark_order_delivered(
-    order_id: int = Path(..., ge=1, description="ID objednávky"),
+    order_id: int = Path(..., ge=1, description="Order ID"),
     db: Session = Depends(get_db),
-    courier: CurrentUser = Depends(get_current_courier)  # Pouze courier
+    courier: CurrentUser = Depends(get_current_courier)
 ):
-    """Označí objednávku jako doručenou. Vyžaduje roli courier a vlastnictví."""
+    """Marks the order as delivered. Requires courier role and ownership."""
     order = order_crud.get_order(db, order_id)
     if not order:
         raise HTTPException(
@@ -526,35 +526,35 @@ async def mark_order_delivered(
 @router.post(
     "/{order_id}/cancel",
     response_model=OrderResponse,
-    summary="Zrušit objednávku",
+    summary="Cancel an order",
     description="""
-Zruší objednávku a uvolní kurýra (pokud byl přiřazen).
+Cancels an order and releases the courier (if assigned).
 
-## Co se stane
-1. Stav se změní na `CANCELLED`
-2. Pokud byl přiřazen kurýr, vrátí se do stavu `available`
-3. Objednávka je ukončena
+## What happens
+1. Status changes to `CANCELLED`
+2. If a courier was assigned, they return to `available`
+3. The order is terminated
 
-## Kdy lze zrušit
-- `CREATED` - Ano
-- `SEARCHING` - Ano
-- `ASSIGNED` - Ano (kurýr se uvolní)
-- `PICKED` - Ano (kurýr se uvolní)
-- `DELIVERED` - **NE** (již doručeno)
-- `CANCELLED` - **NE** (již zrušeno)
+## When can an order be cancelled
+- `CREATED` - Yes
+- `SEARCHING` - Yes
+- `ASSIGNED` - Yes (courier is released)
+- `PICKED` - Yes (courier is released)
+- `DELIVERED` - **No** (already delivered)
+- `CANCELLED` - **No** (already cancelled)
 
-## Důvody zrušení
-- Zákazník si rozmyslel objednávku
-- Restaurace nemůže objednávku připravit
-- Technický problém
+## Reasons for cancellation
+- Customer changed their mind
+- Restaurant cannot prepare the order
+- Technical issue
 
-## Chyby
-- **404 Not Found** - Objednávka neexistuje
-- **400 Bad Request** - Objednávku nelze zrušit (DELIVERED/CANCELLED)
+## Errors
+- **404 Not Found** - Order does not exist
+- **400 Bad Request** - Order cannot be cancelled (DELIVERED/CANCELLED)
     """,
     responses={
         200: {
-            "description": "Objednávka zrušena",
+            "description": "Order cancelled",
             "content": {
                 "application/json": {
                     "example": {
@@ -566,7 +566,7 @@ Zruší objednávku a uvolní kurýra (pokud byl přiřazen).
             }
         },
         400: {
-            "description": "Objednávku nelze zrušit",
+            "description": "Order cannot be cancelled",
             "content": {
                 "application/json": {
                     "example": {"detail": "Order cannot be cancelled (status: DELIVERED)"}
@@ -574,7 +574,7 @@ Zruší objednávku a uvolní kurýra (pokud byl přiřazen).
             }
         },
         404: {
-            "description": "Objednávka nenalezena",
+            "description": "Order not found",
             "content": {
                 "application/json": {
                     "example": {"detail": "Order not found"}
@@ -584,11 +584,11 @@ Zruší objednávku a uvolní kurýra (pokud byl přiřazen).
     }
 )
 async def cancel_order(
-    order_id: int = Path(..., ge=1, description="ID objednávky"),
+    order_id: int = Path(..., ge=1, description="Order ID"),
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(get_current_user)  # Auth uživatel může zrušit
+    user: CurrentUser = Depends(get_current_user)
 ):
-    """Zruší objednávku. Vyžaduje autentizaci."""
+    """Cancels an order. Requires authentication."""
     order = order_crud.get_order(db, order_id)
     if not order:
         raise HTTPException(
@@ -620,27 +620,27 @@ async def cancel_order(
 @router.delete(
     "/{order_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Smazat objednávku",
+    summary="Delete an order",
     description="""
-Trvale smaže objednávku ze systému.
+Permanently deletes an order from the system.
 
-## Upozornění
-- Akce je **nevratná**!
-- Používejte pouze pro testování nebo opravu chyb
-- Pro běžné ukončení objednávky použijte `/orders/{id}/cancel`
+## Warning
+- This action is **irreversible**!
+- Use only for testing or error correction
+- For normal order termination use `/orders/{id}/cancel`
 
-## Doporučení
-V produkci objednávky nemazat - slouží pro historii a reporting.
+## Recommendation
+In production, do not delete orders — they serve as history and reporting data.
 
-## Chyby
-- **404 Not Found** - Objednávka neexistuje
+## Errors
+- **404 Not Found** - Order does not exist
     """,
     responses={
         204: {
-            "description": "Objednávka smazána"
+            "description": "Order deleted"
         },
         404: {
-            "description": "Objednávka nenalezena",
+            "description": "Order not found",
             "content": {
                 "application/json": {
                     "example": {"detail": "Order not found"}
@@ -650,11 +650,11 @@ V produkci objednávky nemazat - slouží pro historii a reporting.
     }
 )
 async def delete_order(
-    order_id: int = Path(..., ge=1, description="ID objednávky"),
+    order_id: int = Path(..., ge=1, description="Order ID"),
     db: Session = Depends(get_db),
-    admin: CurrentUser = Depends(get_current_admin)  # Pouze admin
+    admin: CurrentUser = Depends(get_current_admin)
 ):
-    """Smaže objednávku (pouze pro admin). Vyžaduje admin roli."""
+    """Deletes an order (admin only). Requires admin role."""
     deleted = order_crud.delete_order(db, order_id)
     if not deleted:
         raise HTTPException(

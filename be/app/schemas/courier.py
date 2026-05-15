@@ -1,7 +1,7 @@
-"""Pydantic schémata pro kurýry.
+"""Pydantic schemas for couriers.
 
-Tento modul definuje datové struktury pro práci s kurýry v API.
-Kurýr je osoba, která doručuje objednávky zákazníkům.
+This module defines data structures for working with couriers in the API.
+A courier is a person who delivers orders to customers.
 """
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional, List
@@ -10,47 +10,47 @@ from app.models.courier import CourierStatus
 
 
 class CourierBase(BaseModel):
-    """Základní atributy kurýra společné pro vytváření i odpovědi."""
+    """Base courier attributes shared by create and response schemas."""
 
     name: str = Field(
         ...,
         min_length=2,
         max_length=100,
-        description="Celé jméno kurýra",
+        description="Full name of the courier",
         json_schema_extra={"example": "Jan Novák"}
     )
     phone: str = Field(
         ...,
         min_length=9,
         max_length=20,
-        description="Telefonní číslo kurýra v mezinárodním formátu",
+        description="Courier phone number in international format",
         json_schema_extra={"example": "+420777123456"}
     )
     email: EmailStr = Field(
         ...,
-        description="E-mailová adresa kurýra (musí být unikátní v systému)",
+        description="Courier e-mail address (must be unique in the system)",
         json_schema_extra={"example": "jan.novak@example.cz"}
     )
     tags: List[str] = Field(
         default=[],
-        description="""Seznam tagů/specializací kurýra. Běžné tagy:
-        - `bike` - jezdí na kole
-        - `car` - má auto
-        - `vip` - preferovaný pro VIP objednávky
-        - `fragile_ok` - může vozit křehké zboží
-        - `fast` - expresní doručení
+        description="""List of courier tags/specializations. Common tags:
+        - `bike` - rides a bicycle
+        - `car` - has a car
+        - `vip` - preferred for VIP orders
+        - `fragile_ok` - can transport fragile items
+        - `fast` - express delivery
         """,
         json_schema_extra={"example": ["bike", "vip"]}
     )
 
 
 class CourierCreate(CourierBase):
-    """Schéma pro vytvoření nového kurýra.
+    """Schema for creating a new courier.
 
-    Po vytvoření je kurýr ve stavu `offline` bez GPS polohy.
-    Pro aktivaci je potřeba nastavit lokaci a změnit stav na `available`.
+    After creation the courier is in `offline` status with no GPS location.
+    To activate, set the location and change status to `available`.
 
-    ## Příklad použití
+    ## Usage example
 
     ```json
     {
@@ -75,16 +75,16 @@ class CourierCreate(CourierBase):
 
 
 class CourierUpdate(BaseModel):
-    """Schéma pro aktualizaci údajů kurýra.
+    """Schema for updating courier data.
 
-    Všechna pole jsou volitelná - odešlete pouze ta, která chcete změnit.
-    E-mail nelze změnit (je unikátní identifikátor).
+    All fields are optional — send only the ones you want to change.
+    E-mail cannot be changed (it is the unique identifier).
 
-    ## Příklad - změna jména a tagů
+    ## Example - change name and tags
 
     ```json
     {
-        "name": "Jan Novák ml.",
+        "name": "Jan Novák Jr.",
         "tags": ["car", "vip", "fragile_ok"]
     }
     ```
@@ -94,26 +94,26 @@ class CourierUpdate(BaseModel):
         default=None,
         min_length=2,
         max_length=100,
-        description="Nové jméno kurýra",
-        json_schema_extra={"example": "Jan Novák ml."}
+        description="New courier name",
+        json_schema_extra={"example": "Jan Novák Jr."}
     )
     phone: Optional[str] = Field(
         default=None,
         min_length=9,
         max_length=20,
-        description="Nové telefonní číslo",
+        description="New phone number",
         json_schema_extra={"example": "+420777999888"}
     )
     tags: Optional[List[str]] = Field(
         default=None,
-        description="Nový seznam tagů (nahradí stávající)",
+        description="New list of tags (replaces the existing list)",
         json_schema_extra={"example": ["car", "vip"]}
     )
 
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "name": "Jan Novák ml.",
+                "name": "Jan Novák Jr.",
                 "tags": ["car", "vip"]
             }
         }
@@ -121,17 +121,17 @@ class CourierUpdate(BaseModel):
 
 
 class CourierLocationUpdate(BaseModel):
-    """Schéma pro aktualizaci GPS polohy kurýra.
+    """Schema for updating the courier's GPS location.
 
-    Tato akce by měla být volána pravidelně z mobilní aplikace kurýra
-    pro sledování jeho pozice v reálném čase.
+    This should be called regularly from the courier's mobile app
+    to track their position in real time.
 
-    ## Souřadnice
+    ## Coordinates
 
-    - `lat` (latitude) - zeměpisná šířka (-90 až 90)
-    - `lng` (longitude) - zeměpisná délka (-180 až 180)
+    - `lat` (latitude) - geographic latitude (-90 to 90)
+    - `lng` (longitude) - geographic longitude (-180 to 180)
 
-    ## Příklad - centrum Prahy
+    ## Example - Prague city centre
 
     ```json
     {
@@ -145,14 +145,14 @@ class CourierLocationUpdate(BaseModel):
         ...,
         ge=-90,
         le=90,
-        description="Zeměpisná šířka (latitude) - WGS84",
+        description="Geographic latitude - WGS84",
         json_schema_extra={"example": 50.0755}
     )
     lng: float = Field(
         ...,
         ge=-180,
         le=180,
-        description="Zeměpisná délka (longitude) - WGS84",
+        description="Geographic longitude - WGS84",
         json_schema_extra={"example": 14.4378}
     )
 
@@ -167,25 +167,25 @@ class CourierLocationUpdate(BaseModel):
 
 
 class CourierStatusUpdate(BaseModel):
-    """Schéma pro změnu stavu kurýra.
+    """Schema for changing the courier's status.
 
-    ## Možné stavy
+    ## Possible statuses
 
-    | Stav | Popis | Může přijmout objednávku |
-    |------|-------|--------------------------|
-    | `offline` | Kurýr není k dispozici | Ne |
-    | `available` | Kurýr je volný a čeká na objednávku | Ano |
-    | `busy` | Kurýr právě doručuje | Ne |
+    | Status | Description | Can accept orders |
+    |--------|-------------|-------------------|
+    | `offline` | Courier is not available | No |
+    | `available` | Courier is free and waiting for an order | Yes |
+    | `busy` | Courier is currently delivering | No |
 
-    ## Stavové přechody
+    ## Status transitions
 
-    - `offline` → `available`: Kurýr se přihlásil do směny
-    - `available` → `busy`: Kurýr přijal objednávku (automaticky při dispatch)
-    - `busy` → `available`: Kurýr dokončil doručení (automaticky)
-    - `available` → `offline`: Kurýr ukončil směnu
-    - `busy` → `offline`: Nelze! Musí nejdřív dokončit objednávku
+    - `offline` → `available`: Courier logged into their shift
+    - `available` → `busy`: Courier accepted an order (automatic during dispatch)
+    - `busy` → `available`: Courier completed delivery (automatic)
+    - `available` → `offline`: Courier ended their shift
+    - `busy` → `offline`: Not allowed! Must complete the order first
 
-    ## Příklad
+    ## Example
 
     ```json
     {
@@ -196,7 +196,7 @@ class CourierStatusUpdate(BaseModel):
 
     status: CourierStatus = Field(
         ...,
-        description="Nový stav kurýra: offline, available, nebo busy",
+        description="New courier status: offline, available, or busy",
         json_schema_extra={"example": "available"}
     )
 
@@ -210,12 +210,12 @@ class CourierStatusUpdate(BaseModel):
 
 
 class CourierResponse(CourierBase):
-    """Kompletní odpověď s daty kurýra.
+    """Complete response with courier data.
 
-    Vrací se při GET operacích a po vytvoření/aktualizaci kurýra.
-    Obsahuje všechny atributy včetně ID, stavu a GPS polohy.
+    Returned on GET operations and after creating/updating a courier.
+    Includes all attributes including ID, status, and GPS location.
 
-    ## Příklad odpovědi
+    ## Example response
 
     ```json
     {
@@ -235,32 +235,32 @@ class CourierResponse(CourierBase):
 
     id: int = Field(
         ...,
-        description="Unikátní identifikátor kurýra v databázi",
+        description="Unique courier identifier in the database",
         json_schema_extra={"example": 1}
     )
     lat: Optional[float] = Field(
         default=None,
-        description="Aktuální zeměpisná šířka (null pokud GPS není nastavena)",
+        description="Current latitude (null if GPS is not set)",
         json_schema_extra={"example": 50.0755}
     )
     lng: Optional[float] = Field(
         default=None,
-        description="Aktuální zeměpisná délka (null pokud GPS není nastavena)",
+        description="Current longitude (null if GPS is not set)",
         json_schema_extra={"example": 14.4378}
     )
     status: CourierStatus = Field(
         ...,
-        description="Aktuální stav kurýra",
+        description="Current courier status",
         json_schema_extra={"example": "available"}
     )
     created_at: datetime = Field(
         ...,
-        description="Datum a čas vytvoření záznamu",
+        description="Date and time the record was created",
         json_schema_extra={"example": "2024-01-15T10:30:00"}
     )
     updated_at: Optional[datetime] = Field(
         default=None,
-        description="Datum a čas poslední aktualizace",
+        description="Date and time of the last update",
         json_schema_extra={"example": "2024-01-15T14:45:00"}
     )
 
@@ -284,11 +284,11 @@ class CourierResponse(CourierBase):
 
 
 class CourierOfferResponse(BaseModel):
-    """Schéma pro odpověď kurýra na nabídku objednávky.
+    """Schema for the courier's response to an order offer.
 
-    Používá se v případě, že kurýr manuálně potvrzuje přijetí objednávky.
+    Used when the courier manually confirms acceptance of an order.
 
-    ## Příklad - přijetí objednávky
+    ## Example - accepting an order
 
     ```json
     {
@@ -299,7 +299,7 @@ class CourierOfferResponse(BaseModel):
 
     accept: bool = Field(
         ...,
-        description="True pokud kurýr přijímá objednávku, False pokud odmítá",
+        description="True if the courier accepts the order, False if they decline",
         json_schema_extra={"example": True}
     )
 

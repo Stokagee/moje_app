@@ -4,37 +4,37 @@ import base64
 
 
 class FormDataBase(BaseModel):
-    """Základní data formuláře."""
+    """Base form data."""
 
     first_name: str = Field(
         ...,
         min_length=1,
         max_length=100,
-        description="Křestní jméno",
+        description="First name",
         json_schema_extra={"example": "Jan"}
     )
     last_name: str = Field(
         ...,
         min_length=1,
         max_length=100,
-        description="Příjmení",
+        description="Last name",
         json_schema_extra={"example": "Novák"}
     )
     phone: str = Field(
         ...,
         min_length=9,
         max_length=25,
-        description="Telefonní číslo (9-25 znaků)",
+        description="Phone number (9-25 characters)",
         json_schema_extra={"example": "+420 123 456 789"}
     )
     gender: str = Field(
         ...,
-        description="Pohlaví: male, female nebo other",
+        description="Gender: male, female, or other",
         json_schema_extra={"example": "male"}
     )
     email: EmailStr = Field(
         ...,
-        description="Emailová adresa (musí být unikátní v systému)",
+        description="Email address (must be unique in the system)",
         json_schema_extra={"example": "jan.novak@example.com"}
     )
 
@@ -52,16 +52,16 @@ class FormDataBase(BaseModel):
 
 
 class FormDataCreate(FormDataBase):
-    """Schéma pro vytvoření nového formuláře."""
+    """Schema for creating a new form."""
     pass
 
 
 class FormData(FormDataBase):
-    """Schéma formuláře s ID (pro čtení z databáze)."""
+    """Form schema with ID (for reading from the database)."""
 
     id: int = Field(
         ...,
-        description="Unikátní identifikátor formuláře",
+        description="Unique form identifier",
         json_schema_extra={"example": 1}
     )
 
@@ -70,82 +70,82 @@ class FormData(FormDataBase):
 
 
 class FormDataResponse(FormData):
-    """Rozšířená odpověď pro FE s výsledkem mini-hry.
+    """Extended response for the frontend with mini game result.
 
-    - easter_egg: zda došlo k zásahu (jméno odpovídá některému tajnému seznamu)
-    - secret_message: zpráva pro FE (zobrazitelná hláška)
+    - easter_egg: whether a match occurred (name matches a secret list)
+    - secret_message: message for the frontend (displayable text)
     """
 
     easter_egg: bool | None = Field(
         None,
-        description="True pokud jméno/příjmení odpovídá tajnému tokenu (mini hra)"
+        description="True if the first/last name matches a secret token (mini game)"
     )
     secret_message: str | None = Field(
         None,
-        description="Tajná zpráva zobrazená při shodě s easter egg",
-        json_schema_extra={"example": "Tajemství odhaleno: 'neo'! Máš oko sokola."}
+        description="Secret message displayed when an easter egg is triggered",
+        json_schema_extra={"example": "Secret revealed: 'neo'! You have the eyes of a hawk."}
     )
 
 
 class NameInput(BaseModel):
-    """Vstup pro vyhodnocení tajného jména v mini hře."""
+    """Input for evaluating a secret name in the mini game."""
 
     text: str = Field(
         ...,
         min_length=1,
         max_length=200,
-        description="Text k ověření (jméno, slovo)",
+        description="Text to check (name, word)",
         json_schema_extra={"example": "neo"}
     )
 
 
 class GameResponse(BaseModel):
-    """Odpověď mini-hry - výsledek vyhodnocení tajného jména."""
+    """Mini game response — result of evaluating a secret name."""
 
     matched: bool = Field(
         ...,
-        description="True pokud text odpovídá tajnému tokenu"
+        description="True if the text matches a secret token"
     )
     message: str | None = Field(
         None,
-        description="Zpráva pro uživatele (pouze při matched=true)",
-        json_schema_extra={"example": "Tajemství odhaleno: 'neo'! Máš oko sokola."}
+        description="Message for the user (only when matched=true)",
+        json_schema_extra={"example": "Secret revealed: 'neo'! You have the eyes of a hawk."}
     )
 
 
 # ============================================
-# Attachment schémata
+# Attachment schemas
 # ============================================
 
 class AttachmentBase(BaseModel):
-    """Základní informace o příloze."""
+    """Basic attachment information."""
 
     filename: str = Field(
         ...,
         min_length=1,
         max_length=255,
-        description="Název souboru včetně přípony",
-        json_schema_extra={"example": "dokument.pdf"}
+        description="Filename including extension",
+        json_schema_extra={"example": "document.pdf"}
     )
     content_type: str = Field(
         ...,
-        description="MIME typ souboru (application/pdf, text/plain)",
+        description="File MIME type (application/pdf, text/plain)",
         json_schema_extra={"example": "application/pdf"}
     )
     instructions: Optional[str] = Field(
         None,
         max_length=5000,
-        description="Volitelné instrukce k příloze",
-        json_schema_extra={"example": "Naskenovaný formulář k podpisu"}
+        description="Optional instructions for the attachment",
+        json_schema_extra={"example": "Scanned form to be signed"}
     )
 
 
 class AttachmentCreate(AttachmentBase):
-    """Schéma pro nahrání nové přílohy (data jako base64)."""
+    """Schema for uploading a new attachment (data as base64)."""
 
     data_base64: str = Field(
         ...,
-        description="Obsah souboru zakódovaný v base64. Maximální velikost po dekódování: 1 MB.",
+        description="File content encoded in base64. Maximum size after decoding: 1 MB.",
         json_schema_extra={"example": "JVBERi0xLjQKJeLjz9MKMyAwIG9iago8PC..."}
     )
 
@@ -171,16 +171,16 @@ class AttachmentCreate(AttachmentBase):
 
 
 class AttachmentOut(AttachmentBase):
-    """Schéma přílohy pro čtení (bez binárních dat)."""
+    """Attachment schema for reading (without binary data)."""
 
     id: int = Field(
         ...,
-        description="Unikátní identifikátor přílohy",
+        description="Unique attachment identifier",
         json_schema_extra={"example": 1}
     )
     form_id: int = Field(
         ...,
-        description="ID formuláře, ke kterému příloha patří",
+        description="ID of the form this attachment belongs to",
         json_schema_extra={"example": 1}
     )
 
@@ -189,37 +189,37 @@ class AttachmentOut(AttachmentBase):
 
 
 # ============================================
-# Instructions schémata
+# Instructions schemas
 # ============================================
 
 class InstructionBase(BaseModel):
-    """Základní schéma instrukcí."""
+    """Base instructions schema."""
 
     text: str = Field(
         ...,
         min_length=1,
         max_length=5000,
-        description="Text instrukcí k formuláři",
-        json_schema_extra={"example": "Vyplňte prosím všechna povinná pole a odešlete formulář."}
+        description="Instructions text for the form",
+        json_schema_extra={"example": "Please fill in all required fields and submit the form."}
     )
 
 
 class InstructionCreate(InstructionBase):
-    """Schéma pro vytvoření/aktualizaci instrukcí."""
+    """Schema for creating/updating instructions."""
     pass
 
 
 class InstructionOut(InstructionBase):
-    """Schéma instrukcí pro čtení."""
+    """Instructions schema for reading."""
 
     id: int = Field(
         ...,
-        description="Unikátní identifikátor instrukcí",
+        description="Unique instructions identifier",
         json_schema_extra={"example": 1}
     )
     form_id: int = Field(
         ...,
-        description="ID formuláře, ke kterému instrukce patří",
+        description="ID of the form these instructions belong to",
         json_schema_extra={"example": 1}
     )
 
@@ -228,24 +228,24 @@ class InstructionOut(InstructionBase):
 
 
 # ============================================
-# Response schémata pro speciální odpovědi
+# Response schemas for special responses
 # ============================================
 
 class DeleteResponse(BaseModel):
-    """Odpověď po smazání záznamu."""
+    """Response after deleting a record."""
 
     message: str = Field(
         ...,
-        description="Potvrzovací zpráva",
-        json_schema_extra={"example": "Záznam úspěšně smazán"}
+        description="Confirmation message",
+        json_schema_extra={"example": "Record deleted successfully"}
     )
 
 
 class ErrorResponse(BaseModel):
-    """Schéma chybové odpovědi."""
+    """Error response schema."""
 
     detail: str = Field(
         ...,
-        description="Popis chyby",
-        json_schema_extra={"example": "Záznam nenalezen"}
+        description="Error description",
+        json_schema_extra={"example": "Record not found"}
     )
